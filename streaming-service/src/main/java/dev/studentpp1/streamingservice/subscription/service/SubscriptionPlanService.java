@@ -34,6 +34,12 @@ public class SubscriptionPlanService {
 
     @Transactional
     public SubscriptionPlan createPlan(CreateSubscriptionPlanRequest request) {
+        if (subscriptionPlanRepository.findByName(request.name()).isPresent()) {
+            throw new IllegalArgumentException(
+                "Subscription plan with name '%s' already exists".formatted(request.name())
+            );
+        }
+
         SubscriptionPlan plan = subscriptionPlanMapper.toEntity(request);
 
         if (request.includedMovieIds() != null) {

@@ -12,7 +12,7 @@ import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "user_subscription")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

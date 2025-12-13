@@ -2,6 +2,7 @@ package dev.studentpp1.streamingservice.subscription.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.payments.dto.PaymentResponse;
+import dev.studentpp1.streamingservice.subscription.dto.CreateFamilySubscriptionRequest;
 import dev.studentpp1.streamingservice.subscription.dto.SubscribeRequest;
 import dev.studentpp1.streamingservice.subscription.dto.UserSubscriptionDto;
 import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
@@ -34,6 +35,21 @@ public class SubscriptionController {
         PaymentResponse paymentResponse = subscriptionService.subscribeUser(request, currentUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentResponse);
+    }
+
+    @PostMapping("/family")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<UserSubscriptionDto>> createFamilySubscription(
+        @Valid @RequestBody CreateFamilySubscriptionRequest request,
+        @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        List<UserSubscription> subscriptions = subscriptionService.createFamilySubscription(request, currentUser);
+
+        List<UserSubscriptionDto> response = subscriptions.stream()
+            .map(userSubscriptionMapper::toDto)
+            .toList();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
