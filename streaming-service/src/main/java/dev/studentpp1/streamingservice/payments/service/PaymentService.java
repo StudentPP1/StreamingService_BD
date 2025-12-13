@@ -16,6 +16,7 @@ import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanUtils;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import jakarta.annotation.PostConstruct;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,7 @@ public class PaymentService {
     public static final String USER_ID = "userId";
     public static final String PLAN_NAME = "planName";
     public static final long QUANTITY = 1L;
+    public static final BigDecimal TO_CENTS_MULTIPLIER = new BigDecimal(100);
 
     @Value("${app.payment.key.secret}")
     private String secretKey;
@@ -102,12 +104,14 @@ public class PaymentService {
     }
 
     private SessionCreateParams.LineItem buildLineItem(SubscriptionPlan plan) {
+        var amount = plan.getPrice().multiply(TO_CENTS_MULTIPLIER).longValue();
+
         return SessionCreateParams.LineItem.builder()
                 .setQuantity(QUANTITY)
                 .setPriceData(
                         PriceData.builder()
                                 .setCurrency(currency)
-                                .setUnitAmount(plan.getPrice().longValue())
+                                .setUnitAmount(amount)
                                 .setProductData(
                                         ProductData.builder()
                                                 .setName(plan.getName())
