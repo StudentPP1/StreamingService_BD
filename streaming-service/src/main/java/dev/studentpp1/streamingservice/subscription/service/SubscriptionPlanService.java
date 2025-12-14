@@ -15,6 +15,8 @@ import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionR
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +30,16 @@ public class SubscriptionPlanService {
     private final SubscriptionPlanMapper subscriptionPlanMapper;
     private final SubscriptionPlanUtils subscriptionPlanUtils;
 
-    public List<SubscriptionPlan> getAllPlans() {
-        return subscriptionPlanRepository.findAll();
+    public Page<SubscriptionPlan> getAllPlans(String search, Pageable pageable) {
+        if (search == null || search.isBlank()) {
+            return subscriptionPlanRepository.findAll(pageable);
+        } else {
+            return subscriptionPlanRepository.findAllByNameContainingIgnoreCase(search, pageable);
+        }
     }
 
     public SubscriptionPlan getPlanById(Long id) {
-        return subscriptionPlanUtils.findById(id);
+        return subscriptionPlanUtils.findByIdWithMovies(id);
     }
 
     @Transactional
@@ -94,8 +100,7 @@ public class SubscriptionPlanService {
 
     @Transactional
     public void deletePlan(Long id) {
-        SubscriptionPlan plan = subscriptionPlanRepository.findByIdWithLock(id)
-            .orElseThrow(() -> new SubscriptionPlanNotFoundException("Plan not found: " + id));
+        SubscriptionPlan plan = subscriptionPlanUtils.findByIdWithLock(id);
 
         userSubscriptionRepository.cancelAllByPlan(plan);
 

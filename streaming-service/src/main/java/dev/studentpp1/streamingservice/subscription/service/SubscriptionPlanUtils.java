@@ -27,6 +27,14 @@ public class SubscriptionPlanUtils {
             );
     }
 
+    public SubscriptionPlan findByIdWithMovies(Long subscriptionId) {
+        return subscriptionPlanRepository.findWithMoviesById(subscriptionId)
+            .orElseThrow(
+                () -> new SubscriptionNotFoundException(
+                    "Subscription not found with id " + subscriptionId)
+            );
+    }
+
     public SubscriptionPlan findByIdWithLock(Long subscriptionId) {
         return subscriptionPlanRepository.findByIdWithLock(subscriptionId)
             .orElseThrow(

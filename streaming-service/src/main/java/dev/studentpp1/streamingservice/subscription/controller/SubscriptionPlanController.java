@@ -3,12 +3,17 @@ package dev.studentpp1.streamingservice.subscription.controller;
 import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRequest;
 import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanDetailsDto;
 import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanSummaryDto;
+import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.mapper.SubscriptionPlanMapper;
 import dev.studentpp1.streamingservice.subscription.mapper.UserSubscriptionMapper;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,13 +28,14 @@ public class SubscriptionPlanController {
     private final SubscriptionPlanMapper subscriptionPlanMapper;
 
     @GetMapping
-    public ResponseEntity<List<SubscriptionPlanSummaryDto>> getAllPlans() {
-        var plans = subscriptionPlanService.getAllPlans()
-            .stream()
-            .map(subscriptionPlanMapper::toSummaryDto)
-            .toList();
+    public ResponseEntity<Page<SubscriptionPlanSummaryDto>> getAllPlans(
+        @RequestParam(required = false) String search,
+        @PageableDefault(sort = "price", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        var planPage = subscriptionPlanService.getAllPlans(search, pageable);
+        var responsePage = planPage.map(subscriptionPlanMapper::toSummaryDto);
 
-        return ResponseEntity.ok(plans);
+        return ResponseEntity.ok(responsePage);
     }
 
     @GetMapping("/{id}")
