@@ -20,18 +20,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
     private final UserSubscriptionMapper userSubscriptionMapper;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PaymentResponse> subscribe(
         @Valid @RequestBody SubscribeRequest request,
         @AuthenticationPrincipal AuthenticatedUser currentUser
@@ -42,7 +40,6 @@ public class SubscriptionController {
     }
 
     @PostMapping("/family")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PaymentResponse> createFamilySubscription(
         @Valid @RequestBody CreateFamilySubscriptionRequest request,
         @AuthenticationPrincipal AuthenticatedUser currentUser
@@ -53,7 +50,6 @@ public class SubscriptionController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<UserSubscriptionDto>> getMySubscriptions(
         @AuthenticationPrincipal AuthenticatedUser currentUser,
         @PageableDefault(sort = "endTime", direction = Sort.Direction.DESC) Pageable pageable
@@ -65,7 +61,6 @@ public class SubscriptionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> cancelSubscription(
         @PathVariable("id") Long subscriptionId,
         @AuthenticationPrincipal AuthenticatedUser currentUser
