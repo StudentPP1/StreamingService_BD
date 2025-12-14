@@ -32,19 +32,6 @@ git clone https://github.com/markOone/StreamingService_BD.git
 cd streaming-service
 ```
 
-### Add payment provider
-1. [Download the Stripe CLI](https://stripe.com/docs/stripe-cli#install)
-
-2. login
-```bash
-stripe login
-```
-
-3. add webhook endpoint
-```bash
-stripe listen --forward-to localhost:8081/api/payments/webhook
-```
-
 ### Run project
 
 + start (everything in docker)

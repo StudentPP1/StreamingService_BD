@@ -9,11 +9,14 @@ import org.springframework.data.repository.query.Param;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 
 public interface UserRepository extends JpaRepository<AppUser, Long> {
-    Optional<AppUser> findByEmailAndDeletedFalse(String email);
+    Optional<AppUser> findByEmail(String email);
 
-    @Query("SELECT u FROM AppUser u WHERE u.id = :id AND u.deleted = FALSE")
     Optional<AppUser> findById(@Param("id") Long id);
 
-    @Query("SELECT u FROM AppUser u WHERE u.id = :id")
+    // @SQLRestriction don't used for native queries
+    @Query(
+            value = "SELECT * FROM users WHERE user_id = :id",
+            nativeQuery = true
+    )
     Optional<AppUser> findByIdIncludingDeleted(@Param("id") Long id);
 }

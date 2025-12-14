@@ -32,13 +32,12 @@ public class UserService {
 
     @Transactional
     public AppUser createUser(RegisterUserRequest request) {
-        if (userRepository.findByEmailAndDeletedFalse(request.email()).isPresent()) {
+        if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new UserAlreadyExistsException("User with email " + request.email() + " already exists");
         }
         AppUser user = userDtoMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.ROLE_USER);
-        user.setDeleted(false);
         return userRepository.save(user);
     }
 
@@ -51,12 +50,12 @@ public class UserService {
         return userRepository.save(appUser); // find by id -> update
     }
 
-    public AppUser getInfo(Principal principal) {
-        return findByEmail(principal.getName());
+    public AppUser getInfo(AuthenticatedUser user) {
+        return findByEmail(user.getUsername());
     }
 
     public AppUser findByEmail(String email) {
-        return userRepository.findByEmailAndDeletedFalse(email).orElseThrow(
+        return userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User with email " + email + " not found")
         );
     }
@@ -67,9 +66,7 @@ public class UserService {
         );
     }
 
-    public void deleteUserById(Long id) {
-        AppUser appUser = findById(id);
-        appUser.setDeleted(true);
-        userRepository.save(appUser);
+    public void softDeleteUser(AuthenticatedUser user) {
+        userRepository.deleteById(user.getAppUser().getId());
     }
 }
