@@ -24,4 +24,9 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM UserSubscription s WHERE s.id = :id")
     Optional<UserSubscription> findByIdWithLock(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE UserSubscription us SET us.status = 'EXPIRED' " +
+        "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
+    int expireOverdueSubscriptions(@Param("now") LocalDateTime now);
 }

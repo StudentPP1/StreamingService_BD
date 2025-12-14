@@ -31,3 +31,5 @@ app:
     key:
       secret: ${STRIPE_SECRET_KEY}
       public: ${STRIPE_PUBLIC_KEY}
+  subscription:
+    expire-cron: "0 0 * * * *"
