@@ -57,6 +57,15 @@ services:
       - db-network
     profiles: ["app"]
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    command: listen --forward-to http://host.docker.internal:8081/api/payments/webhook --api-key ${STRIPE_SECRET_KEY}
+    networks:
+      - db-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+
 volumes:
   postgres_data:
     driver: local
