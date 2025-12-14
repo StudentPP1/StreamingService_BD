@@ -2,6 +2,8 @@ package dev.studentpp1.streamingservice.users.repository;
 
 import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.auth.persistence.Role;
+import dev.studentpp1.streamingservice.payments.repository.PaymentRepository;
+import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionRepository;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,12 +21,20 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserSubscriptionRepository userSubscriptionRepository;
+
     private AppUser deletedUser;
     private AppUser activeUser1;
     private AppUser activeUser2;
 
     @BeforeEach
     void setUp() {
+        paymentRepository.deleteAll();
+        userSubscriptionRepository.deleteAll();
         userRepository.deleteAll();
 
         deletedUser = userRepository.save(AppUser.builder()

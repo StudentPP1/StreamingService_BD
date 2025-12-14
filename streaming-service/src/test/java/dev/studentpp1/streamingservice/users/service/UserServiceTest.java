@@ -2,6 +2,8 @@ package dev.studentpp1.streamingservice.users.service;
 
 import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
+import dev.studentpp1.streamingservice.payments.repository.PaymentRepository;
+import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionRepository;
 import dev.studentpp1.streamingservice.users.dto.RegisterUserRequest;
 import dev.studentpp1.streamingservice.users.dto.UpdateUserRequest;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
@@ -33,11 +35,19 @@ class UserServiceTest extends AbstractPostgresContainerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserSubscriptionRepository userSubscriptionRepository;
+
     private RegisterUserRequest validRegisterRequest;
 
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
+        paymentRepository.deleteAll();
+        userSubscriptionRepository.deleteAll();
         userRepository.deleteAll();
         validRegisterRequest = new RegisterUserRequest(
                 "ActiveName",
