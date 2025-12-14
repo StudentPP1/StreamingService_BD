@@ -43,9 +43,6 @@ public class PaymentService {
     public static final long QUANTITY = 1L;
     public static final BigDecimal TO_CENTS_MULTIPLIER = new BigDecimal(100);
 
-    @Resource
-    private PaymentService paymentService;
-
     @Value("${app.payment.key.secret}")
     private String secretKey;
 
