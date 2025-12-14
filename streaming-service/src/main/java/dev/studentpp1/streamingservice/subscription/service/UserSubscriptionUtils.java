@@ -19,4 +19,13 @@ public class UserSubscriptionUtils {
                 )
             );
     }
+
+    public UserSubscription findByIdWithLock(Long subscriptionId) {
+        return userSubscriptionRepository.findByIdWithLock(subscriptionId)
+            .orElseThrow(
+                () -> new SubscriptionNotFoundException(
+                    "Subscription not found with id " + subscriptionId
+                )
+            );
+    }
 }

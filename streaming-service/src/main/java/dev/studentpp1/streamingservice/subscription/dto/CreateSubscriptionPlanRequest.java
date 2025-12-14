@@ -23,7 +23,10 @@ public record CreateSubscriptionPlanRequest(
         @Positive
         Integer duration,
 
-        List<Long> includedMovieIds
+        List<Long> includedMovieIds,
+
+        @NotNull
+        Long version
 ) {
 
 }

@@ -13,6 +13,7 @@ import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionR
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import dev.studentpp1.streamingservice.users.service.UserService;
 import java.util.ArrayList;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +32,11 @@ public class SubscriptionService {
     private final UserService userService;
     private final PaymentService paymentService;
     private final UserSubscriptionUtils userSubscriptionUtils;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
     public PaymentResponse subscribeUser(SubscribeRequest request, AuthenticatedUser currentUser) {
         SubscriptionPlan plan = subscriptionPlanUtils.findById(request.planId());
-        createUserSubscription(
-            plan.getName(),
-            currentUser.getAppUser().getId().toString()
-        );
 
         return paymentService.checkoutProduct(plan);
     }
@@ -57,7 +57,7 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public List<UserSubscription> createFamilySubscription(CreateFamilySubscriptionRequest request, AuthenticatedUser currentUser) {
+    public PaymentResponse createFamilySubscription(CreateFamilySubscriptionRequest request, AuthenticatedUser currentUser) {
         SubscriptionPlan plan = subscriptionPlanUtils.findById(request.planId());
         AppUser mainUser = currentUser.getAppUser();
 
@@ -65,6 +65,25 @@ public class SubscriptionService {
         List<AppUser> allUsers = buildAllUsersList(familyMembers, mainUser);
 
         validateNoActiveSubscriptions(allUsers, plan);
+
+        String memberEmailsJson;
+        try {
+            memberEmailsJson = objectMapper.writeValueAsString(request.memberEmails());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize family member emails", e);
+        }
+
+        Map<String, String> metadata = Map.of(PaymentService.FAMILY_MEMBER_EMAILS, memberEmailsJson);
+        return paymentService.checkoutProduct(plan, metadata);
+    }
+
+    @Transactional
+    public List<UserSubscription> createFamilySubscriptionAfterPayment(String userId, String planName, List<String> memberEmails) {
+        SubscriptionPlan plan = subscriptionPlanUtils.findByName(planName);
+        AppUser mainUser = userService.findById(Long.parseLong(userId));
+
+        List<AppUser> familyMembers = findFamilyMembers(memberEmails, mainUser);
+        List<AppUser> allUsers = buildAllUsersList(familyMembers, mainUser);
 
         return createAndSaveSubscriptions(allUsers, plan);
     }
@@ -131,12 +150,9 @@ public class SubscriptionService {
     @Transactional
     public void cancelSubscription(Long subscriptionId, AuthenticatedUser currentUser) {
         Long userId = currentUser.getAppUser().getId();
+        UserSubscription subscription = userSubscriptionUtils.findByIdWithLock(subscriptionId);
 
-        UserSubscription subscription = userSubscriptionUtils.findById(subscriptionId);
-
-        if (!subscription.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not authorized to cancel this subscription");
-        }
+        validateUserOwnsSubscription(subscription, userId);
 
         if (!subscription.getStatus().equals(SubscriptionStatus.ACTIVE)) {
             throw new IllegalStateException("Only active subscriptions can be cancelled");
@@ -144,5 +160,11 @@ public class SubscriptionService {
 
         subscription.setStatus(SubscriptionStatus.CANCELLED);
         userSubscriptionRepository.save(subscription);
+    }
+
+    private static void validateUserOwnsSubscription(UserSubscription subscription, Long userId) {
+        if (!subscription.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not authorized to cancel this subscription");
+        }
     }
 }

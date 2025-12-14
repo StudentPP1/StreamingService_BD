@@ -39,17 +39,13 @@ public class SubscriptionController {
 
     @PostMapping("/family")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<UserSubscriptionDto>> createFamilySubscription(
+    public ResponseEntity<PaymentResponse> createFamilySubscription(
         @Valid @RequestBody CreateFamilySubscriptionRequest request,
         @AuthenticationPrincipal AuthenticatedUser currentUser
     ) {
-        List<UserSubscription> subscriptions = subscriptionService.createFamilySubscription(request, currentUser);
+        PaymentResponse paymentResponse = subscriptionService.createFamilySubscription(request, currentUser);
 
-        List<UserSubscriptionDto> response = subscriptions.stream()
-            .map(userSubscriptionMapper::toDto)
-            .toList();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentResponse);
     }
 
     @GetMapping

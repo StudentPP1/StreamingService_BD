@@ -47,4 +47,7 @@ public class SubscriptionPlan {
     )
     @Builder.Default
     private Set<Movie> movies = new HashSet<>();
+
+    @Version
+    private Long version;
 }
