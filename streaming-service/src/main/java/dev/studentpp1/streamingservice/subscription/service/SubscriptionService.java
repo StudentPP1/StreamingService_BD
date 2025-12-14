@@ -15,6 +15,8 @@ import dev.studentpp1.streamingservice.users.service.UserService;
 import java.util.ArrayList;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,11 +142,11 @@ public class SubscriptionService {
         return userSubscriptionRepository.saveAll(newSubscriptions);
     }
 
-    public List<UserSubscription> getUserSubscriptions(AuthenticatedUser currentUser) {
+    public Page<UserSubscription> getUserSubscriptions(AuthenticatedUser currentUser, Pageable pageable) {
         Long userId = currentUser.getAppUser().getId();
         AppUser user = userService.findById(userId);
 
-        return userSubscriptionRepository.findByUser(user);
+        return userSubscriptionRepository.findAllByUser(user, pageable);
     }
 
     @Transactional

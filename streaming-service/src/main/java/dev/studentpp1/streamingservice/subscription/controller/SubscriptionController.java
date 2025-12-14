@@ -10,6 +10,10 @@ import dev.studentpp1.streamingservice.subscription.mapper.UserSubscriptionMappe
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,15 +54,14 @@ public class SubscriptionController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<UserSubscriptionDto>> getMySubscriptions(
-        @AuthenticationPrincipal AuthenticatedUser currentUser
+    public ResponseEntity<Page<UserSubscriptionDto>> getMySubscriptions(
+        @AuthenticationPrincipal AuthenticatedUser currentUser,
+        @PageableDefault(sort = "endTime", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        var subscriptions = subscriptionService.getUserSubscriptions(currentUser)
-            .stream()
-            .map(userSubscriptionMapper::toDto)
-            .toList();
+        var page = subscriptionService.getUserSubscriptions(currentUser, pageable);
+        var dtoPage = page.map(userSubscriptionMapper::toDto);
 
-        return ResponseEntity.ok(subscriptions);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @DeleteMapping("/{id}")
