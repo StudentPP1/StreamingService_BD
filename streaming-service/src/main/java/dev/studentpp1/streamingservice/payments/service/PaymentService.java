@@ -16,6 +16,7 @@ import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanUtils;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -37,8 +39,12 @@ public class PaymentService {
     public static final String SESSION_CREATED = "Payment session created";
     public static final String USER_ID = "userId";
     public static final String PLAN_NAME = "planName";
+    public static final String FAMILY_MEMBER_EMAILS = "familyMemberEmails";
     public static final long QUANTITY = 1L;
     public static final BigDecimal TO_CENTS_MULTIPLIER = new BigDecimal(100);
+
+    @Resource
+    private PaymentService paymentService;
 
     @Value("${app.payment.key.secret}")
     private String secretKey;
@@ -68,9 +74,14 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse checkoutProduct(SubscriptionPlan plan) {
+        return checkoutProduct(plan, Map.of());
+    }
+
+    @Transactional
+    public PaymentResponse checkoutProduct(SubscriptionPlan plan, Map<String, String> extraMetadata) {
         Long userId = getAuthenticatedUserId();
 
-        Session session = createCheckoutSession(plan, userId);
+        Session session = createCheckoutSession(plan, userId, extraMetadata);
         Payment payment = createPendingPayment(plan, session, userId);
 
         log.info("Created PENDING payment id={}, sessionId={}, userId={}, plan={}",
@@ -84,16 +95,19 @@ public class PaymentService {
         );
     }
 
-    private Session createCheckoutSession(SubscriptionPlan plan, Long userId) {
-        SessionCreateParams params = SessionCreateParams.builder()
+    private Session createCheckoutSession(SubscriptionPlan plan, Long userId, Map<String, String> extraMetadata) {
+        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
                 .setClientReferenceId(userId.toString())
                 .addLineItem(buildLineItem(plan))
                 .putMetadata(USER_ID, userId.toString())
-                .putMetadata(PLAN_NAME, plan.getName())
-                .build();
+                .putMetadata(PLAN_NAME, plan.getName());
+
+        extraMetadata.forEach(paramsBuilder::putMetadata);
+
+        SessionCreateParams params = paramsBuilder.build();
 
         try {
             return Session.create(params);

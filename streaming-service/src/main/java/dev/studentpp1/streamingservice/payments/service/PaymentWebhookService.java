@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.payments.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
@@ -8,6 +9,7 @@ import dev.studentpp1.streamingservice.payments.entity.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.repository.PaymentRepository;
 import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -55,11 +57,26 @@ public class PaymentWebhookService {
             return;
         }
 
-        UserSubscription subscription = subscriptionService.createUserSubscription(payload.planName(), payload.userId());
+        // Check if this is a family subscription
+        List<UserSubscription> subscriptions;
+        if (payload.familyMemberEmails() != null && !payload.familyMemberEmails().isEmpty()) {
+            subscriptions = subscriptionService.createFamilySubscriptionAfterPayment(
+                payload.userId(), 
+                payload.planName(), 
+                payload.familyMemberEmails()
+            );
+            log.info("Created {} family subscriptions for userId={}, plan={}", 
+                subscriptions.size(), payload.userId(), payload.planName());
+        } else {
+            UserSubscription subscription = subscriptionService.createUserSubscription(payload.planName(), payload.userId());
+            subscriptions = List.of(subscription);
+            log.info("Created individual subscription for userId={}, plan={}", payload.userId(), payload.planName());
+        }
 
         payment.setStatus(PaymentStatus.COMPLETED);
         payment.setPaidAt(LocalDateTime.now());
-        payment.setUserSubscription(subscription);
+        // For family subscriptions, link to the main user's subscription (first in list)
+        payment.setUserSubscription(subscriptions.get(0));
 
         log.info("Payment COMPLETED, sessionId={}, userId={}, plan={}",
                 payload.sessionId(), payload.userId(), payload.planName());
@@ -100,7 +117,19 @@ public class PaymentWebhookService {
 
             if (userId == null || planName == null) return null;
 
-            return new SessionPayload(sessionId, userId, planName);
+            // Check for family member emails in metadata
+            String familyMemberEmailsJson = metadata.path("familyMemberEmails").asText(null);
+            List<String> familyMemberEmails = null;
+            
+            if (familyMemberEmailsJson != null) {
+                try {
+                    familyMemberEmails = mapper.readValue(familyMemberEmailsJson, new TypeReference<List<String>>() {});
+                } catch (Exception e) {
+                    log.error("Failed to parse family member emails from metadata", e);
+                }
+            }
+
+            return new SessionPayload(sessionId, userId, planName, familyMemberEmails);
         } catch (Exception e) {
             log.error("Failed to parse Stripe event payload", e);
             return null;
@@ -115,6 +144,6 @@ public class PaymentWebhookService {
         log.info("Deleted {} stale PENDING payments older than {}", deleted, threshold);
     }
 
-    record SessionPayload(String sessionId, String userId, String planName) {
+    record SessionPayload(String sessionId, String userId, String planName, List<String> familyMemberEmails) {
     }
 }
