@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.repository;
 
+import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionStatus;
 import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
@@ -26,7 +27,12 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
     Optional<UserSubscription> findByIdWithLock(@Param("id") Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE UserSubscription us SET us.status = 'EXPIRED' " +
-        "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
+    @Query("UPDATE UserSubscription us SET us.status = 'EXPIRED' "
+        + "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
     int expireOverdueSubscriptions(@Param("now") LocalDateTime now);
+
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE UserSubscription u SET u.status = 'CANCELLED' "
+        + "WHERE u.plan = :plan AND u.status = 'ACTIVE'")
+    void cancelAllByPlan(@Param("plan") SubscriptionPlan plan);
 }

@@ -6,9 +6,12 @@ import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRe
 import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanDetailsDto;
 import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanSummaryDto;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
+import dev.studentpp1.streamingservice.subscription.entity.SubscriptionStatus;
+import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
 import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanNotFoundException;
 import dev.studentpp1.streamingservice.subscription.mapper.SubscriptionPlanMapper;
 import dev.studentpp1.streamingservice.subscription.repository.SubscriptionPlanRepository;
+import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionRepository;
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscriptionPlanService {
 
     private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final UserSubscriptionRepository userSubscriptionRepository;
     private final MovieRepository movieRepository;
     private final SubscriptionPlanMapper subscriptionPlanMapper;
     private final SubscriptionPlanUtils subscriptionPlanUtils;
@@ -90,11 +94,12 @@ public class SubscriptionPlanService {
 
     @Transactional
     public void deletePlan(Long id) {
-        if (!subscriptionPlanRepository.existsById(id)) {
-            throw new SubscriptionPlanNotFoundException(
-                "Subscription Plan not found with id " + id);
-        }
-        subscriptionPlanRepository.deleteById(id);
+        SubscriptionPlan plan = subscriptionPlanRepository.findByIdWithLock(id)
+            .orElseThrow(() -> new SubscriptionPlanNotFoundException("Plan not found: " + id));
+
+        userSubscriptionRepository.cancelAllByPlan(plan);
+
+        subscriptionPlanRepository.delete(plan);
     }
 
 
