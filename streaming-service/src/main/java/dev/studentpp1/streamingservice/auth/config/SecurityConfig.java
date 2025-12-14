@@ -25,6 +25,7 @@ public class SecurityConfig {
         "/api/auth/login",
         "/api/auth/register",
         "/api/subscriptions",
+        "/api/subscriptions/family",
         "/api/subscriptions/{id}",
         "/api/subscription-plans",
         "/api/subscription-plans/{id}",
@@ -32,7 +33,8 @@ public class SecurityConfig {
         "/api/movie/{movie_id}",
         "/api/movie/actor/{actor_id}",
         "/api/movie/director/{director_id}",
-        "/api/payments/webhook"
+        "/api/payments/webhook",
+        "/api/analytics/directors-roi"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
