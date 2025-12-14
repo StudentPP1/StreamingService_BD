@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.service;
 
+import dev.studentpp1.streamingservice.movies.exception.ResourceNotFoundException;
 import dev.studentpp1.streamingservice.movies.dto.ActorDetailDto;
 import dev.studentpp1.streamingservice.movies.dto.ActorDto;
 import dev.studentpp1.streamingservice.movies.dto.ActorRequest;
@@ -23,13 +24,13 @@ public class ActorService {
     @Transactional(readOnly = true)
     public ActorDetailDto getActorDetails(Long id) {
         Actor actor = actorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Actor not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Actor not found with id: " + id));
         return actorMapper.toDetailDto(actor);
     }
 
     public ActorDto getActorById(Long id) {
         Actor actor = actorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Actor not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Actor not found with id: " + id));
         return actorMapper.toDto(actor);
     }
 
@@ -41,7 +42,7 @@ public class ActorService {
 
     public ActorDto updateActor(Long id, ActorRequest request) {
         Actor existingActor = actorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Actor not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Actor not found with id: " + id));
 
         actorMapper.updateActorFromRequest(request, existingActor);
 
@@ -52,7 +53,7 @@ public class ActorService {
 
     public void deleteActor(Long id) {
         if (!actorRepository.existsById(id)) {
-            throw new RuntimeException("Actor not found with id: " + id);
+            throw new ResourceNotFoundException("Actor not found with id: " + id);
         }
         actorRepository.deleteById(id);
     }

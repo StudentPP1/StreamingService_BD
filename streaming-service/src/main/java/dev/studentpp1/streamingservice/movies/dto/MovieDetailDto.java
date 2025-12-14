@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record MovieDetailDto(
@@ -7,7 +8,7 @@ public record MovieDetailDto(
         String title,
         String description,
         Integer year,
-        Double rating,
+        BigDecimal rating,
         DirectorDto director,
         List<MovieCastDto> cast
 ) {}

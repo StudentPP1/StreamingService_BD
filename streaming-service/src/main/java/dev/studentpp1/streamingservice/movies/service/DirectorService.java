@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.service;
 
+import dev.studentpp1.streamingservice.movies.exception.ResourceNotFoundException;
 import dev.studentpp1.streamingservice.movies.dto.DirectorDetailDto;
 import dev.studentpp1.streamingservice.movies.dto.DirectorDto;
 import dev.studentpp1.streamingservice.movies.dto.DirectorRequest;
@@ -33,18 +34,17 @@ public class DirectorService {
     @Transactional(readOnly = true)
     public DirectorDetailDto getDirectorDetails(Long id) {
         Director director = directorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Director not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Director not found with id: " + id));
 
         List<Movie> movies = movieRepository.findAllByDirectorId(id);
         List<MovieDto> movieDtos = movieMapper.toDtoList(movies);
 
-        // Передаємо фільми вручну
         return directorMapper.toDetailDto(director, movieDtos);
     }
 
     public DirectorDto getDirectorById(Long id) {
         Director director = directorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Director not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Director not found with id: " + id));
         return directorMapper.toDto(director);
     }
 
@@ -56,7 +56,7 @@ public class DirectorService {
 
     public DirectorDto updateDirector(Long id, DirectorRequest request) {
         Director existingDirector = directorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Director not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Director not found with id: " + id));
 
         directorMapper.updateDirectorFromRequest(request, existingDirector);
 
@@ -65,7 +65,7 @@ public class DirectorService {
 
     public void deleteDirector(Long id) {
         if (!directorRepository.existsById(id)) {
-            throw new RuntimeException("Director not found with id: " + id);
+            throw new ResourceNotFoundException("Director not found with id: " + id);
         }
         directorRepository.deleteById(id);
     }

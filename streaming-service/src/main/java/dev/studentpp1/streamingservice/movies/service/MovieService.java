@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.service;
 
+import dev.studentpp1.streamingservice.movies.exception.ResourceNotFoundException;
 import dev.studentpp1.streamingservice.movies.dto.MovieDetailDto;
 import dev.studentpp1.streamingservice.movies.dto.MovieDto;
 import dev.studentpp1.streamingservice.movies.dto.MovieRequest;
@@ -29,7 +30,7 @@ public class MovieService {
     @Transactional(readOnly = true)
     public MovieDetailDto getMovieMethodDetails(Long id) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id: " + id));
         return movieMapper.toDetailDto(movie);
     }
 
@@ -39,19 +40,19 @@ public class MovieService {
 
     public MovieDto getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id: " + id));
         return movieMapper.toDto(movie);
     }
 
     public MovieDto createMovie(MovieRequest request) {
         Director director = directorRepository.findById(request.directorId())
-                .orElseThrow(() -> new RuntimeException("Director not found with id: " + request.directorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Director not found with id: " + request.directorId()));
 
         Movie movie = movieMapper.toEntity(request);
         movie.setDirector(director);
 
         if (movie.getYear() != null && movie.getYear() <= 1880) {
-            throw new RuntimeException("Movie year must be greater than 1880");
+            throw new IllegalArgumentException("Movie year must be greater than 1880");
         }
 
         Movie savedMovie = movieRepository.save(movie);
@@ -60,13 +61,13 @@ public class MovieService {
 
     public MovieDto updateMovie(Long id, MovieRequest request) {
         Movie existingMovie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id: " + id));
 
         movieMapper.updateMovieFromRequest(request, existingMovie);
 
         if (request.directorId() != null) {
             Director director = directorRepository.findById(request.directorId())
-                    .orElseThrow(() -> new RuntimeException("Director not found with id: " + request.directorId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Director not found with id: " + request.directorId()));
             existingMovie.setDirector(director);
         }
 
@@ -75,7 +76,7 @@ public class MovieService {
 
     public void deleteMovie(Long id) {
         if (!movieRepository.existsById(id)) {
-            throw new RuntimeException("Movie not found with id: " + id);
+            throw new ResourceNotFoundException("Movie not found with id: " + id);
         }
         movieRepository.deleteById(id);
     }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "movie")
@@ -27,7 +28,7 @@ public class Movie {
     private Integer year;
 
     @Column(name = "rating", precision = 3, scale = 1)
-    private Double rating;
+    private BigDecimal rating;
 
     @ManyToOne
     @JoinColumn(name = "director_id", nullable = false)

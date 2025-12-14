@@ -30,3 +30,4 @@ public class Actor {
     @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL)
     private List<Performance> performances;
 }
+
