@@ -1,6 +1,8 @@
 package dev.studentpp1.streamingservice.analytics.controller;
 
+import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStatsDto;
+import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticResponse;
 import dev.studentpp1.streamingservice.analytics.service.AnalyticsService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/analytics")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
@@ -28,5 +30,10 @@ public class AnalyticsController {
         @RequestParam(required = false, defaultValue = "#{T(java.time.LocalDateTime).now()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         return ResponseEntity.ok(analyticsService.getTopDirectorsAggregated(from, to));
+    }
+
+    @GetMapping("/monthly-plans")
+    public ResponseEntity<List<MonthlyPlanStatisticResponse>> getMonthlyPlansAnalytics() {
+        return ResponseEntity.ok(analyticsService.getMonthlyPlanStatistics());
     }
 }

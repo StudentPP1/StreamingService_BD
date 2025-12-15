@@ -44,7 +44,6 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
                 .password("password1")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .role(Role.ROLE_USER)
-                .deleted(true)
                 .build());
 
         activeUser1 = userRepository.save(AppUser.builder()
@@ -54,7 +53,6 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
                 .password("password2")
                 .birthday(LocalDate.of(1995, 2, 2))
                 .role(Role.ROLE_USER)
-                .deleted(false)
                 .build());
 
         activeUser2 = userRepository.save(AppUser.builder()
@@ -64,30 +62,31 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
                 .password("password3")
                 .birthday(LocalDate.of(1998, 3, 3))
                 .role(Role.ROLE_USER)
-                .deleted(false)
                 .build());
+
+        userRepository.deleteById(deletedUser.getId());
+        userRepository.flush();
     }
 
     @Test
     void findByEmailAndDeletedFalse_shouldReturnNotDeletedUser() {
-        Optional<AppUser> result = userRepository.findByEmailAndDeletedFalse("user2@example.com");
+        Optional<AppUser> result = userRepository.findByEmail("user2@example.com");
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(activeUser1.getId());
-        assertThat(result.get().isDeleted()).isFalse();
         assertThat(result.get().getEmail()).isEqualTo("user2@example.com");
     }
 
     @Test
     void findByEmailAndDeletedFalse_shouldReturnEmpty_whenUserDeleted() {
-        Optional<AppUser> result = userRepository.findByEmailAndDeletedFalse("user1@example.com");
+        Optional<AppUser> result = userRepository.findByEmail("user1@example.com");
 
         assertThat(result).isEmpty();
     }
 
     @Test
     void findByEmailAndDeletedFalse_shouldReturnEmpty_whenEmailNotFound() {
-        Optional<AppUser> result = userRepository.findByEmailAndDeletedFalse("missing@example.com");
+        Optional<AppUser> result = userRepository.findByEmail("missing@example.com");
 
         assertThat(result).isEmpty();
     }
@@ -98,7 +97,6 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(activeUser2.getId());
-        assertThat(result.get().isDeleted()).isFalse();
     }
 
     @Test
@@ -121,7 +119,6 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(activeUser1.getId());
-        assertThat(result.get().isDeleted()).isFalse();
     }
 
     @Test
@@ -130,7 +127,6 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(deletedUser.getId());
-        assertThat(result.get().isDeleted()).isTrue();
     }
 
     @Test

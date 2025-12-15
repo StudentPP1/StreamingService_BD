@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.payments.dto;
+package dev.studentpp1.streamingservice.analytics.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

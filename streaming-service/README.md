@@ -32,19 +32,6 @@ git clone https://github.com/markOone/StreamingService_BD.git
 cd streaming-service
 ```
 
-### Add payment provider
-1. [Download the Stripe CLI](https://stripe.com/docs/stripe-cli#install)
-
-2. login
-```bash
-stripe login
-```
-
-3. add webhook endpoint
-```bash
-stripe listen --forward-to localhost:8081/api/payments/webhook
-```
-
 ### Run project
 
 + start (everything in docker)
@@ -78,6 +65,7 @@ mvn -Dtest=PaymentRepositoryTest#deletePaymentsBefore_removesOnlyOlderPayments t
 ```
 streaming-service/
 ├── src/main/java/dev/studentpp1/streamingservice/
+│   ├── analytics/          # analytics endpoints
 │   ├── auth/               # authentication and authorization
 │   ├── users/              # user management
 │   ├── payments/           # Stripe payment flow
@@ -95,6 +83,7 @@ streaming-service/
 ### Architecture of modules
 Each module has a typical structure:
 
++ analytics/ — analytics endpoints
 + controller/ — REST API controllers
 + service/ — business login
 + repository/ — access to DB (Spring Data JPA)
@@ -195,6 +184,6 @@ Host: localhost:8081
 
 + Watch percent of subscription plan gained money by month
 ```http request
-GET /api/payments/monthly-plans HTTP/1.1
+GET /api/analytics/monthly-plans HTTP/1.1
 Host: localhost:8081
 ```
