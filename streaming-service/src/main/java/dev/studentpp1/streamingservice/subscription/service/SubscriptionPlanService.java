@@ -3,15 +3,14 @@ package dev.studentpp1.streamingservice.subscription.service;
 import dev.studentpp1.streamingservice.movies.entity.Movie;
 import dev.studentpp1.streamingservice.movies.repository.MovieRepository;
 import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRequest;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanDetailsDto;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanSummaryDto;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
-import dev.studentpp1.streamingservice.subscription.entity.SubscriptionStatus;
-import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanNotFoundException;
+import dev.studentpp1.streamingservice.subscription.exception.MoviesNotFoundException;
+import dev.studentpp1.streamingservice.subscription.exception.MoviesNotInPlanException;
+import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanAlreadyExistsException;
 import dev.studentpp1.streamingservice.subscription.mapper.SubscriptionPlanMapper;
 import dev.studentpp1.streamingservice.subscription.repository.SubscriptionPlanRepository;
 import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionRepository;
+import dev.studentpp1.streamingservice.subscription.service.utils.SubscriptionPlanUtils;
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -45,9 +44,7 @@ public class SubscriptionPlanService {
     @Transactional
     public SubscriptionPlan createPlan(CreateSubscriptionPlanRequest request) {
         if (subscriptionPlanRepository.findByName(request.name()).isPresent()) {
-            throw new IllegalArgumentException(
-                "Subscription plan with name '%s' already exists".formatted(request.name())
-            );
+            throw new SubscriptionPlanAlreadyExistsException(request.name());
         }
 
         SubscriptionPlan plan = subscriptionPlanMapper.toEntity(request);
@@ -92,7 +89,7 @@ public class SubscriptionPlanService {
             List<Long> missingIds = movieIds.stream()
                 .filter(id -> !foundIds.contains(id))
                 .toList();
-            throw new IllegalArgumentException("Movies not found with ids: " + missingIds);
+            throw new MoviesNotFoundException(missingIds);
         }
 
         return newMovies;
@@ -116,7 +113,7 @@ public class SubscriptionPlanService {
         boolean changed = plan.getMovies().removeIf(movie -> movieIds.contains(movie.getId()));
 
         if (!changed) {
-            throw new IllegalArgumentException("None of the provided movies were found in the plan");
+            throw new MoviesNotInPlanException();
         }
 
         return subscriptionPlanRepository.save(plan);
