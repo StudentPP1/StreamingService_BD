@@ -3,6 +3,7 @@ package dev.studentpp1.streamingservice.subscription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
+import dev.studentpp1.streamingservice.common.time.ClockService;
 import dev.studentpp1.streamingservice.payments.dto.PaymentResponse;
 import dev.studentpp1.streamingservice.payments.service.PaymentService;
 import dev.studentpp1.streamingservice.subscription.dto.CreateFamilySubscriptionRequest;
@@ -40,6 +41,7 @@ public class SubscriptionService {
     private final PaymentService paymentService;
     private final UserSubscriptionUtils userSubscriptionUtils;
     private final ObjectMapper objectMapper;
+    private final ClockService clockService;
 
     public static final String ERROR_SERIALIZING_FAMILY_MEMBER_EMAILS =
         "Failed to serialize family member emails";
@@ -54,7 +56,9 @@ public class SubscriptionService {
     public UserSubscription createUserSubscription(String planName, String userId) {
         SubscriptionPlan plan = subscriptionPlanUtils.findByName(planName);
         AppUser user = userService.findById(Long.parseLong(userId));
-        LocalDateTime startTime = LocalDateTime.now();
+
+        LocalDateTime startTime = clockService.now();
+
         UserSubscription subscription = UserSubscription.builder()
             .user(user)
             .plan(plan)
@@ -137,10 +141,12 @@ public class SubscriptionService {
 
     private List<UserSubscription> createAndSaveSubscriptions(List<AppUser> users,
         SubscriptionPlan plan) {
+        LocalDateTime now = clockService.now();
+
         UserSubscription userSub = UserSubscription.builder()
             .plan(plan)
-            .startTime(LocalDateTime.now())
-            .endTime(LocalDateTime.now().plusDays(plan.getDuration()))
+            .startTime(now)
+            .endTime(now.plusDays(plan.getDuration()))
             .status(SubscriptionStatus.ACTIVE)
             .build();
 

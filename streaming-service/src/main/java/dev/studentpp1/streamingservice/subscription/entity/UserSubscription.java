@@ -31,7 +31,6 @@ public class UserSubscription {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Future
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
@@ -50,6 +49,6 @@ public class UserSubscription {
 
     @AssertTrue(message = "End time must be after start time")
     private boolean isEndTimeAfterStartTime() {
-        return endTime.isAfter(startTime);
+        return endTime != null && startTime != null && endTime.isAfter(startTime);
     }
 }
