@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.dto;
+package dev.studentpp1.streamingservice.subscription.dto.request;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;

@@ -1,9 +1,9 @@
 package dev.studentpp1.streamingservice.subscription.controller;
 
 import dev.studentpp1.streamingservice.common.validation.ValidId;
-import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRequest;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanDetailsDto;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanSummaryDto;
+import dev.studentpp1.streamingservice.subscription.dto.request.CreateSubscriptionPlanRequest;
+import dev.studentpp1.streamingservice.subscription.dto.response.SubscriptionPlanDetailsDto;
+import dev.studentpp1.streamingservice.subscription.dto.response.SubscriptionPlanSummaryDto;
 import dev.studentpp1.streamingservice.subscription.mapper.SubscriptionPlanMapper;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanService;
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.mapper;
 
-import dev.studentpp1.streamingservice.subscription.dto.UserSubscriptionDto;
+import dev.studentpp1.streamingservice.subscription.dto.response.UserSubscriptionDto;
 import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.dto;
+package dev.studentpp1.streamingservice.subscription.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,6 +11,6 @@ public record CreateFamilySubscriptionRequest(
     Long planId,
 
     @NotEmpty(message = "Family member emails are required")
-    @Size(max = 4, message = "Maximum 4 family members allowed")
+     @Size(max = 4, message = "Maximum 4 family members allowed")
     List<@Email(message = "Invalid email format") String> memberEmails
 ) {}

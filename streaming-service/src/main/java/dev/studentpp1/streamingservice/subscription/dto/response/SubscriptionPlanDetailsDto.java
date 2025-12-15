@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.dto;
+package dev.studentpp1.streamingservice.subscription.dto.response;
 
 import dev.studentpp1.streamingservice.movies.dto.MovieDto;
 import java.math.BigDecimal;

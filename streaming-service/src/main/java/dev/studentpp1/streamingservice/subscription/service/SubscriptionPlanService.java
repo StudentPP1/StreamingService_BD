@@ -2,7 +2,7 @@ package dev.studentpp1.streamingservice.subscription.service;
 
 import dev.studentpp1.streamingservice.movies.entity.Movie;
 import dev.studentpp1.streamingservice.movies.repository.MovieRepository;
-import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRequest;
+import dev.studentpp1.streamingservice.subscription.dto.request.CreateSubscriptionPlanRequest;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.exception.MoviesNotFoundException;
 import dev.studentpp1.streamingservice.subscription.exception.MoviesNotInPlanException;
