@@ -21,6 +21,7 @@ public interface SubscriptionPlanMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "movies", ignore = true)
+    @Mapping(target = "version", ignore = true)
     SubscriptionPlan toEntity(CreateSubscriptionPlanRequest request);
 
     @Mapping(target = "id", ignore = true)
