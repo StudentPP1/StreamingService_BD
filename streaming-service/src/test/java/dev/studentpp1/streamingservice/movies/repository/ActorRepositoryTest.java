@@ -7,12 +7,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ActorRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
@@ -30,7 +32,6 @@ class ActorRepositoryTest extends AbstractPostgresContainerTest {
 
     @BeforeEach
     void setUp() {
-        //entityManager.createNativeQuery("DELETE FROM included_movie").executeUpdate();
         performanceRepository.deleteAll();
         movieRepository.deleteAll();
         directorRepository.deleteAll();

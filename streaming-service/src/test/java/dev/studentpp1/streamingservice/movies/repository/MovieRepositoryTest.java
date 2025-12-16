@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.repository;
 
+import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.movies.entity.Director;
 import dev.studentpp1.streamingservice.movies.entity.Movie;
 import jakarta.persistence.EntityManager;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -19,18 +21,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Testcontainers
-class MovieRepositoryTest {
-
-    private static final DockerImageName POSTGRES_IMAGE = DockerImageName.parse("postgres:16-alpine");
-
-    @Container
-    @ServiceConnection
-    protected static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(POSTGRES_IMAGE)
-                    .withDatabaseName("streaming_service_test_db")
-                    .withUsername("test")
-                    .withPassword("test");
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+class MovieRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private MovieRepository movieRepository;
