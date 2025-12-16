@@ -86,26 +86,59 @@ class SubscriptionServiceTest {
         return new AuthenticatedUser(appUser);
     }
 
+    private SubscriptionPlan createTestPlan(Long id, String name, BigDecimal price, int duration) {
+        return SubscriptionPlan.builder()
+            .id(id)
+            .name(name)
+            .price(price)
+            .duration(duration)
+            .description(name + " plan")
+            .build();
+    }
+
+    private SubscriptionPlan createTestPlan() {
+        return createTestPlan(1L, "PREMIUM", new BigDecimal("20.00"), 30);
+    }
+
+    private AppUser createTestUser(Long id, String email) {
+        return AppUser.builder()
+            .id(id)
+            .email(email)
+            .name("Test")
+            .surname("User")
+            .birthday(LocalDate.of(1990, 1, 1))
+            .build();
+    }
+
+    private UserSubscription createTestSubscription(Long id, AppUser user, SubscriptionPlan plan,
+        SubscriptionStatus status) {
+        return UserSubscription.builder()
+            .id(id)
+            .user(user)
+            .plan(plan)
+            .status(status)
+            .startTime(LocalDateTime.of(2025, 1, 1, 12, 0))
+            .endTime(LocalDateTime.of(2025, 1, 31, 12, 0))
+            .build();
+    }
+
+    private PaymentResponse createTestPaymentResponse() {
+        return new PaymentResponse(
+            PaymentStatus.PENDING.name(),
+            "Payment session created",
+            "cs_123",
+            "https://stripe.com/checkout/cs_123"
+        );
+    }
+
     @Test
     void subscribeUser_callsPaymentServiceCheckout_returnsResponse() {
         Long planId = 1L;
         SubscribeRequest request = new SubscribeRequest(planId);
         AuthenticatedUser currentUser = mockAuthenticatedUser(42L, "user@test.com");
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(planId)
-            .name("PREMIUM")
-            .price(new BigDecimal("20.00"))
-            .duration(30)
-            .description("Premium plan")
-            .build();
-
-        PaymentResponse expectedResponse = new PaymentResponse(
-            PaymentStatus.PENDING.name(),
-            "Payment session created",
-            "cs_123",
-            "https://stripe.com/checkout/cs_123"
-        );
+        SubscriptionPlan plan = createTestPlan(planId, "PREMIUM", new BigDecimal("20.00"), 30);
+        PaymentResponse expectedResponse = createTestPaymentResponse();
 
         when(subscriptionPlanUtils.findById(planId)).thenReturn(plan);
         when(paymentService.checkoutProduct(plan)).thenReturn(expectedResponse);
@@ -126,21 +159,8 @@ class SubscriptionServiceTest {
         String userId = "42";
         LocalDateTime now = LocalDateTime.of(2025, 1, 1, 12, 0);
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(1L)
-            .name(planName)
-            .price(new BigDecimal("20.00"))
-            .duration(30)
-            .description("Premium plan")
-            .build();
-
-        AppUser user = AppUser.builder()
-            .id(42L)
-            .email("user@test.com")
-            .name("Test")
-            .surname("User")
-            .birthday(LocalDate.of(1990, 1, 1))
-            .build();
+        SubscriptionPlan plan = createTestPlan(1L, planName, new BigDecimal("20.00"), 30);
+        AppUser user = createTestUser(42L, "user@test.com");
 
         when(subscriptionPlanUtils.findByName(planName)).thenReturn(plan);
         when(userService.findById(42L)).thenReturn(user);
@@ -173,18 +193,8 @@ class SubscriptionServiceTest {
         String userId = "10";
         LocalDateTime fixedTime = LocalDateTime.of(2025, 6, 15, 10, 30);
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(2L)
-            .name(planName)
-            .price(new BigDecimal("10.00"))
-            .duration(7)
-            .description("Basic plan")
-            .build();
-
-        AppUser user = AppUser.builder()
-            .id(10L)
-            .email("basic@test.com")
-            .build();
+        SubscriptionPlan plan = createTestPlan(2L, planName, new BigDecimal("10.00"), 7);
+        AppUser user = createTestUser(10L, "basic@test.com");
 
         when(subscriptionPlanUtils.findByName(planName)).thenReturn(plan);
         when(userService.findById(10L)).thenReturn(user);
@@ -212,24 +222,12 @@ class SubscriptionServiceTest {
             memberEmails);
         AuthenticatedUser currentUser = mockAuthenticatedUser(42L, "main@test.com");
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(planId)
-            .name("FAMILY")
-            .price(new BigDecimal("30.00"))
-            .duration(30)
-            .description("Family plan")
-            .build();
-
-        AppUser member1 = AppUser.builder().id(10L).email("member1@test.com").build();
-        AppUser member2 = AppUser.builder().id(20L).email("member2@test.com").build();
+        SubscriptionPlan plan = createTestPlan(planId, "FAMILY", new BigDecimal("30.00"), 30);
+        AppUser member1 = createTestUser(10L, "member1@test.com");
+        AppUser member2 = createTestUser(20L, "member2@test.com");
 
         String memberEmailsJson = "[\"member1@test.com\",\"member2@test.com\"]";
-        PaymentResponse expectedResponse = new PaymentResponse(
-            PaymentStatus.PENDING.name(),
-            "Payment session created",
-            "cs_123",
-            "https://stripe.com/checkout/cs_123"
-        );
+        PaymentResponse expectedResponse = createTestPaymentResponse();
 
         when(subscriptionPlanUtils.findById(planId)).thenReturn(plan);
         when(userService.findByEmail("member1@test.com")).thenReturn(member1);
@@ -263,11 +261,7 @@ class SubscriptionServiceTest {
             memberEmails);
         AuthenticatedUser currentUser = mockAuthenticatedUser(42L, "main@test.com");
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(planId)
-            .name("FAMILY")
-            .build();
-
+        SubscriptionPlan plan = createTestPlan(planId, "FAMILY", new BigDecimal("30.00"), 30);
         AppUser mainUser = currentUser.getAppUser();
 
         when(subscriptionPlanUtils.findById(planId)).thenReturn(plan);
@@ -290,19 +284,11 @@ class SubscriptionServiceTest {
             memberEmails);
         AuthenticatedUser currentUser = mockAuthenticatedUser(42L, "main@test.com");
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(planId)
-            .name("FAMILY")
-            .build();
+        SubscriptionPlan plan = createTestPlan(planId, "FAMILY", new BigDecimal("30.00"), 30);
+        AppUser member1 = createTestUser(10L, "member1@test.com");
 
-        AppUser member1 = AppUser.builder().id(10L).email("member1@test.com").build();
-
-        UserSubscription existingSubscription = UserSubscription.builder()
-            .id(1L)
-            .user(member1)
-            .plan(plan)
-            .status(SubscriptionStatus.ACTIVE)
-            .build();
+        UserSubscription existingSubscription = createTestSubscription(1L, member1, plan,
+            SubscriptionStatus.ACTIVE);
 
         when(subscriptionPlanUtils.findById(planId)).thenReturn(plan);
         when(userService.findByEmail("member1@test.com")).thenReturn(member1);
@@ -329,12 +315,8 @@ class SubscriptionServiceTest {
             memberEmails);
         AuthenticatedUser currentUser = mockAuthenticatedUser(42L, "main@test.com");
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(planId)
-            .name("FAMILY")
-            .build();
-
-        AppUser member1 = AppUser.builder().id(10L).email("member1@test.com").build();
+        SubscriptionPlan plan = createTestPlan(planId, "FAMILY", new BigDecimal("30.00"), 30);
+        AppUser member1 = createTestUser(10L, "member1@test.com");
 
         when(subscriptionPlanUtils.findById(planId)).thenReturn(plan);
         when(userService.findByEmail("member1@test.com")).thenReturn(member1);
@@ -359,16 +341,10 @@ class SubscriptionServiceTest {
         List<String> memberEmails = List.of("member1@test.com", "member2@test.com");
         LocalDateTime now = LocalDateTime.of(2025, 1, 1, 12, 0);
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(1L)
-            .name(planName)
-            .price(new BigDecimal("30.00"))
-            .duration(30)
-            .build();
-
-        AppUser mainUser = AppUser.builder().id(42L).email("main@test.com").build();
-        AppUser member1 = AppUser.builder().id(10L).email("member1@test.com").build();
-        AppUser member2 = AppUser.builder().id(20L).email("member2@test.com").build();
+        SubscriptionPlan plan = createTestPlan(1L, planName, new BigDecimal("30.00"), 30);
+        AppUser mainUser = createTestUser(42L, "main@test.com");
+        AppUser member1 = createTestUser(10L, "member1@test.com");
+        AppUser member2 = createTestUser(20L, "member2@test.com");
 
         when(subscriptionPlanUtils.findByName(planName)).thenReturn(plan);
         when(userService.findById(42L)).thenReturn(mainUser);
@@ -405,14 +381,9 @@ class SubscriptionServiceTest {
         List<String> memberEmails = List.of("member1@test.com");
         LocalDateTime fixedTime = LocalDateTime.of(2025, 3, 10, 15, 45);
 
-        SubscriptionPlan plan = SubscriptionPlan.builder()
-            .id(1L)
-            .name(planName)
-            .duration(30)
-            .build();
-
-        AppUser mainUser = AppUser.builder().id(42L).email("main@test.com").build();
-        AppUser member1 = AppUser.builder().id(10L).email("member1@test.com").build();
+        SubscriptionPlan plan = createTestPlan(1L, planName, new BigDecimal("30.00"), 30);
+        AppUser mainUser = createTestUser(42L, "main@test.com");
+        AppUser member1 = createTestUser(10L, "member1@test.com");
 
         when(subscriptionPlanUtils.findByName(planName)).thenReturn(plan);
         when(userService.findById(42L)).thenReturn(mainUser);
@@ -439,18 +410,12 @@ class SubscriptionServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         AppUser user = currentUser.getAppUser();
+        SubscriptionPlan plan = createTestPlan();
 
-        UserSubscription subscription1 = UserSubscription.builder()
-            .id(1L)
-            .user(user)
-            .status(SubscriptionStatus.ACTIVE)
-            .build();
-
-        UserSubscription subscription2 = UserSubscription.builder()
-            .id(2L)
-            .user(user)
-            .status(SubscriptionStatus.CANCELLED)
-            .build();
+        UserSubscription subscription1 = createTestSubscription(1L, user, plan,
+            SubscriptionStatus.ACTIVE);
+        UserSubscription subscription2 = createTestSubscription(2L, user, plan,
+            SubscriptionStatus.CANCELLED);
 
         Page<UserSubscription> expectedPage = new PageImpl<>(
             List.of(subscription1, subscription2),
@@ -479,12 +444,10 @@ class SubscriptionServiceTest {
         AuthenticatedUser currentUser = mockAuthenticatedUser(userId, "user@test.com");
 
         AppUser user = currentUser.getAppUser();
+        SubscriptionPlan plan = createTestPlan();
 
-        UserSubscription subscription = UserSubscription.builder()
-            .id(subscriptionId)
-            .user(user)
-            .status(SubscriptionStatus.ACTIVE)
-            .build();
+        UserSubscription subscription = createTestSubscription(subscriptionId, user, plan,
+            SubscriptionStatus.ACTIVE);
 
         when(userSubscriptionUtils.findByIdWithLock(subscriptionId)).thenReturn(subscription);
         when(userSubscriptionRepository.save(any(UserSubscription.class))).thenAnswer(
@@ -504,16 +467,11 @@ class SubscriptionServiceTest {
         Long userId = 42L;
         AuthenticatedUser currentUser = mockAuthenticatedUser(userId, "user@test.com");
 
-        AppUser otherUser = AppUser.builder()
-            .id(99L)
-            .email("other@test.com")
-            .build();
+        AppUser otherUser = createTestUser(99L, "other@test.com");
+        SubscriptionPlan plan = createTestPlan();
 
-        UserSubscription subscription = UserSubscription.builder()
-            .id(subscriptionId)
-            .user(otherUser)
-            .status(SubscriptionStatus.ACTIVE)
-            .build();
+        UserSubscription subscription = createTestSubscription(subscriptionId, otherUser, plan,
+            SubscriptionStatus.ACTIVE);
 
         when(userSubscriptionUtils.findByIdWithLock(subscriptionId)).thenReturn(subscription);
 
@@ -533,12 +491,10 @@ class SubscriptionServiceTest {
         AuthenticatedUser currentUser = mockAuthenticatedUser(userId, "user@test.com");
 
         AppUser user = currentUser.getAppUser();
+        SubscriptionPlan plan = createTestPlan();
 
-        UserSubscription subscription = UserSubscription.builder()
-            .id(subscriptionId)
-            .user(user)
-            .status(SubscriptionStatus.CANCELLED)
-            .build();
+        UserSubscription subscription = createTestSubscription(subscriptionId, user, plan,
+            SubscriptionStatus.CANCELLED);
 
         when(userSubscriptionUtils.findByIdWithLock(subscriptionId)).thenReturn(subscription);
 
