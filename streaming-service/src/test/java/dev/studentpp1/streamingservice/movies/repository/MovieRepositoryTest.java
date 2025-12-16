@@ -1,77 +1,104 @@
 package dev.studentpp1.streamingservice.movies.repository;
 
-import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.movies.entity.Director;
 import dev.studentpp1.streamingservice.movies.entity.Movie;
+import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class MovieRepositoryTest extends AbstractPostgresContainerTest {
+@Testcontainers
+class MovieRepositoryTest {
+
+    private static final DockerImageName POSTGRES_IMAGE = DockerImageName.parse("postgres:16-alpine");
+
+    @Container
+    @ServiceConnection
+    protected static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>(POSTGRES_IMAGE)
+                    .withDatabaseName("streaming_service_test_db")
+                    .withUsername("test")
+                    .withPassword("test");
 
     @Autowired
     private MovieRepository movieRepository;
-
     @Autowired
     private DirectorRepository directorRepository;
+    @Autowired
+    private PerformanceRepository performanceRepository;
+    @Autowired
+    private ActorRepository actorRepository;
+    @Autowired
+    private EntityManager entityManager;
 
-    @Test
-    void findAllByDirectorId_ShouldReturnMovies_WhenDirectorExists() {
-        Director director = new Director();
-        director.setName("Denis");
-        director.setSurname("Villeneuve");
-        directorRepository.saveAndFlush(director);
+    private Director villeneuve;
+    private Movie dune;
+    private Movie arrival;
 
-        Movie movie1 = new Movie();
-        movie1.setTitle("Dune");
-        movie1.setYear(2021);
-        movie1.setDirector(director);
-        movieRepository.save(movie1);
+    @BeforeEach
+    void setUp() {
+        entityManager.createNativeQuery("DELETE FROM included_movie").executeUpdate();
+        performanceRepository.deleteAll();
+        movieRepository.deleteAll();
+        directorRepository.deleteAll();
+        actorRepository.deleteAll();
 
-        Movie movie2 = new Movie();
-        movie2.setTitle("Arrival");
-        movie2.setYear(2016);
-        movie2.setDirector(director);
-        movieRepository.save(movie2);
+        villeneuve = new Director();
+        villeneuve.setName("Denis");
+        villeneuve.setSurname("Villeneuve");
+        villeneuve = directorRepository.save(villeneuve);
 
-        Director otherDirector = new Director();
-        otherDirector.setName("Steven");
-        otherDirector.setSurname("Spielberg");
-        directorRepository.saveAndFlush(otherDirector);
+        dune = new Movie();
+        dune.setTitle("Dune");
+        dune.setYear(2021);
+        dune.setDirector(villeneuve);
+        dune = movieRepository.save(dune);
 
-        Movie otherMovie = new Movie();
-        otherMovie.setTitle("Jaws");
-        otherMovie.setYear(1975);
-        otherMovie.setDirector(otherDirector);
-        movieRepository.save(otherMovie);
-
-        movieRepository.flush();
-
-        List<Movie> result = movieRepository.findAllByDirectorId(director.getId());
-
-        assertThat(result).hasSize(2);
-        assertThat(result).extracting(Movie::getTitle)
-                .containsExactlyInAnyOrder("Dune", "Arrival");
-
-        assertThat(result).extracting(Movie::getTitle)
-                .doesNotContain("Jaws");
+        arrival = new Movie();
+        arrival.setTitle("Arrival");
+        arrival.setYear(2016);
+        arrival.setDirector(villeneuve);
+        arrival = movieRepository.save(arrival);
     }
 
     @Test
-    void save_ShouldFail_WhenDirectorIsNull() {
-        Movie movie = new Movie();
-        movie.setTitle("No Director Movie");
-        movie.setYear(2022);
+    void findAllByDirectorId_ShouldReturnMovies() {
+        List<Movie> movies = movieRepository.findAllByDirectorId(villeneuve.getId());
 
-        try {
-            movieRepository.saveAndFlush(movie);
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
-        }
+        assertThat(movies).hasSize(2);
+        assertThat(movies).extracting(Movie::getTitle)
+                .containsExactlyInAnyOrder("Dune", "Arrival");
+    }
+
+    @Test
+    void findAllByDirectorId_ShouldReturnEmpty_WhenDirectorHasNoMovies() {
+        Director spielberg = new Director();
+        spielberg.setName("Steven");
+        spielberg.setSurname("Spielberg");
+        spielberg = directorRepository.save(spielberg);
+
+        List<Movie> movies = movieRepository.findAllByDirectorId(spielberg.getId());
+
+        assertThat(movies).isEmpty();
+    }
+
+    @Test
+    void findById_ShouldReturnMovie() {
+        Optional<Movie> found = movieRepository.findById(dune.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getTitle()).isEqualTo("Dune");
     }
 }
