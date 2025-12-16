@@ -13,6 +13,7 @@ public interface DirectorMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
             nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     void updateDirectorFromRequest(DirectorRequest request, @MappingTarget Director director);
-    
+
+    @Mapping(source = "movies", target = "movies")
     DirectorDetailDto toDetailDto(Director director, List<MovieDto> movies);
 }

@@ -51,7 +51,7 @@ class MovieRepositoryTest extends AbstractPostgresContainerTest {
         movieRepository.save(otherMovie);
 
         movieRepository.flush();
-        
+
         List<Movie> result = movieRepository.findAllByDirectorId(director.getId());
 
         assertThat(result).hasSize(2);
