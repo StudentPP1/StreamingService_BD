@@ -105,7 +105,6 @@ public class SubscriptionPlanService {
     }
 
 
-    // TODO: choose removal strategy (Idempotency or Strictness)
     @Transactional
     public SubscriptionPlan removeMoviesFromPlan(Long planId, List<Long> movieIds) {
         SubscriptionPlan plan = subscriptionPlanUtils.findById(planId);

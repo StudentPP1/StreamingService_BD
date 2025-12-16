@@ -22,7 +22,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 @Entity
 @Table(name = "subscription_plan")
-@SQLDelete(sql = "UPDATE subscription_plan SET deleted = true WHERE subscription_plan_id = ?")
+@SQLDelete(sql = "UPDATE subscription_plan SET deleted = true WHERE subscription_plan_id = ? AND version = ?")
 @SQLRestriction("deleted = false")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class SubscriptionPlan {
