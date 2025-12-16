@@ -26,5 +26,6 @@ public interface SubscriptionPlanMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "movies", ignore = true)
+    @Mapping(target = "version", ignore = true)
     void updateEntityFromDto(CreateSubscriptionPlanRequest request, @MappingTarget SubscriptionPlan plan);
 }
