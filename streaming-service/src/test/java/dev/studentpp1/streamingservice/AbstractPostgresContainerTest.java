@@ -12,13 +12,13 @@ import org.testcontainers.utility.DockerImageName;
 public abstract class AbstractPostgresContainerTest {
 
     private static final DockerImageName POSTGRES_IMAGE =
-            DockerImageName.parse("postgres:16-alpine");
+        DockerImageName.parse("postgres:16-alpine");
 
     @Container
     @ServiceConnection
     protected static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(POSTGRES_IMAGE)
-                    .withDatabaseName("streaming_service_test_db")
-                    .withUsername("test")
-                    .withPassword("test");
+        new PostgreSQLContainer<>(POSTGRES_IMAGE)
+            .withDatabaseName("streaming_service_test_db")
+            .withUsername("test")
+            .withPassword("test");
 }
