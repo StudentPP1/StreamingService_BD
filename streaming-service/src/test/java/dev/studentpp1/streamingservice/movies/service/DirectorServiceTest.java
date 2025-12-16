@@ -54,11 +54,9 @@ class DirectorServiceTest {
 
     @Test
     void getDirectorById_ShouldThrowException_WhenNotFound() {
-        // Arrange
         Long id = 999L;
         when(directorRepository.findById(id)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> directorService.getDirectorById(id));
     }
 
