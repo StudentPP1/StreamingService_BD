@@ -1,7 +1,6 @@
 package dev.studentpp1.streamingservice.payments.repository;
 
 import dev.studentpp1.streamingservice.payments.dto.HistoryPaymentResponse;
-import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticProjection;
 import dev.studentpp1.streamingservice.payments.entity.Payment;
 import dev.studentpp1.streamingservice.payments.entity.PaymentStatus;
 import jakarta.persistence.LockModeType;
@@ -19,8 +18,7 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // Stripe can send retry with the same intent ->
-    // implement pessimistic lock to avoid duplicate of payment & subscription ->
-    // PESSIMISTIC_WRITE: lock row if two transaction try to compute one payment
+    // implement pessimistic lock to avoid duplicate of payment & subscription
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Payment p where p.providerSessionId = :providerSessionId")
     Optional<Payment> findByProviderPaymentIdForUpdate(@Param("providerSessionId") String providerSessionId);

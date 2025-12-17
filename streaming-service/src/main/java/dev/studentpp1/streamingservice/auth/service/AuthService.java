@@ -50,7 +50,6 @@ public class AuthService {
         // return Authentication(principal=UserDetails, credentials=null (password don't saved), authenticated=true, authorities=roles)
         Authentication authentication = authenticationManager.authenticate(authenticationTokenRequest);
         SecurityContext context = saveUserDetailsToSecurityContext(authentication);
-        // send session cookie and save to in-memory store our session
         createHttpSession(httpServletRequest, context);
     }
 
@@ -82,6 +81,5 @@ public class AuthService {
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 context
         );
-        // good to replace -> SecurityContextRepository.saveContext(context, request, response)
     }
 }

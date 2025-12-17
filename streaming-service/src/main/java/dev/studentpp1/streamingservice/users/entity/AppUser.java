@@ -31,6 +31,7 @@ import org.hibernate.annotations.SQLRestriction;
 public class AppUser {
 
     @Id
+    // hibernate generate insert without id -> delegate it to db (serial)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
