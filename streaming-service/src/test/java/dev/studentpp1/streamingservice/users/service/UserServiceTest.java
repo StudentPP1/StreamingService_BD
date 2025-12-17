@@ -23,8 +23,10 @@ import dev.studentpp1.streamingservice.users.dto.UpdateUserRequest;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import dev.studentpp1.streamingservice.users.exception.UserAlreadyExistsException;
 import dev.studentpp1.streamingservice.users.repository.UserRepository;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserServiceTest extends AbstractPostgresContainerTest {
 
     @Autowired
