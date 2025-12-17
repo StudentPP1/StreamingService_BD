@@ -86,7 +86,7 @@ class SubscriptionPlanServiceTest {
         movie.setTitle(title);
         movie.setDescription("Description for " + title);
         movie.setYear(2020);
-        movie.setRating(8.5);
+        movie.setRating(BigDecimal.valueOf(8.5));
         return movie;
     }
 

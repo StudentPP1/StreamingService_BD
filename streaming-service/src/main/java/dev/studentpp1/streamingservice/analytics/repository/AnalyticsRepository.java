@@ -4,12 +4,12 @@ import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats; // –ù–
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticProjection;
 import dev.studentpp1.streamingservice.movies.entity.Movie;
-import java.time.LocalDateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -46,8 +46,8 @@ public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
                 LIMIT 10
         """, nativeQuery = true)
     List<DirectorRevenueStats> findTopDirectorsAggregated(
-        @Param("startDate") LocalDateTime startDate,
-        @Param("endDate") LocalDateTime endDate
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
     );
 
     @Query(value = """
@@ -116,8 +116,7 @@ public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
             FROM monthly_statistic ms
             ORDER BY ms.current_month DESC, ms.total_plan_amount DESC;
             """,
-        nativeQuery = true
+            nativeQuery = true
     )
     List<MonthlyPlanStatisticProjection> findMonthlyPlanStatistics();
-
 }

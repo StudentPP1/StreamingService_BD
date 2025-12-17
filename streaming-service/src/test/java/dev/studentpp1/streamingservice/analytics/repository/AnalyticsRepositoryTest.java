@@ -159,7 +159,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         inception.setTitle("Inception");
         inception.setDescription("Mind-bending thriller");
         inception.setYear(2010);
-        inception.setRating(8.8);
+        inception.setRating(BigDecimal.valueOf(8.8));
         inception.setDirector(nolan);
         inception = movieRepository.save(inception);
 
@@ -167,7 +167,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         pulpFiction.setTitle("Pulp Fiction");
         pulpFiction.setDescription("Crime drama");
         pulpFiction.setYear(1994);
-        pulpFiction.setRating(8.9);
+        pulpFiction.setRating(BigDecimal.valueOf(8.9));
         pulpFiction.setDirector(tarantino);
         pulpFiction = movieRepository.save(pulpFiction);
 
@@ -175,7 +175,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         jaws.setTitle("Jaws");
         jaws.setDescription("Shark thriller");
         jaws.setYear(1975);
-        jaws.setRating(8.1);
+        jaws.setRating(BigDecimal.valueOf(8.1));
         jaws.setDirector(spielberg);
         jaws = movieRepository.save(jaws);
 
@@ -183,7 +183,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         shining.setTitle("The Shining");
         shining.setDescription("Horror classic");
         shining.setYear(1980);
-        shining.setRating(8.4);
+        shining.setRating(BigDecimal.valueOf(8.4));
         shining.setDirector(kubrick);
         shining = movieRepository.save(shining);
 
@@ -297,7 +297,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
             movie.setTitle("Movie" + i);
             movie.setDescription("Test movie");
             movie.setYear(2020);
-            movie.setRating(7.0);
+            movie.setRating(BigDecimal.valueOf(7.0));
             movie.setDirector(director);
             movie = movieRepository.save(movie);
 
@@ -351,7 +351,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         interstellar.setTitle("Interstellar");
         interstellar.setDescription("Space epic");
         interstellar.setYear(2014);
-        interstellar.setRating(8.6);
+        interstellar.setRating(BigDecimal.valueOf(8.6));
         interstellar.setDirector(nolan);
         interstellar = movieRepository.save(interstellar);
         addMovieToPlan(interstellar, standard);
@@ -499,7 +499,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         singleMovie.setTitle("Single Movie");
         singleMovie.setDescription("Only movie");
         singleMovie.setYear(2020);
-        singleMovie.setRating(8.0);
+        singleMovie.setRating(BigDecimal.valueOf(8.0));
         singleMovie.setDirector(singleDirector);
         singleMovie = movieRepository.save(singleMovie);
 
@@ -561,7 +561,7 @@ class AnalyticsRepositoryTest extends AbstractPostgresContainerTest {
         unmappedMovie.setTitle("Unmapped Movie");
         unmappedMovie.setDescription("Not in any plan");
         unmappedMovie.setYear(2020);
-        unmappedMovie.setRating(7.0);
+        unmappedMovie.setRating(BigDecimal.valueOf(7.0));
         unmappedMovie.setDirector(unmappedDirector);
         movieRepository.save(unmappedMovie);
 

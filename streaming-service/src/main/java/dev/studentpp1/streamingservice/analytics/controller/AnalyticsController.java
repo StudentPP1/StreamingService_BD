@@ -1,6 +1,6 @@
 package dev.studentpp1.streamingservice.analytics.controller;
 
-import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats; // Імпорт
+import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats;
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStatsDto;
 import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticResponse;
