@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.service;
 
+import dev.studentpp1.streamingservice.movies.exception.ResourceNotFoundException;
 import dev.studentpp1.streamingservice.movies.dto.PerformanceDto;
 import dev.studentpp1.streamingservice.movies.dto.PerformanceRequest;
 import dev.studentpp1.streamingservice.movies.entity.Actor;
@@ -31,16 +32,16 @@ public class PerformanceService {
 
     public PerformanceDto getPerformanceById(Long id) {
         Performance performance = performanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Performance not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Performance not found with id: " + id));
         return performanceMapper.toDto(performance);
     }
 
     public PerformanceDto createPerformance(PerformanceRequest request) {
         Actor actor = actorRepository.findById(request.actorId())
-                .orElseThrow(() -> new RuntimeException("Actor not found with id: " + request.actorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Actor not found with id: " + request.actorId()));
 
         Movie movie = movieRepository.findById(request.movieId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.movieId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id: " + request.movieId()));
 
         Performance performance = performanceMapper.toEntity(request);
         performance.setActor(actor);
@@ -51,7 +52,7 @@ public class PerformanceService {
 
     public void deletePerformance(Long id) {
         if (!performanceRepository.existsById(id)) {
-            throw new RuntimeException("Performance not found with id: " + id);
+            throw new ResourceNotFoundException("Performance not found with id: " + id);
         }
         performanceRepository.deleteById(id);
     }

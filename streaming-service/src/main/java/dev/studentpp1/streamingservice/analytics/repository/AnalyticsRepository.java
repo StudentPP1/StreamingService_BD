@@ -1,18 +1,20 @@
 package dev.studentpp1.streamingservice.analytics.repository;
 
+import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats; // Наш новий імпорт
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticProjection;
 import dev.studentpp1.streamingservice.movies.entity.Movie;
-import java.time.LocalDateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
+
 
     @Query(value = """
         WITH RevenuePerPlan AS (
@@ -44,9 +46,45 @@ public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
                 LIMIT 10
         """, nativeQuery = true)
     List<DirectorRevenueStats> findTopDirectorsAggregated(
-        @Param("startDate") LocalDateTime startDate,
-        @Param("endDate") LocalDateTime endDate
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
     );
+
+    @Query(value = """
+        WITH GlobalStats AS (
+            SELECT AVG(m.rating) as global_avg_rating
+            FROM movie m
+        ),
+        ActorStats AS (
+            SELECT 
+                a.actor_id,
+                CONCAT(a.name, ' ', a.surname) as full_name,
+                COUNT(DISTINCT m.movie_id) as total_movies,
+                COUNT(DISTINCT d.director_id) as distinct_directors,
+                AVG(m.rating) as avg_actor_rating
+            FROM actor a
+            JOIN performance p ON a.actor_id = p.actor_id
+            JOIN movie m ON p.movie_id = m.movie_id
+            JOIN director d ON m.director_id = d.director_id
+            GROUP BY a.actor_id, a.name, a.surname
+            HAVING COUNT(DISTINCT m.movie_id) >= 1
+        )
+        SELECT 
+            s.full_name as fullName,
+            s.total_movies as totalMovies,
+            s.distinct_directors as distinctDirectors,
+            CAST(s.avg_actor_rating AS NUMERIC(3,1)) as actorRating,
+            DENSE_RANK() OVER (ORDER BY s.avg_actor_rating DESC) as rankInSystem,
+            CASE 
+                WHEN s.avg_actor_rating > g.global_avg_rating THEN 'Above Average'
+                ELSE 'Below Average'
+            END as performanceStatus
+        FROM ActorStats s
+        CROSS JOIN GlobalStats g
+        ORDER BY s.avg_actor_rating DESC
+        LIMIT 20
+        """, nativeQuery = true)
+    List<ActorAnalyticsStats> findActorAnalytics();
 
     @Query(value = """
                     WITH monthly_statistic AS (
@@ -78,8 +116,7 @@ public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
             FROM monthly_statistic ms
             ORDER BY ms.current_month DESC, ms.total_plan_amount DESC;
             """,
-        nativeQuery = true
+            nativeQuery = true
     )
     List<MonthlyPlanStatisticProjection> findMonthlyPlanStatistics();
-
 }

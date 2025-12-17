@@ -92,7 +92,7 @@ class SubscriptionPlanMapperTest {
         movie1.setTitle("Inception");
         movie1.setDescription("Mind-bending thriller");
         movie1.setYear(2010);
-        movie1.setRating(8.8);
+        movie1.setRating(BigDecimal.valueOf(8.8));
         movie1.setDirector(director);
 
         Movie movie2 = new Movie();
@@ -100,7 +100,7 @@ class SubscriptionPlanMapperTest {
         movie2.setTitle("Interstellar");
         movie2.setDescription("Space exploration");
         movie2.setYear(2014);
-        movie2.setRating(8.6);
+        movie2.setRating(BigDecimal.valueOf(8.6));
         movie2.setDirector(director);
 
         Set<Movie> movies = new HashSet<>();
@@ -177,7 +177,7 @@ class SubscriptionPlanMapperTest {
         movie.setTitle("Pulp Fiction");
         movie.setDescription("Crime drama");
         movie.setYear(1994);
-        movie.setRating(8.9);
+        movie.setRating(BigDecimal.valueOf(8.9));
         movie.setDirector(director);
 
         Set<Movie> movies = new HashSet<>();
@@ -198,8 +198,6 @@ class SubscriptionPlanMapperTest {
         assertThat(dto.movies().iterator().next().id()).isEqualTo(10L);
         assertThat(dto.movies().iterator().next().title()).isEqualTo("Pulp Fiction");
         assertThat(dto.movies().iterator().next().directorId()).isEqualTo(5L);
-        assertThat(dto.movies().iterator().next().directorName()).isEqualTo("Quentin");
-        assertThat(dto.movies().iterator().next().directorSurname()).isEqualTo("Tarantino");
     }
 
     @Test

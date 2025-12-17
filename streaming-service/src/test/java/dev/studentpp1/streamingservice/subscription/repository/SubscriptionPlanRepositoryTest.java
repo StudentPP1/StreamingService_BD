@@ -82,7 +82,7 @@ class SubscriptionPlanRepositoryTest extends AbstractPostgresContainerTest {
         movie1.setTitle("Inception");
         movie1.setDescription("A mind-bending thriller");
         movie1.setYear(2010);
-        movie1.setRating(8.8);
+        movie1.setRating(BigDecimal.valueOf(8.8));
         movie1.setDirector(testDirector);
         movie1 = movieRepository.save(movie1);
 
@@ -90,7 +90,7 @@ class SubscriptionPlanRepositoryTest extends AbstractPostgresContainerTest {
         movie2.setTitle("Interstellar");
         movie2.setDescription("Space exploration epic");
         movie2.setYear(2014);
-        movie2.setRating(8.6);
+        movie2.setRating(BigDecimal.valueOf(8.6));
         movie2.setDirector(testDirector);
         movie2 = movieRepository.save(movie2);
 
@@ -98,7 +98,7 @@ class SubscriptionPlanRepositoryTest extends AbstractPostgresContainerTest {
         movie3.setTitle("The Dark Knight");
         movie3.setDescription("Batman confronts the Joker");
         movie3.setYear(2008);
-        movie3.setRating(9.0);
+        movie3.setRating(BigDecimal.valueOf(9.0));
         movie3.setDirector(testDirector);
         movie3 = movieRepository.save(movie3);
 
