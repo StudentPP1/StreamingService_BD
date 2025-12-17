@@ -1,11 +1,11 @@
 package dev.studentpp1.streamingservice.subscription.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
+import dev.studentpp1.streamingservice.common.validation.ValidId;
 import dev.studentpp1.streamingservice.payments.dto.PaymentResponse;
-import dev.studentpp1.streamingservice.subscription.dto.CreateFamilySubscriptionRequest;
-import dev.studentpp1.streamingservice.subscription.dto.SubscribeRequest;
-import dev.studentpp1.streamingservice.subscription.dto.UserSubscriptionDto;
-import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
+import dev.studentpp1.streamingservice.subscription.dto.request.CreateFamilySubscriptionRequest;
+import dev.studentpp1.streamingservice.subscription.dto.request.SubscribeRequest;
+import dev.studentpp1.streamingservice.subscription.dto.response.UserSubscriptionDto;
 import dev.studentpp1.streamingservice.subscription.mapper.UserSubscriptionMapper;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
@@ -18,12 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
+@Validated
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
@@ -62,7 +64,7 @@ public class SubscriptionController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelSubscription(
-        @PathVariable("id") Long subscriptionId,
+        @PathVariable("id") @ValidId Long subscriptionId,
         @AuthenticationPrincipal AuthenticatedUser currentUser
     ) {
         subscriptionService.cancelSubscription(subscriptionId, currentUser);

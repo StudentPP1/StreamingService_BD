@@ -13,11 +13,12 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class UserRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired

@@ -9,7 +9,7 @@ import dev.studentpp1.streamingservice.payments.entity.Payment;
 import dev.studentpp1.streamingservice.payments.entity.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.repository.PaymentRepository;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
-import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanUtils;
+import dev.studentpp1.streamingservice.subscription.service.utils.SubscriptionPlanUtils;
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
