@@ -12,6 +12,8 @@ import dev.studentpp1.streamingservice.movies.repository.DirectorRepository;
 import dev.studentpp1.streamingservice.movies.repository.MovieRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -35,8 +37,9 @@ public class MovieService {
         return movieMapper.toDetailDto(movie);
     }
 
-    public List<MovieDto> getAllMovies() {
-        return movieMapper.toDtoList(movieRepository.findAll());
+    public Page<MovieDto> getAllMovies(Pageable pageable) {
+        return movieRepository.findAll(pageable)
+                .map(movieMapper::toDto);
     }
 
     public MovieDto getMovieById(Long id) {
