@@ -412,15 +412,18 @@ Host: localhost:8081
 
 ## Actors Endpoints 
 + Get actor details (including performances/movies)
-```GET /api/actors/1/details HTTP/1.1
+```http request
+GET /api/actors/1/details HTTP/1.1
 Host: localhost:8081
 ```
 + Get actor by ID
-```GET /api/actors/1 HTTP/1.1
+```http request
+GET /api/actors/1 HTTP/1.1
 Host: localhost:8081
 ```
 + Create new actor (admin only)
-```POST /api/actors HTTP/1.1
+```http request
+POST /api/actors HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -432,7 +435,8 @@ Content-Type: application/json
 }
 ```
 + Update actor (admin only)
-```PUT /api/actors/1 HTTP/1.1
+```http request
+PUT /api/actors/1 HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -444,22 +448,26 @@ Content-Type: application/json
 }
 ```
 + Delete actor (admin only)
-```DELETE /api/actors/1 HTTP/1.1
+```http request
+DELETE /api/actors/1 HTTP/1.1
 Host: localhost:8081
 ```
 
 ## Director endpoints
 + Get director details (including movies)
-```GET /api/directors/1/details HTTP/1.1
+```http request
+GET /api/directors/1/details HTTP/1.1
 Host: localhost:8081
 ```
 
 + Get director by ID
-```GET /api/directors/1 HTTP/1.1
+```http request
+GET /api/directors/1 HTTP/1.1
 Host: localhost:8081
 ```
 + Create new director (admin only)
-```POST /api/directors HTTP/1.1
+```http request
+POST /api/directors HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -471,7 +479,8 @@ Content-Type: application/json
 ```
 
 + Update director (admin only)
-```PUT /api/directors/1 HTTP/1.1
+```http request
+PUT /api/directors/1 HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -482,26 +491,31 @@ Content-Type: application/json
 }
 ```
 + Delete director (admin only)
-```DELETE /api/directors/1 HTTP/1.1
+```http request
+DELETE /api/directors/1 HTTP/1.1
 Host: localhost:8081
 ```
 
 ## Movie endpoints
 
 + Get all movies
-```GET /api/movies HTTP/1.1
+```http request
+GET /api/movies HTTP/1.1
 Host: localhost:8081
 ```
 + Get movie details (including actors/performances)
-```GET /api/movies/1/details HTTP/1.1
+```http request
+GET /api/movies/1/details HTTP/1.1
 Host: localhost:8081
 ```
 + Get movie by ID
-```GET /api/movies/1 HTTP/1.1
+```http request
+GET /api/movies/1 HTTP/1.1
 Host: localhost:8081
 ```
 + Create new movie (admin only)
-```POST /api/movies HTTP/1.1
+```http request
+POST /api/movies HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -514,7 +528,8 @@ Content-Type: application/json
 }
 ```
 + Update movie (admin only)
-```PUT /api/movies/1 HTTP/1.1
+```http request
+PUT /api/movies/1 HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -527,16 +542,19 @@ Content-Type: application/json
 }
 ```
 + Delete movie (admin only)
-```DELETE /api/movies/1 HTTP/1.1
+```http request
+DELETE /api/movies/1 HTTP/1.1
 Host: localhost:8081
 ```
 ## Performance endpoints
 + Get performance by ID
-```GET /api/performances/1 HTTP/1.1
+```http request
+GET /api/performances/1 HTTP/1.1
 Host: localhost:8081
 ```
 + Add actor to movie (Create performance - admin only)
-```POST /api/performances HTTP/1.1
+```http request
+POST /api/performances HTTP/1.1
 Host: localhost:8081
 Content-Type: application/json
 
@@ -547,7 +565,8 @@ Content-Type: application/json
 }
 ```
 + Remove actor from movie (Delete performance - admin only)
-```DELETE /api/performances/1 HTTP/1.1
+```http request
+DELETE /api/performances/1 HTTP/1.1
 Host: localhost:8081
 ```
 
