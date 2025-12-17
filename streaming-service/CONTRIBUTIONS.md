@@ -15,3 +15,8 @@
 - Database schema design and optimization (indexes, partial indexes)
 - Documentation updates (README, schema.md, queries.md)
 - Docker-compose update (added stripe-cli image)
+
+## Member 3: Mark
+- Implement movie domain
+- Integration & unit tests with movie, actor, director
+- Create analytic query for analysis popular actors
