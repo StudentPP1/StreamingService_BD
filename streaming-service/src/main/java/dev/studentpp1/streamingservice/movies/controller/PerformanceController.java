@@ -6,6 +6,7 @@ import dev.studentpp1.streamingservice.movies.service.PerformanceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,11 +25,13 @@ public class PerformanceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PerformanceDto> createPerformance(@RequestBody @Valid PerformanceRequest request) {
         return new ResponseEntity<>(performanceService.createPerformance(request), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePerformance(@PathVariable Long id) {
         performanceService.deletePerformance(id);
         return ResponseEntity.noContent().build();

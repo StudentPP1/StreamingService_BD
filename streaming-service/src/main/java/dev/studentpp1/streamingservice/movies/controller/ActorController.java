@@ -7,6 +7,7 @@ import dev.studentpp1.streamingservice.movies.service.ActorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,16 +31,19 @@ public class ActorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> createActor(@RequestBody @Valid ActorRequest request) {
         return new ResponseEntity<>(actorService.createActor(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> updateActor(@PathVariable Long id, @RequestBody @Valid ActorRequest request) {
         return ResponseEntity.ok(actorService.updateActor(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteActor(@PathVariable Long id) {
         actorService.deleteActor(id);
         return ResponseEntity.noContent().build();

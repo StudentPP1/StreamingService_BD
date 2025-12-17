@@ -7,6 +7,7 @@ import dev.studentpp1.streamingservice.movies.service.DirectorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,16 +31,19 @@ public class DirectorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DirectorDto> createDirector(@RequestBody @Valid DirectorRequest request) {
         return new ResponseEntity<>(directorService.createDirector(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DirectorDto> updateDirector(@PathVariable Long id, @RequestBody @Valid DirectorRequest request) {
         return ResponseEntity.ok(directorService.updateDirector(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDirector(@PathVariable Long id) {
         directorService.deleteDirector(id);
         return ResponseEntity.noContent().build();
