@@ -1,0 +1,35 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  flyway:
+    enabled: true
+    default-schema: public
+    clean-disabled: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+  jpa:
+    open-in-view: false
+
+server:
+  port: 8081
+
+springdoc:
+  swagger-ui:
+    tryItOutEnabled: true
+
+app:
+  payment:
+    currency: usd
+    webhook:
+      key: ${STRIPE_WEBHOOK_KEY}
+    url:
+      success: http://localhost:3000/payment/success
+      cancel: http://localhost:3000/payment/cancel
+    key:
+      secret: ${STRIPE_SECRET_KEY}
+      public: ${STRIPE_PUBLIC_KEY}
+  subscription:
+    expire-cron: "0 0 * * * *"

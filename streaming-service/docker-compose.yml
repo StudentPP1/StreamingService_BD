@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+      TZ: "Europe/Kyiv"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - db-network
+
+  app:
+    image: app
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      APP_PAYMENT_KEY_SECRET: ${STRIPE_SECRET_KEY}
+      APP_PAYMENT_KEY_PUBLIC: ${STRIPE_PUBLIC_KEY}
+      APP_PAYMENT_WEBHOOK_KEY: ${STRIPE_WEBHOOK_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    networks:
+      - db-network
+    profiles: ["app"]
+
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    command: listen --forward-to http://host.docker.internal:8081/api/payments/webhook --api-key ${STRIPE_SECRET_KEY}
+    networks:
+      - db-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  db-network:
+    driver: bridge
