@@ -2,7 +2,7 @@
 
 ## Діаграма сутність-зв'язок (ERD)
 
-![ER diagram](https://raw.githubusercontent.com/markOone/StreamingService_BD/refs/heads/main/lab1/ER%20diagram.jpg)
+![ER diagram](https://raw.githubusercontent.com/markOone/StreamingService_BD/refs/heads/main/lab1/updated_diagram.jpg)
 
 ## Таблиця: `users`
 
@@ -35,16 +35,18 @@
 
 **Стовпці:**
 
-| Стовпець | Тип | Обмеження | Опис |
-|----------|-----|-----------|------|
-| subscription_plan_id | SERIAL | PRIMARY KEY | Унікальний ідентифікатор плану |
+| Стовпець | Тип | Обмеження | Опис                                  |
+|----------|-----|-----------|---------------------------------------|
+| subscription_plan_id | SERIAL | PRIMARY KEY | Унікальний ідентифікатор плану        |
 | name | VARCHAR(150) | UNIQUE, NOT NULL | Назва плану (наприклад, "Basic Plan") |
-| description | TEXT | NOT NULL | Детальний опис можливостей плану |
-| price | DECIMAL(8, 2) | NOT NULL, CHECK (price >= 0.0) | Вартість підписки |
-| duration | INT | NOT NULL | Тривалість підписки в днях |
+| description | TEXT | NOT NULL | Детальний опис можливостей плану      |
+| price | DECIMAL(8, 2) | NOT NULL, CHECK (price >= 0.0) | Вартість підписки                     |
+| duration | INT | NOT NULL | Тривалість підписки в днях            |
+| deleted | BOOLEAN | NOT NULL, DEFAULT FALSE | Прапорець м'якого видалення           |
+| version | BIGINT | NOT NULL, DEFAULT 0 | Версія для оптимістичного блокування  |
 
 **Індекси:**
-- UNIQUE constraint на `name` створює неявний індекс
+- `idx_subscription_plan_name_unique_active` на `name WHERE deleted = FALSE` (унікальність назви тільки для активних планів)
 
 **Зв'язки:**
 - Один-до-багатьох з `user_subscription` (план може мати багато активних підписок)
@@ -101,12 +103,16 @@
 
 ### **Індекси:**
 
-* `uk_payment_provider_pid` -- унікальний індекс на `provider_session_id`
+* `uk_payment_provider_pid` -- унікальний індекс на `provider_session_id WHERE provider_session_id IS NOT NULL`
   *(забезпечує ідемпотентність обробки платіжних подій)*
-* `idx_payment_status_created_at` на `(status, created_at)`
+* `ix_payment_status_created` на `(status, created_at)`
   *(для пошуку та очищення завислих платежів зі статусом `PENDING`)*
-* `idx_payment_user_subscription_id` на `user_subscription_id`
-  *(для JOIN-операцій та аналітики)*
+* `idx_payment_user_subscription_id_status_amount` на `(user_subscription_id, status) INCLUDE (amount)`
+  *(для JOIN-операцій з user_subscription та аналітики доходів)*
+* `idx_payment_status_paid_at` на `(status, paid_at DESC)`
+  *(для аналітичних запитів з агрегацією за датою)*
+* `idx_payment_paid_at` на `paid_at`
+  *(для видалення старих платежів)*
 
 ### **Зв'язки:**
 
@@ -122,14 +128,15 @@
 
 **Стовпці:**
 
-| Стовпець | Тип | Обмеження | Опис |
-|----------|-----|-----------|------|
-| movie_id | SERIAL | PRIMARY KEY | Унікальний ідентифікатор фільму |
-| title | VARCHAR(255) | NOT NULL | Назва фільму |
-| description | TEXT | NULL | Опис сюжету фільму |
-| year | INT | NOT NULL, CHECK (year > 1878) | Рік випуску (після винаходу кіно) |
-| rating | DECIMAL(4, 1) | CHECK (rating >= 0.0 AND rating <= 10.0) | Рейтинг фільму (0-10) |
-| director_id | INT | NOT NULL, FK | Посилання на режисера |
+| Стовпець | Тип | Обмеження | Опис                                 |
+|----------|-----|-----------|--------------------------------------|
+| movie_id | SERIAL | PRIMARY KEY | Унікальний ідентифікатор фільму      |
+| title | VARCHAR(255) | NOT NULL | Назва фільму                         |
+| description | TEXT | NULL | Опис сюжету фільму                   |
+| year | INT | NOT NULL, CHECK (year > 1878) | Рік випуску (після винаходу кіно)    |
+| rating | DECIMAL(4, 1) | CHECK (rating >= 0.0 AND rating <= 10.0) | Рейтинг фільму (0-10)                |
+| version | BIGINT | NOT NULL, DEFAULT 0 | Версія для оптимістичного блокування |
+| director_id | INT | NOT NULL, FK | Посилання на режисера                |
 
 **Індекси:**
 - `idx_movie_director_id` на `director_id` (для пошуку фільмів режисера)
@@ -214,6 +221,7 @@
 
 **Індекси:**
 - `idx_included_movie_subscription_plan_id` на `subscription_plan_id` (для пошуку фільмів плану)
+- `idx_included_movie_movie_id` на `movie_id` (для reverse join — пошук планів для фільму, аналітика)
 - Composite PRIMARY KEY автоматично створює індекс
 
 **Зв'язки:**
@@ -265,7 +273,18 @@
 
 1. **Foreign Keys:**
    - Всі FK отримали індекси для ефективних JOIN операцій
+   - Використання INCLUDE для покриваючих індексів (наприклад, `idx_payment_user_subscription_id_status_amount`)
 
 2. **Популярні запити:**
-   - Автентифікація: `idx_users_email_deleted` (index тільки для non-deleted)
-   - Аналітика: `idx_payment_status_paid_at` (для WHERE + GROUP BY)
+   - Автентифікація: `idx_users_email_deleted` (часткові індекс тільки для `deleted = FALSE`)
+   - Аналітика: `idx_payment_status_paid_at` (для WHERE + GROUP BY при обчисленні доходів)
+   - Пошук активних підписок: `idx_user_subscription_user_status` (композитний індекс)
+
+3. **Часткові (Partial) індекси:**
+   - `idx_users_email_deleted` - індексує лише активних користувачів
+   - `uk_payment_provider_pid` - індексує лише записи з непустим provider_session_id
+   - `idx_subscription_plan_name_unique_active` - унікальність назви тільки для невидалених планів
+
+4. **Оптимізація для конкретних сценаріїв:**
+   - Cleanup старих pending платежів: `ix_payment_status_created`
+   - Reverse joins для аналітики: `idx_included_movie_movie_id`
