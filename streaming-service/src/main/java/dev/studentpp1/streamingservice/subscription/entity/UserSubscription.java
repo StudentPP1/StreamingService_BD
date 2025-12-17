@@ -2,9 +2,9 @@ package dev.studentpp1.streamingservice.subscription.entity;
 
 import dev.studentpp1.streamingservice.users.entity.AppUser;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
@@ -24,7 +24,6 @@ public class UserSubscription {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @CreationTimestamp
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
@@ -43,4 +42,16 @@ public class UserSubscription {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUser user;
+
+    @AssertTrue(message = "End time must be after start time")
+    private boolean isEndTimeAfterStartTime() {
+        return endTime != null && startTime != null && endTime.isAfter(startTime);
+    }
+
+    @PrePersist
+    private void onCreate() {
+        if (startTime == null) {
+            startTime = LocalDateTime.now();
+        }
+    }
 }

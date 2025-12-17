@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.service;
+package dev.studentpp1.streamingservice.subscription.service.utils;
 
 import dev.studentpp1.streamingservice.subscription.entity.UserSubscription;
 import dev.studentpp1.streamingservice.subscription.exception.SubscriptionNotFoundException;
@@ -9,23 +9,16 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserSubscriptionUtils {
+
     private final UserSubscriptionRepository userSubscriptionRepository;
 
     public UserSubscription findById(Long subscriptionId) {
         return userSubscriptionRepository.findById(subscriptionId)
-            .orElseThrow(
-                () -> new SubscriptionNotFoundException(
-                    "Subscription not found with id " + subscriptionId
-                )
-            );
+            .orElseThrow(() -> new SubscriptionNotFoundException(subscriptionId));
     }
 
     public UserSubscription findByIdWithLock(Long subscriptionId) {
         return userSubscriptionRepository.findByIdWithLock(subscriptionId)
-            .orElseThrow(
-                () -> new SubscriptionNotFoundException(
-                    "Subscription not found with id " + subscriptionId
-                )
-            );
+            .orElseThrow(() -> new SubscriptionNotFoundException(subscriptionId));
     }
 }

@@ -1,11 +1,10 @@
 package dev.studentpp1.streamingservice.subscription.controller;
 
-import dev.studentpp1.streamingservice.subscription.dto.CreateSubscriptionPlanRequest;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanDetailsDto;
-import dev.studentpp1.streamingservice.subscription.dto.SubscriptionPlanSummaryDto;
-import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
+import dev.studentpp1.streamingservice.common.validation.ValidId;
+import dev.studentpp1.streamingservice.subscription.dto.request.CreateSubscriptionPlanRequest;
+import dev.studentpp1.streamingservice.subscription.dto.response.SubscriptionPlanDetailsDto;
+import dev.studentpp1.streamingservice.subscription.dto.response.SubscriptionPlanSummaryDto;
 import dev.studentpp1.streamingservice.subscription.mapper.SubscriptionPlanMapper;
-import dev.studentpp1.streamingservice.subscription.mapper.UserSubscriptionMapper;
 import dev.studentpp1.streamingservice.subscription.service.SubscriptionPlanService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -17,11 +16,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/subscription-plans")
 @RequiredArgsConstructor
+@Validated
 public class SubscriptionPlanController {
 
     private final SubscriptionPlanService subscriptionPlanService;
@@ -39,7 +40,9 @@ public class SubscriptionPlanController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubscriptionPlanDetailsDto> getPlanById(@PathVariable Long id) {
+    public ResponseEntity<SubscriptionPlanDetailsDto> getPlanById(
+        @PathVariable @ValidId Long id
+    ) {
 
         var plan = subscriptionPlanMapper.toDetailsDto(
             subscriptionPlanService.getPlanById(id)
@@ -51,7 +54,8 @@ public class SubscriptionPlanController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SubscriptionPlanDetailsDto> createPlan(
-        @Valid @RequestBody CreateSubscriptionPlanRequest request) {
+        @Valid @RequestBody CreateSubscriptionPlanRequest request
+    ) {
 
         var createdPlan = subscriptionPlanMapper.toDetailsDto(
             subscriptionPlanService.createPlan(request)
@@ -63,8 +67,9 @@ public class SubscriptionPlanController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SubscriptionPlanDetailsDto> updatePlan(
-        @PathVariable("id") Long planId,
-        @Valid @RequestBody CreateSubscriptionPlanRequest request) {
+        @PathVariable("id") @ValidId Long planId,
+        @Valid @RequestBody CreateSubscriptionPlanRequest request
+    ) {
 
         var updatedPlan = subscriptionPlanMapper.toDetailsDto(
             subscriptionPlanService.updatePlan(planId, request)
@@ -76,8 +81,9 @@ public class SubscriptionPlanController {
     @PostMapping("/{id}/movies")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SubscriptionPlanDetailsDto> addMoviesToPlan(
-        @PathVariable("id") Long planId,
-        @RequestBody List<Long> movieIds) {
+        @PathVariable("id") @ValidId Long planId,
+        @Valid @RequestBody List<@ValidId Long> movieIds
+    ) {
 
         var updatedPlan = subscriptionPlanMapper.toDetailsDto(
             subscriptionPlanService.addMoviesToPlan(planId, movieIds)
@@ -89,8 +95,8 @@ public class SubscriptionPlanController {
     @DeleteMapping("/{id}/movies")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SubscriptionPlanDetailsDto> removeMoviesFromPlan(
-        @PathVariable("id") Long planId,
-        @RequestBody List<Long> movieIds) {
+        @PathVariable("id") @ValidId Long planId,
+        @Valid @RequestBody List<@ValidId Long> movieIds) {
 
         var updatedPlan = subscriptionPlanMapper.toDetailsDto(
             subscriptionPlanService.removeMoviesFromPlan(planId, movieIds)
@@ -101,7 +107,9 @@ public class SubscriptionPlanController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePlan(
+        @PathVariable @ValidId Long id
+    ) {
         subscriptionPlanService.deletePlan(id);
 
         return ResponseEntity.noContent().build();

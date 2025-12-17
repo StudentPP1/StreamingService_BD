@@ -1,7 +1,14 @@
 package dev.studentpp1.streamingservice.common.config;
 
 import dev.studentpp1.streamingservice.common.dto.ErrorResponse;
+import dev.studentpp1.streamingservice.subscription.exception.ActiveSubscriptionAlreadyExistsException;
+import dev.studentpp1.streamingservice.subscription.exception.InvalidFamilyMemberException;
+import dev.studentpp1.streamingservice.subscription.exception.MoviesNotFoundException;
+import dev.studentpp1.streamingservice.subscription.exception.MoviesNotInPlanException;
+import dev.studentpp1.streamingservice.subscription.exception.SubscriptionAccessDeniedException;
+import dev.studentpp1.streamingservice.subscription.exception.SubscriptionNotActiveException;
 import dev.studentpp1.streamingservice.subscription.exception.SubscriptionNotFoundException;
+import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanAlreadyExistsException;
 import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanNotFoundException;
 import dev.studentpp1.streamingservice.users.exception.UserAlreadyExistsException;
 import dev.studentpp1.streamingservice.users.exception.UserNotFoundException;
@@ -21,6 +28,17 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler({
+        ActiveSubscriptionAlreadyExistsException.class,
+        SubscriptionPlanAlreadyExistsException.class
+    })
+    public ResponseEntity<ErrorResponse> handleConflict(
+        RuntimeException ex,
+        HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
+    }
+
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExists(
             UserAlreadyExistsException ex,
@@ -29,7 +47,10 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, UsernameNotFoundException.class})
+    @ExceptionHandler({
+        UserNotFoundException.class,
+        UsernameNotFoundException.class
+    })
     public ResponseEntity<ErrorResponse> handleUserNotFound(
             RuntimeException ex,
             HttpServletRequest request
@@ -37,7 +58,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler({SubscriptionNotFoundException.class, SubscriptionPlanNotFoundException.class})
+    @ExceptionHandler({
+        SubscriptionNotFoundException.class,
+        SubscriptionPlanNotFoundException.class,
+        MoviesNotFoundException.class
+    })
     public ResponseEntity<ErrorResponse> handleSubscriptionNotFound(
         RuntimeException ex,
         HttpServletRequest request
@@ -45,6 +70,26 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 
+
+    @ExceptionHandler({
+        InvalidFamilyMemberException.class,
+        SubscriptionNotActiveException.class,
+        MoviesNotInPlanException.class
+    })
+    public ResponseEntity<ErrorResponse> handleBadRequest(
+        RuntimeException ex,
+        HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(SubscriptionAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+        RuntimeException ex,
+        HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(

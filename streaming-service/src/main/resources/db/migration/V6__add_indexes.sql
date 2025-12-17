@@ -1,6 +1,6 @@
--- For join with user_subscription
-CREATE INDEX IF NOT EXISTS idx_payment_user_subscription_id
-    ON payment(user_subscription_id);
+-- For join with user_subscription and analytics revenue calculation
+CREATE INDEX IF NOT EXISTS idx_payment_user_subscription_id_status_amount
+    ON payment(user_subscription_id, status) INCLUDE (amount);
 
 -- For analytics query (using status & aggregating by date)
 CREATE INDEX IF NOT EXISTS idx_payment_status_paid_at
@@ -42,3 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_performance_movie_id
 -- For fetching movies included in subscription plan
 CREATE INDEX IF NOT EXISTS idx_included_movie_subscription_plan_id
     ON included_movie(subscription_plan_id);
+
+-- For reverse join from movie to subscription plans (analytics)
+CREATE INDEX IF NOT EXISTS idx_included_movie_movie_id
+    ON included_movie(movie_id);

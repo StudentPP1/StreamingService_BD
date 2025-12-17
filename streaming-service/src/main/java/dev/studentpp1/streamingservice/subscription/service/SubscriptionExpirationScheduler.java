@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.service;
 
+import dev.studentpp1.streamingservice.common.time.ClockService;
 import dev.studentpp1.streamingservice.subscription.repository.UserSubscriptionRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscriptionExpirationScheduler {
 
     private final UserSubscriptionRepository userSubscriptionRepository;
+    private final ClockService clockService;
 
     @Transactional
     @Scheduled(cron = "${app.subscription.expire-cron}")
     public void expireSubscriptions() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = clockService.now();
 
         int updatedCount = userSubscriptionRepository.expireOverdueSubscriptions(now);
 
