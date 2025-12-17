@@ -115,3 +115,60 @@ LIMIT 10;
 | Steven Spielberg | 424.94       | Premium, Annual, Standard | {"Annual": 399.96, "Premium": 14.99, "Standard": 9.99}                  | 1 |
 | Sofia Coppola | 399.96       | Annual | {"Annual": 399.96}                                                      | 2 |
 | Christopher Nolan | 23.95        | Standard, Batman Classics Collection, Basic | {"Standard": 9.99, "Batman Classics Collection": 8.97, "Basic": 4.99}   | 3 |
+
+# Запит 3: Рейтинг успішності акторів
+
+## Бізнес-питання
++ Чиї фільми мають рейтинг вищий за середній по платформі?
++ Хто є найбільш продуктивним актором (кількість фільмів)?
++ З якою кількістю унікальних режисерів співпрацював актор?
+
+## SQL-запит
+```sql
+WITH GlobalStats AS (
+    SELECT AVG(m.rating) as global_avg_rating
+    FROM movie m
+),
+ActorStats AS (
+    SELECT 
+        a.actor_id,
+        CONCAT(a.name, ' ', a.surname) as full_name,
+        COUNT(DISTINCT m.movie_id) as total_movies,
+        COUNT(DISTINCT d.director_id) as distinct_directors,
+        AVG(m.rating) as avg_actor_rating
+    FROM actor a
+    JOIN performance p ON a.actor_id = p.actor_id
+    JOIN movie m ON p.movie_id = m.movie_id
+    JOIN director d ON m.director_id = d.director_id
+    GROUP BY a.actor_id, a.name, a.surname
+    HAVING COUNT(DISTINCT m.movie_id) >= 1
+)
+SELECT 
+    s.full_name as fullName,
+    s.total_movies as totalMovies,
+    s.distinct_directors as distinctDirectors,
+    CAST(s.avg_actor_rating AS NUMERIC(3,1)) as actorRating,
+    DENSE_RANK() OVER (ORDER BY s.avg_actor_rating DESC) as rankInSystem,
+    CASE 
+        WHEN s.avg_actor_rating > g.global_avg_rating THEN 'Above Average'
+        ELSE 'Below Average'
+    END as performanceStatus
+FROM ActorStats s
+CROSS JOIN GlobalStats g
+ORDER BY s.avg_actor_rating DESC
+LIMIT 20
+```
+
+## Пояснення
++ CTE GlobalStats: обчислює середній рейтинг усіх фільмів у базі.
++ CTE ActorStats: агрегує статистику по кожному актору (кількість фільмів, унікальних режисерів, середній рейтинг фільмів актора).
++ CROSS JOIN: додає глобальний середній рейтинг до кожного рядка актора для порівняння.
++ CASE: визначає статус 'Above Average' (якщо рейтинг актора вищий за глобальний) або 'Below Average'.
++ DENSE_RANK: ранжує акторів за середнім рейтингом.
+
+## Приклад виводу:
+| fullName | totalMovies | distinctDirectors | actorRating                                                    | rankInSystem |performanceStatus|
+| :--- |:-------------| :--- |:------------------------------------------------------------------------| :--- | :--- |
+| Leonardo DiCaprio | 5 | 3       | 8.9 | 1                  | Above Average |
+| Brad Pitt | 4      | 2 | 7.2                                                  | Below Average |
+| Jonah Hill | 2        | 1 | 8.1 | 3   | 3 | Above Average|
