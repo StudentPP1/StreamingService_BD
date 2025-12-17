@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.analytics.service;
 
+import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats; // Імпорт
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticResponse;
 import dev.studentpp1.streamingservice.analytics.repository.AnalyticsRepository;
@@ -18,6 +19,10 @@ public class AnalyticsService {
 
     public List<DirectorRevenueStats> getTopDirectorsByRevenue() {
         return analyticsRepository.findTopDirectorsByRevenue();
+    }
+
+    public List<ActorAnalyticsStats> getActorAnalytics() {
+        return analyticsRepository.findActorAnalytics();
     }
 
     public List<MonthlyPlanStatisticResponse> getMonthlyPlanStatistics() {

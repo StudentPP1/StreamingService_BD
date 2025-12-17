@@ -20,7 +20,7 @@ public class Performance {
     @Column(name = "character_name", nullable = false, length = 255)
     private String characterName;
 
-    @Column(name = "description", columnDefinition = "TEXTS")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne

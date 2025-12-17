@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.analytics.controller;
 
+import dev.studentpp1.streamingservice.analytics.dto.ActorAnalyticsStats; // Імпорт
 import dev.studentpp1.streamingservice.analytics.dto.DirectorRevenueStats;
 import dev.studentpp1.streamingservice.analytics.dto.MonthlyPlanStatisticResponse;
 import dev.studentpp1.streamingservice.analytics.service.AnalyticsService;
@@ -23,6 +24,11 @@ public class AnalyticsController {
     @GetMapping("/directors-roi")
     public ResponseEntity<List<DirectorRevenueStats>> getDirectorsRoi() {
         return ResponseEntity.ok(analyticsService.getTopDirectorsByRevenue());
+    }
+
+    @GetMapping("/actors-rating")
+    public ResponseEntity<List<ActorAnalyticsStats>> getActorsRating() {
+        return ResponseEntity.ok(analyticsService.getActorAnalytics());
     }
 
     @GetMapping("/monthly-plans")
