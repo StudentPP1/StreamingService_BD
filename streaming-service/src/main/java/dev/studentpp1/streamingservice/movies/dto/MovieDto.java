@@ -8,5 +8,6 @@ public record MovieDto(
         String description,
         Integer year,
         BigDecimal rating,
-        Long directorId
+        Long directorId,
+        Long version
 ) {}

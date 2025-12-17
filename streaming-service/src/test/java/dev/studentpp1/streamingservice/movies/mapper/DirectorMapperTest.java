@@ -74,7 +74,7 @@ class DirectorMapperTest {
         director.setName("Guy");
         director.setSurname("Ritchie");
 
-        MovieDto movieDto = new MovieDto(10L, "Snatch", "Desc", 2000, null, 1L);
+        MovieDto movieDto = new MovieDto(10L, "Snatch", "Desc", 2000, null, 1L, null);
         List<MovieDto> movies = List.of(movieDto);
 
         DirectorDetailDto detailDto = directorMapper.toDetailDto(director, movies);

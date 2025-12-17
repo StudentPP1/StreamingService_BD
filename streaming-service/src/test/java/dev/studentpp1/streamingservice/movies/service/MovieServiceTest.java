@@ -39,7 +39,7 @@ class MovieServiceTest {
         Long id = 1L;
         Movie movie = new Movie();
         movie.setId(id);
-        MovieDto expectedDto = new MovieDto(id, "Inception", "Desc", 2010, BigDecimal.TEN, 1L);
+        MovieDto expectedDto = new MovieDto(id, "Inception", "Desc", 2010, BigDecimal.TEN, 1L,null);
 
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
         when(movieMapper.toDto(movie)).thenReturn(expectedDto);
@@ -53,7 +53,7 @@ class MovieServiceTest {
     @Test
     void createMovie_ShouldSave_WhenDirectorExistsAndYearValid() {
         Long directorId = 1L;
-        MovieRequest request = new MovieRequest("Inception", "Desc", 2010, BigDecimal.TEN, directorId);
+        MovieRequest request = new MovieRequest("Inception", "Desc", 2010, BigDecimal.TEN, directorId, null);
         Director director = new Director();
         director.setId(directorId);
 
@@ -63,7 +63,7 @@ class MovieServiceTest {
         Movie savedMovie = new Movie();
         savedMovie.setId(10L);
 
-        MovieDto expectedDto = new MovieDto(10L, "Inception", "Desc", 2010, BigDecimal.TEN, directorId);
+        MovieDto expectedDto = new MovieDto(10L, "Inception", "Desc", 2010, BigDecimal.TEN, directorId, null);
 
         // Мокаємо поведінку
         when(directorRepository.findById(directorId)).thenReturn(Optional.of(director));
@@ -83,7 +83,7 @@ class MovieServiceTest {
 
     @Test
     void createMovie_ShouldThrowException_WhenDirectorNotFound() {
-        MovieRequest request = new MovieRequest("Title", "Desc", 2020, BigDecimal.TEN, 99L);
+        MovieRequest request = new MovieRequest("Title", "Desc", 2020, BigDecimal.TEN, 99L, null);
 
         when(directorRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -94,7 +94,7 @@ class MovieServiceTest {
     @Test
     void createMovie_ShouldThrowException_WhenYearIsOld() {
         Long directorId = 1L;
-        MovieRequest request = new MovieRequest("Old Movie", "Desc", 1800, BigDecimal.TEN, directorId);
+        MovieRequest request = new MovieRequest("Old Movie", "Desc", 1800, BigDecimal.TEN, directorId, null);
         Director director = new Director();
 
         Movie movieEntity = new Movie();

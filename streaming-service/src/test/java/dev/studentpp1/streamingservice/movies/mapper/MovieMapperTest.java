@@ -46,7 +46,7 @@ class MovieMapperTest {
 
     @Test
     void toEntity_ShouldIgnoreDirectorAndId() {
-        MovieRequest request = new MovieRequest("Dune 2", "Desc", 2024, BigDecimal.TEN, 55L);
+        MovieRequest request = new MovieRequest("Dune 2", "Desc", 2024, BigDecimal.TEN, 55L, null);
 
         Movie movie = movieMapper.toEntity(request);
 

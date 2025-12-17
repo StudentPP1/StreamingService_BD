@@ -36,4 +36,7 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie")
     private List<Performance> performances;
+
+    @Version
+    private Long version;
 }

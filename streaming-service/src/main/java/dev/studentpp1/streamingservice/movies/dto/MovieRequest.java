@@ -20,5 +20,7 @@ public record MovieRequest(
         BigDecimal rating,
 
         @NotNull(message = "Director ID is required")
-        Long directorId
+        Long directorId,
+
+        Long version
 ) {}

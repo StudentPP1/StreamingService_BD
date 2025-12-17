@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.movies.service;
 
+import dev.studentpp1.streamingservice.movies.exception.OptimisticLockingException; // ВАШ НОВИЙ ІМПОРТ
 import dev.studentpp1.streamingservice.movies.exception.ResourceNotFoundException;
 import dev.studentpp1.streamingservice.movies.dto.MovieDetailDto;
 import dev.studentpp1.streamingservice.movies.dto.MovieDto;
@@ -62,6 +63,10 @@ public class MovieService {
     public MovieDto updateMovie(Long id, MovieRequest request) {
         Movie existingMovie = movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id: " + id));
+
+        if (request.version() != null && !request.version().equals(existingMovie.getVersion())) {
+            throw new OptimisticLockingException("Дані фільму були змінені іншим користувачем. Будь ласка, оновіть сторінку.");
+        }
 
         movieMapper.updateMovieFromRequest(request, existingMovie);
 

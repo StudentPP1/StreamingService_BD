@@ -10,5 +10,6 @@ public record MovieDetailDto(
         Integer year,
         BigDecimal rating,
         DirectorDto director,
-        List<MovieCastDto> cast
+        List<MovieCastDto> cast,
+        Long version
 ) {}
