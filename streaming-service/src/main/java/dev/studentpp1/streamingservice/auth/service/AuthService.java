@@ -25,7 +25,6 @@ public class AuthService {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
-    // these endpoints in white list -> security we do by hand (the same flow as in spring)
     public void register(RegisterUserRequest request, HttpServletRequest httpServletRequest) throws Exception {
         AppUser appUser = userService.createUser(request);
         UserDetails userDetails = new AuthenticatedUser(appUser);
@@ -35,7 +34,6 @@ public class AuthService {
                 userDetails.getAuthorities()
         );
         SecurityContext context = saveUserDetailsToSecurityContext(authentication);
-        // send session cookie and save to in-memory store our session
         createHttpSession(httpServletRequest, context);
     }
 
@@ -65,6 +63,7 @@ public class AuthService {
     }
 
     private SecurityContext saveUserDetailsToSecurityContext(Authentication authentication) {
+        // SecurityContextHolder use ThreadLocal to save Context -> live during current request
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
@@ -72,10 +71,17 @@ public class AuthService {
     }
 
     private void createHttpSession(HttpServletRequest httpServletRequest, SecurityContext context) {
+        // Save SecurityContext to HttpSession on server side
+        // Cookie contains only sessionId (JSESSIONID)
+        // Next request: SecurityContextPersistenceFilter
+        //  - reads sessionId from cookie
+        //  - finds HttpSession (save HashMap on server side with sessions)
+        //  - loads SecurityContext from session into SecurityContextHolder
         HttpSession session = httpServletRequest.getSession(true);
         session.setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 context
         );
+        // good to replace -> SecurityContextRepository.saveContext(context, request, response)
     }
 }

@@ -1,5 +1,6 @@
 package dev.studentpp1.streamingservice.payments.repository;
 
+import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.auth.persistence.Role;
 import dev.studentpp1.streamingservice.payments.dto.HistoryPaymentResponse;
 import dev.studentpp1.streamingservice.payments.entity.Payment;
@@ -15,11 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,20 +25,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
 @DataJpaTest
-class PaymentRepositoryTest {
-
-    private static final DockerImageName POSTGRES_IMAGE =
-            DockerImageName.parse("postgres:16-alpine");
-
-    @Container
-    @ServiceConnection
-    protected static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(POSTGRES_IMAGE)
-                    .withDatabaseName("streaming_service_test_db")
-                    .withUsername("test")
-                    .withPassword("test");
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class PaymentRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private PaymentRepository paymentRepository;

@@ -48,8 +48,6 @@ public interface AnalyticsRepository extends JpaRepository<Movie, Long> {
         @Param("endDate") LocalDateTime endDate
     );
 
-    // nativeQuery -> because it's complex query
-    // interface projection -> to simplify mapping be using getters
     @Query(value = """
                     WITH monthly_statistic AS (
                 SELECT
