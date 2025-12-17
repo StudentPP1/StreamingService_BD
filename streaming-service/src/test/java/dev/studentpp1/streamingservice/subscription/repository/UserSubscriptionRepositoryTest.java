@@ -3,6 +3,7 @@ package dev.studentpp1.streamingservice.subscription.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.auth.persistence.Role;
 import dev.studentpp1.streamingservice.payments.repository.PaymentRepository;
 import dev.studentpp1.streamingservice.subscription.entity.SubscriptionPlan;
@@ -28,36 +29,22 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-@Testcontainers
 @DataJpaTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class UserSubscriptionRepositoryTest {
-
-    private static final DockerImageName POSTGRES_IMAGE =
-        DockerImageName.parse("postgres:16-alpine");
-
-    @Container
-    @ServiceConnection
-    protected static final PostgreSQLContainer<?> POSTGRES =
-        new PostgreSQLContainer<>(POSTGRES_IMAGE)
-            .withDatabaseName("streaming_service_test_db")
-            .withUsername("test")
-            .withPassword("test");
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+class UserSubscriptionRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private UserSubscriptionRepository userSubscriptionRepository;
@@ -83,8 +70,6 @@ class UserSubscriptionRepositoryTest {
     private SubscriptionPlan basicPlan;
     private SubscriptionPlan standardPlan;
     private SubscriptionPlan premiumPlan;
-
-    // Basic repository operations
 
     @BeforeEach
     void setUp() {
@@ -131,6 +116,8 @@ class UserSubscriptionRepositoryTest {
         premiumPlan = subscriptionPlanRepository.findByName("PREMIUM")
             .orElseThrow(() -> new IllegalStateException("PREMIUM plan not found"));
     }
+
+    // Basic repository operations
 
     @Test
     void saveUserSubscription_persistsToDatabase() {
