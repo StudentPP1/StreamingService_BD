@@ -410,6 +410,166 @@ DELETE /api/subscription-plans/1 HTTP/1.1
 Host: localhost:8081
 ```
 
+## Actors Endpoints 
++ Get actor details (including performances/movies)
+```http request
+GET /api/actors/1/details HTTP/1.1
+Host: localhost:8081
+```
++ Get actor by ID
+```http request
+GET /api/actors/1 HTTP/1.1
+Host: localhost:8081
+```
++ Create new actor (admin only)
+```http request
+POST /api/actors HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "name": "Leonardo",
+  "surname": "DiCaprio",
+  "biography": "American actor and film producer.",
+  "birthDate": "1974-11-11"
+}
+```
++ Update actor (admin only)
+```http request
+PUT /api/actors/1 HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "name": "Leonardo",
+  "surname": "Wilhelm DiCaprio",
+  "biography": "Updated biography...",
+  "birthDate": "1974-11-11"
+}
+```
++ Delete actor (admin only)
+```http request
+DELETE /api/actors/1 HTTP/1.1
+Host: localhost:8081
+```
+
+## Director endpoints
++ Get director details (including movies)
+```http request
+GET /api/directors/1/details HTTP/1.1
+Host: localhost:8081
+```
+
++ Get director by ID
+```http request
+GET /api/directors/1 HTTP/1.1
+Host: localhost:8081
+```
++ Create new director (admin only)
+```http request
+POST /api/directors HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "name": "Christopher",
+  "surname": "Nolan",
+  "biography": "British-American film director, producer, and screenwriter."
+}
+```
+
++ Update director (admin only)
+```http request
+PUT /api/directors/1 HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "name": "Christopher",
+  "surname": "Nolan",
+  "biography": "Updated biography text."
+}
+```
++ Delete director (admin only)
+```http request
+DELETE /api/directors/1 HTTP/1.1
+Host: localhost:8081
+```
+
+## Movie endpoints
+
++ Get all movies
+```http request
+GET /api/movies HTTP/1.1
+Host: localhost:8081
+```
++ Get movie details (including actors/performances)
+```http request
+GET /api/movies/1/details HTTP/1.1
+Host: localhost:8081
+```
++ Get movie by ID
+```http request
+GET /api/movies/1 HTTP/1.1
+Host: localhost:8081
+```
++ Create new movie (admin only)
+```http request
+POST /api/movies HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "description": "A thief who steals corporate secrets through the use of dream-sharing technology...",
+  "year": 2010,
+  "rating": 8.8,
+  "directorId": 1
+}
+```
++ Update movie (admin only)
+```http request
+PUT /api/movies/1 HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "description": "Updated description",
+  "year": 2010,
+  "rating": 9.0,
+  "directorId": 1
+}
+```
++ Delete movie (admin only)
+```http request
+DELETE /api/movies/1 HTTP/1.1
+Host: localhost:8081
+```
+## Performance endpoints
++ Get performance by ID
+```http request
+GET /api/performances/1 HTTP/1.1
+Host: localhost:8081
+```
++ Add actor to movie (Create performance - admin only)
+```http request
+POST /api/performances HTTP/1.1
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "movieId": 1,
+  "actorId": 1,
+  "role": "Cobb"
+}
+```
++ Remove actor from movie (Delete performance - admin only)
+```http request
+DELETE /api/performances/1 HTTP/1.1
+Host: localhost:8081
+```
+
 ## Analytics endpoints
 
 + Get top directors by revenue (admin only)
@@ -423,6 +583,12 @@ Host: localhost:8081
 
 ```http request
 GET /api/analytics/monthly-plans HTTP/1.1
+Host: localhost:8081
+```
+
++ Get actors rating analytics (admin only)
+```http request
+GET /api/analytics/actors-rating HTTP/1.1
 Host: localhost:8081
 ```
 
