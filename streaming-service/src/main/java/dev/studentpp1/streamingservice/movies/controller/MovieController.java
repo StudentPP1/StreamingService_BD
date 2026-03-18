@@ -5,12 +5,14 @@ import dev.studentpp1.streamingservice.movies.dto.MovieDto;
 import dev.studentpp1.streamingservice.movies.dto.MovieRequest;
 import dev.studentpp1.streamingservice.movies.service.MovieService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -26,10 +28,12 @@ public class MovieController {
     public ResponseEntity<MovieDetailDto> getMovieMethodDetails(@PathVariable Long id) {
         return ResponseEntity.ok(movieService.getMovieMethodDetails(id));
     }
-
+    
     @GetMapping
-    public ResponseEntity<List<MovieDto>> getAllMovies() {
-        return ResponseEntity.ok(movieService.getAllMovies());
+    public ResponseEntity<Page<MovieDto>> getAllMovies(
+            @PageableDefault(sort = "title", direction = Sort.Direction.ASC, size = 10) Pageable pageable
+    ) {
+        return ResponseEntity.ok(movieService.getAllMovies(pageable));
     }
 
     @GetMapping("/{id}")
