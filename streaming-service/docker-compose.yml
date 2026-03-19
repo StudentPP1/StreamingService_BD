@@ -6,7 +6,6 @@ services:
       POSTGRES_USER: "${DB_USER}"
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
       POSTGRES_DB: "${DB_NAME}"
-      TZ: "Europe/Kyiv"
     ports:
       - "5432:5432"
     volumes:

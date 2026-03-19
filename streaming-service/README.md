@@ -7,42 +7,35 @@ Users can choose and purchase different subscription plans, each containing a li
 They can also view detailed information about movies, directors, actors, and subscription plans.
 Admin roles are implemented to manage content and user access.
 
-## Team
-| Domain                      | GitHub                                      |
-|-----------------------------|---------------------------------------------|
-| Movie, Actor, Performance   | [markOone](https://github.com/markOone) |
-| Subscption, Subscption Plan | [arcctg](https://github.com/arcctg)        |
-| Payment, User               | [StudentPP1](https://github.com/StudentPP1) |
-
 ## Tech stack
 
 ### Language and version
-- **Java** 21 — Modern LTS version with enhanced features
+- **Java** 21 - Modern LTS version with enhanced features
 
 ### Framework
-- **Spring Boot** 4.0.0 — Comprehensive framework for building production-ready applications
-- **Spring Web MVC** — RESTful web services
-- **Spring Security** — Authentication and authorization
-- **Spring Data JPA** — Database access layer with repository pattern
+- **Spring Boot** 4.0.0 - Comprehensive framework for building production-ready applications
+- **Spring Web MVC** - RESTful web services
+- **Spring Security** - Authentication and authorization
+- **Spring Data JPA** - Database access layer with repository pattern
 
 ### ORM and Database
-- **Hibernate** — ORM for Java (via Spring Data JPA)
-- **PostgreSQL** 16 — Relational database
-- **Flyway** 11.1.0 — Database migration tool
+- **Hibernate** - ORM for Java (via Spring Data JPA)
+- **PostgreSQL** 16 - Relational database
+- **Flyway** 11.1.0 - Database migration tool
 
 ### Testing Framework
-- **JUnit** 5 — Unit testing framework
-- **Mockito** — Mocking framework for tests
-- **Testcontainers** — Integration testing with Docker containers
-- **Spring Security Test** — Security testing utilities
+- **JUnit** 5 - Unit testing framework
+- **Mockito** - Mocking framework for tests
+- **Testcontainers** - Integration testing with Docker containers
+- **Spring Security Test** - Security testing utilities
 
 ### Other Technologies
-- **Docker** and **Docker Compose** — Containerization and orchestration
-- **Swagger/OpenAPI** 3.0.0 — API documentation (SpringDoc)
-- **Stripe** 31.0.0 — Payment processing integration
-- **MapStruct** 1.6.3 — DTO mapping
-- **Lombok** — Boilerplate code reduction
-- **Bean Validation** — Request validation
+- **Docker** and **Docker Compose** - Containerization and orchestration
+- **Swagger/OpenAPI** 3.0.0 - API documentation (SpringDoc)
+- **Stripe** 31.0.0 - Payment processing integration
+- **MapStruct** 1.6.3 - DTO mapping
+- **Lombok** - Boilerplate code reduction
+- **Bean Validation** - Request validation
 
 ## Setup Instructions
 
@@ -57,7 +50,7 @@ Admin roles are implemented to manage content and user access.
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/markOone/StreamingService_BD.git
+git clone https://github.com/StudentPP1/StreamingService_BD.git
 cd streaming-service
 ```
 
