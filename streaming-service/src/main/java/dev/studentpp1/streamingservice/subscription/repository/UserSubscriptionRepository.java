@@ -23,22 +23,27 @@ import java.util.List;
 public interface UserSubscriptionRepository extends JpaRepository<UserSubscription, Long> {
     List<UserSubscription> findByUser(AppUser user);
 
+    // join with SubscriptionPlan table, prevent N+1
     @EntityGraph(attributePaths = "plan")
     Page<UserSubscription> findAllByUser(AppUser user, Pageable pageable);
 
     List<UserSubscription> findAllByStatusAndEndTimeBefore(SubscriptionStatus status, LocalDateTime dateTime);
 
+    // block raw in db while current transaction is not completing
+    // to prevent double canceling
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM UserSubscription s WHERE s.id = :id")
     Optional<UserSubscription> findByIdWithLock(@Param("id") Long id);
 
+    // clearAutomatically -> clear hibernate 1st level cache
     @Modifying(clearAutomatically = true)
     @Query("UPDATE UserSubscription us SET us.status = 'EXPIRED' "
-        + "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
+            + "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
     int expireOverdueSubscriptions(@Param("now") LocalDateTime now);
 
+    // flushAutomatically = true -> sync all previous changes to db, do cancel & save to db
     @Modifying(flushAutomatically = true)
     @Query("UPDATE UserSubscription u SET u.status = 'CANCELLED' "
-        + "WHERE u.plan = :plan AND u.status = 'ACTIVE'")
+            + "WHERE u.plan = :plan AND u.status = 'ACTIVE'")
     void cancelAllByPlan(@Param("plan") SubscriptionPlan plan);
 }

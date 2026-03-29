@@ -6,6 +6,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+// single class for all tests
 @Testcontainers
 public abstract class AbstractPostgresContainerTest {
 

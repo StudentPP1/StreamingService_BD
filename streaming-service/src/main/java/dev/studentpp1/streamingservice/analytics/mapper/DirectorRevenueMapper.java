@@ -25,6 +25,7 @@ public abstract class DirectorRevenueMapper {
         this.objectMapper = objectMapper;
     }
 
+    // maps revenueBreakdownJson (String) to revenueBreakdown (Map) using jsonToMap method
     @Mapping(target = "revenueBreakdown", source = "revenueBreakdownJson", qualifiedByName = "jsonToMap")
     public abstract DirectorRevenueStatsDto toDto(DirectorRevenueStats stats);
 
@@ -34,20 +35,20 @@ public abstract class DirectorRevenueMapper {
             return Collections.emptyMap();
         }
         try {
+            // parse json as Map<String, BigDecimal>
             Map<String, BigDecimal> unsortedMap = objectMapper.readValue(
-                json,
-                new TypeReference<>() {
-                }
+                    json,
+                    new TypeReference<>() {} // save Map<String, BigDecimal> type in runtime
             );
 
             return unsortedMap.entrySet().stream()
-                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue,
-                    (e1, e2) -> e1,
-                    LinkedHashMap::new
-                ));
+                    .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (e1, e2) -> e1, // if we have two values with the same keys -> save only first (json hasn't duplicate keys)
+                            LinkedHashMap::new  // save order of adding
+                    ));
 
         } catch (IOException e) {
             return Collections.emptyMap();

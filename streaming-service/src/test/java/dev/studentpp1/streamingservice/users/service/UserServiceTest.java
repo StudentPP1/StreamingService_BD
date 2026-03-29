@@ -27,6 +27,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 @SpringBootTest
+// recreate spring context to prevent errors
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class UserServiceTest extends AbstractPostgresContainerTest {
 
