@@ -1,8 +1,8 @@
 package dev.studentpp1.streamingservice.auth.controller;
 
+import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
+import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
 import dev.studentpp1.streamingservice.auth.service.AuthService;
-import dev.studentpp1.streamingservice.users.dto.LoginUserRequest;
-import dev.studentpp1.streamingservice.users.dto.RegisterUserRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

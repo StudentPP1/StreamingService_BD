@@ -89,5 +89,10 @@ CREATE TABLE IF NOT EXISTS payment
     paid_at              TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     amount               DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
     status               payment_status NOT NULL,
-    user_subscription_id INT            NOT NULL REFERENCES user_subscription (user_subscription_id)
+    product_name VARCHAR(100),
+    currency VARCHAR(100),
+    user_subscription_id INT            NOT NULL REFERENCES user_subscription (user_subscription_id),
+    user_id INT NOT NULL REFERENCES users (user_id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    provider_session_id VARCHAR(100)
 );

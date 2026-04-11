@@ -1,10 +1,10 @@
 package dev.studentpp1.streamingservice.auth.service;
 
+import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
+import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
-import dev.studentpp1.streamingservice.users.dto.LoginUserRequest;
-import dev.studentpp1.streamingservice.users.dto.RegisterUserRequest;
-import dev.studentpp1.streamingservice.users.entity.AppUser;
-import dev.studentpp1.streamingservice.users.service.UserService;
+import dev.studentpp1.streamingservice.users.application.usecase.UserService;
+import dev.studentpp1.streamingservice.users.domain.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,11 +29,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public void register(RegisterUserRequest request, HttpServletRequest httpServletRequest) throws Exception {
-        AppUser appUser = userService.createUser(request);
-        UserDetails userDetails = new AuthenticatedUser(appUser);
+        User user = userService.createUser(request);
+        UserDetails userDetails = new AuthenticatedUser(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority(user.getRole().name()))
+        );
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDetails,
-                null,
+                userDetails.getPassword(),
                 userDetails.getAuthorities()
         );
         SecurityContext context = saveUserDetailsToSecurityContext(authentication);

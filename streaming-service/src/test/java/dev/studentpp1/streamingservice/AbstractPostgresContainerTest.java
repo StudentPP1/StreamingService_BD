@@ -4,21 +4,15 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-// single class for all tests
 @Testcontainers
 public abstract class AbstractPostgresContainerTest {
 
-    private static final DockerImageName POSTGRES_IMAGE =
-        DockerImageName.parse("postgres:16-alpine");
-
     @Container
     @ServiceConnection
-    protected static final PostgreSQLContainer<?> POSTGRES =
-        new PostgreSQLContainer<>(POSTGRES_IMAGE)
-            .withDatabaseName("streaming_service_test_db")
-            .withUsername("test")
-            .withUrlParam("serverTimezone", "Europe/Kyiv")
-            .withPassword("test");
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("streaming_service_test_db")
+                    .withUsername("test")
+                    .withPassword("test");
 }

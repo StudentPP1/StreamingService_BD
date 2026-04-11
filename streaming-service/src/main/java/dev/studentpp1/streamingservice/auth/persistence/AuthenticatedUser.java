@@ -1,37 +1,30 @@
 package dev.studentpp1.streamingservice.auth.persistence;
 
-import dev.studentpp1.streamingservice.users.entity.AppUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class AuthenticatedUser implements UserDetails {
-    private AppUser appUser;
+    @Getter
+    private final Long id;
+    private final String username;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(appUser.getRole().name()));
-    }
+    public String getUsername() { return username; }
 
     @Override
-    public @Nullable String getPassword() {
-        return appUser.getPassword();
-    }
+    public String getPassword() { return password; }
 
     @Override
-    public String getUsername() {
-        return appUser.getEmail();
-    }
+    public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 }

@@ -1,6 +1,17 @@
+TRUNCATE TABLE
+    payment,
+    user_subscription,
+    users,
+    included_movie,
+    subscription_plan,
+    performance,
+    movie,
+    actor,
+    director
+RESTART IDENTITY CASCADE;
+-- 1. Справочники и фильмы (Модуль Movies - без изменений)
 INSERT INTO director (name, surname, biography)
-VALUES ('Christopher', 'Nolan',
-        'British-American film director known for Inception and The Dark Knight.'),
+VALUES ('Christopher', 'Nolan', 'British-American film director known for Inception and The Dark Knight.'),
        ('Steven', 'Spielberg', 'American director famous for Jurassic Park and E.T.'),
        ('Quentin', 'Tarantino', 'American filmmaker known for Pulp Fiction and Kill Bill.'),
        ('Sofia', 'Coppola', 'American director, screenwriter, and actress.'),
@@ -21,30 +32,6 @@ VALUES ('Leonardo', 'DiCaprio', 'American actor known for Titanic and Inception.
        ('Ben', 'Affleck', 'Is an American actor and filmmaker.'),
        ('Robert', 'Pattinson', 'is an English actor.');
 
-INSERT INTO subscription_plan (name, description, price, duration)
-VALUES ('Basic', 'Access to limited movies', 4.99, 30),
-       ('Standard', 'Access to full library in HD', 9.99, 30),
-       ('Premium', 'Access to full library in 4K + extras', 14.99, 30),
-       ('Annual', 'Yearly subscription with discount', 99.99, 365),
-       ('Batman Classics Collection', 'Access to Best Batman movies', 2.99, 30);
-
-INSERT INTO users (name, surname, email, password, birthday)
-VALUES ('Alice', 'Smith', 'alice@example.com',
-        '$2a$12$cNFQwOfBpG5CyTlTM/USpe2H2wRGFgmYeueCNQdVvU/D/oKoAGAAS',
-        '1990-05-12'), -- password1
-       ('Bob', 'Johnson', 'bob@example.com',
-        '$2a$12$80iU24lKu2x.uhKt5OjLd.rTFkyg2ecdKPvKnxQp/m5XY98Wj51Ie',
-        '1985-09-23'), -- password2
-       ('Charlie', 'Brown', 'charlie@example.com',
-        '$2a$12$JELhzDIWOUjsfYbr/KFcLOBCT9gPQCw/47HfxbU5QRFQkSL/C62c.',
-        '1993-01-14'), -- password3
-       ('Diana', 'Prince', 'diana@example.com',
-        '$2a$12$RYYr10cBQ44npbp8sz4jAOR6IVJt9RDIKdL3vqBw5B31CDk3AYf4a',
-        '1988-07-07'), -- password4
-       ('Batman enjoyer', 'I like him', 'keatonthebest@example.com',
-        '$2a$12$OWOaJCo3IUmdcZC/DdMKBu/GaLOK8EQhEGeLQIRZLLAylTZWAcP1O',
-        '1980-03-17'); -- password5
-
 INSERT INTO movie (title, description, year, rating, director_id)
 VALUES ('Inception', 'A mind-bending thriller about dreams within dreams.', 2010, 8.8, 1),
        ('Jurassic Park', 'Dinosaurs are brought back to life in a theme park.', 1993, 8.1, 2),
@@ -59,24 +46,6 @@ VALUES ('Inception', 'A mind-bending thriller about dreams within dreams.', 2010
        ('The Dark Knight Rises', '', 2012, 8.4, 1),
        ('Batman v Superman: Dawn of Justice', '', 2016, 6.4, 7),
        ('The Batman', '', 2022, 7.8, 8);
-
-INSERT INTO included_movie (movie_id, subscription_plan_id)
-VALUES (1, 1),
-       (1, 2),
-       (2, 2),
-       (2, 3),
-       (2, 4),
-       (3, 3),
-       (4, 4),
-       (5, 5),
-       (6, 5),
-       (7, 5),
-       (8, 5),
-       (9, 5),
-       (10, 5),
-       (11, 5),
-       (12, 5),
-       (13, 5);
 
 INSERT INTO performance (character_name, description, actor_id, movie_id)
 VALUES ('Cobb', 'A skilled thief.', 1, 1),
@@ -93,6 +62,25 @@ VALUES ('Cobb', 'A skilled thief.', 1, 1),
        ('Batman', 'Superhero', 9, 12),
        ('Batman', 'Superhero', 10, 13);
 
+-- 2. Планы и Пользователи (Модули Subscription и Users)
+INSERT INTO subscription_plan (name, description, price, duration)
+VALUES ('Basic', 'Access to limited movies', 4.99, 30),
+       ('Standard', 'Access to full library in HD', 9.99, 30),
+       ('Premium', 'Access to full library in 4K + extras', 14.99, 30),
+       ('Annual', 'Yearly subscription with discount', 99.99, 365),
+       ('Batman Classics Collection', 'Access to Best Batman movies', 2.99, 30);
+
+INSERT INTO included_movie (movie_id, subscription_plan_id)
+VALUES (1, 1), (1, 2), (2, 2), (2, 3), (2, 4), (3, 3), (4, 4),
+       (5, 5), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5), (11, 5), (12, 5), (13, 5);
+
+INSERT INTO users (name, surname, email, password, birthday)
+VALUES ('Alice', 'Smith', 'alice@example.com', '$2a$12$cNFQwOfBpG5CyTlTM/USpe2H2wRGFgmYeueCNQdVvU/D/oKoAGAAS', '1990-05-12'),
+       ('Bob', 'Johnson', 'bob@example.com', '$2a$12$80iU24lKu2x.uhKt5OjLd.rTFkyg2ecdKPvKnxQp/m5XY98Wj51Ie', '1985-09-23'),
+       ('Charlie', 'Brown', 'charlie@example.com', '$2a$12$JELhzDIWOUjsfYbr/KFcLOBCT9gPQCw/47HfxbU5QRFQkSL/C62c.', '1993-01-14'),
+       ('Diana', 'Prince', 'diana@example.com', '$2a$12$RYYr10cBQ44npbp8sz4jAOR6IVJt9RDIKdL3vqBw5B31CDk3AYf4a', '1988-07-07'),
+       ('Batman enjoyer', 'I like him', 'keatonthebest@example.com', '$2a$12$OWOaJCo3IUmdcZC/DdMKBu/GaLOK8EQhEGeLQIRZLLAylTZWAcP1O', '1980-03-17');
+
 INSERT INTO user_subscription (start_time, end_time, status, subscription_plan_id, user_id)
 VALUES ('2024-01-01 10:00:00', '2024-02-01 10:00:00', 'EXPIRED', 1, 1),
        ('2024-01-15 12:00:00', '2024-02-15 12:00:00', 'CANCELLED', 2, 2),
@@ -104,18 +92,19 @@ VALUES ('2024-01-01 10:00:00', '2024-02-01 10:00:00', 'EXPIRED', 1, 1),
        ('2025-05-01 10:00:00', '2026-05-01 10:00:00', 'ACTIVE', 4, 5),
        ('2025-06-07 10:00:00', '2025-07-01 10:00:00', 'ACTIVE', 2, 4);
 
-INSERT INTO payment (paid_at, amount, status, user_subscription_id)
-VALUES ('2024-01-01 10:05:00', 4.99, 'COMPLETED', 1),
-       ('2024-01-15 12:05:00', 9.99, 'REFUNDED', 2),
-       ('2024-02-01 09:05:00', 14.99, 'COMPLETED', 3),
-       ('2024-03-01 09:00:00', 14.99, 'FAILED', 3),
-       ('2024-05-02 09:00:00', 14.99, 'FAILED', 3),
-       ('2024-06-02 09:00:00', 14.99, 'FAILED', 3),
-       ('2024-02-10 18:05:00', 99.99, 'COMPLETED', 4),
-       ('2025-10-12 19:08:47', 2.99, 'COMPLETED', 5),
-       ('2025-11-12 19:08:47', 2.99, 'FAILED', 5),
-       ('2025-12-12 19:08:47', 2.99, 'FAILED', 5),
-       ('2025-01-01 10:05:00', 99.99, 'COMPLETED', 6),
-       ('2025-02-01 10:05:00', 99.99, 'COMPLETED', 7),
-       ('2025-05-01 10:05:00', 99.99, 'COMPLETED', 8),
-       ('2025-06-07 10:05:00', 9.99, 'COMPLETED', 9);
+-- 3. Модуль Payments (САМЫЕ ВАЖНЫЕ ИЗМЕНЕНИЯ)
+-- Добавляем user_id, product_name, currency и provider_session_id
+INSERT INTO payment (created_at, paid_at, amount, currency, status, provider_session_id, user_id, product_name, user_subscription_id)
+VALUES
+    ('2024-01-01 10:00:00', '2024-01-01 10:05:00', 4.99, 'USD', 'COMPLETED', 'cs_test_1', 1, 'Basic', 1),
+    ('2024-01-15 12:00:00', '2024-01-15 12:05:00', 9.99, 'USD', 'REFUNDED',  'cs_test_2', 2, 'Standard', 2),
+    ('2024-02-01 09:00:00', '2024-02-01 09:05:00', 14.99, 'USD', 'COMPLETED', 'cs_test_3', 3, 'Premium', 3),
+    ('2024-03-01 08:50:00', '2024-03-01 09:00:00', 14.99, 'USD', 'FAILED',    'cs_test_4', 3, 'Premium', 3),
+    ('2024-05-02 08:50:00', '2024-05-02 09:00:00', 14.99, 'USD', 'FAILED',    'cs_test_5', 3, 'Premium', 3),
+    ('2024-02-10 18:00:00', '2024-02-10 18:05:00', 99.99, 'USD', 'COMPLETED', 'cs_test_6', 4, 'Annual', 4),
+    ('2025-10-12 19:00:00', '2025-10-12 19:08:47', 2.99, 'USD', 'COMPLETED',  'cs_test_7', 5, 'Batman Classics Collection', 5),
+    ('2025-11-12 19:00:00', '2025-11-12 19:08:47', 2.99, 'USD', 'FAILED',     'cs_test_8', 5, 'Batman Classics Collection', 5),
+    ('2025-01-01 10:00:00', '2025-01-01 10:05:00', 99.99, 'USD', 'COMPLETED', 'cs_test_9', 1, 'Annual', 6),
+    ('2025-02-01 10:00:00', '2025-02-01 10:05:00', 99.99, 'USD', 'COMPLETED', 'cs_test_10', 3, 'Annual', 7),
+    ('2025-05-01 10:00:00', '2025-05-01 10:05:00', 99.99, 'USD', 'COMPLETED', 'cs_test_11', 5, 'Annual', 8),
+    ('2025-06-07 10:00:00', '2025-06-07 10:05:00', 9.99, 'USD', 'COMPLETED',  'cs_test_12', 4, 'Standard', 9);
