@@ -1,4 +1,5 @@
 package dev.studentpp1.streamingservice.subscription.integration;
+
 import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
@@ -18,14 +19,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -40,10 +45,12 @@ class SubscriptionControllerQueryIntegrationTest extends AbstractPostgresContain
     private UserSubscriptionJpaRepository userSubscriptionJpaRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("TRUNCATE TABLE user_subscription, included_movie, subscription_plan, users RESTART IDENTITY CASCADE");
     }
+
     private AuthenticatedUser principal() {
         return new AuthenticatedUser(
                 1L,

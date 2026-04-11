@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,13 +19,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class UserControllerIntegrationTest extends AbstractPostgresContainerTest {
+class UserControllerQueryIntegrationTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,30 +74,5 @@ class UserControllerIntegrationTest extends AbstractPostgresContainerTest {
                         .with(user(principal())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(TEST_EMAIL));
-    }
-
-    @Test
-    void updateUser_authenticated_returnsOk() throws Exception {
-        saveTestUser();
-
-        String json = """
-                {"name":"Updated","surname":"Name"}
-                """;
-
-        mockMvc.perform(post("/api/users/update")
-                        .with(user(principal()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated"));
-    }
-
-    @Test
-    void deleteUser_authenticated_returnsOk() throws Exception {
-        saveTestUser();
-
-        mockMvc.perform(delete("/api/users")
-                        .with(user(principal())))
-                .andExpect(status().isOk());
     }
 }

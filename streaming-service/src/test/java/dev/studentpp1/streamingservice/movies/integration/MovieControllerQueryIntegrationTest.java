@@ -10,20 +10,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
+class MovieControllerQueryIntegrationTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,36 +69,6 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void createMovie_admin_returnsCreated() throws Exception {
-        directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
-
-        String json = """
-                {"title":"Inception","description":"desc","year":2010,"rating":8.8,"directorId":1}
-                """;
-
-        mockMvc.perform(post("/api/movies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Inception"))
-                .andExpect(jsonPath("$.id").value(1));
-    }
-
-    @Test
-    @WithMockUser
-    void createMovie_userRole_returnsForbidden() throws Exception {
-        String json = """
-                {"title":"Inception","description":"desc","year":2010,"rating":8.8,"directorId":1}
-                """;
-
-        mockMvc.perform(post("/api/movies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     @WithMockUser
     void getMovieById_notFound_returns404() throws Exception {
         mockMvc.perform(get("/api/movies/99999"))
@@ -105,10 +76,49 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void deleteMovie_notFound_returns404() throws Exception {
+    @WithMockUser
+    void getMovieById_returnsMovieDto() throws Exception {
+        DirectorEntity director = directorJpaRepository.save(
+                new DirectorEntity(null, "Denis", "Villeneuve", "bio", null)
+        );
+        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
+                null,
+                "Dune",
+                "epic",
+                2021,
+                BigDecimal.valueOf(8.2),
+                director,
+                null,
+                0L
+        ));
 
-        mockMvc.perform(delete("/api/movies/99999"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/movies/{id}", movie.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(movie.getId()))
+                .andExpect(jsonPath("$.title").value("Dune"));
+    }
+
+    @Test
+    @WithMockUser
+    void getMovieDetails_returnsMovieDetailDto() throws Exception {
+        DirectorEntity director = directorJpaRepository.save(
+                new DirectorEntity(null, "Christopher", "Nolan", "bio", null)
+        );
+        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
+                null,
+                "Interstellar",
+                "space",
+                2014,
+                BigDecimal.valueOf(8.6),
+                director,
+                null,
+                0L
+        ));
+
+        mockMvc.perform(get("/api/movies/{id}/details", movie.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(movie.getId()))
+                .andExpect(jsonPath("$.director.id").value(director.getId()))
+                .andExpect(jsonPath("$.title").value("Interstellar"));
     }
 }

@@ -1,95 +1,66 @@
 package dev.studentpp1.streamingservice.movies.application.cqs;
 
-import dev.studentpp1.streamingservice.common.dto.PageResult;
 import dev.studentpp1.streamingservice.movies.application.cqs.MoviesCqs.*;
-import dev.studentpp1.streamingservice.movies.application.usecase.ActorService;
-import dev.studentpp1.streamingservice.movies.application.usecase.DirectorService;
-import dev.studentpp1.streamingservice.movies.application.usecase.MovieService;
-import dev.studentpp1.streamingservice.movies.application.usecase.PerformanceService;
-import dev.studentpp1.streamingservice.movies.domain.model.Actor;
-import dev.studentpp1.streamingservice.movies.domain.model.Director;
-import dev.studentpp1.streamingservice.movies.domain.model.Movie;
-import dev.studentpp1.streamingservice.movies.domain.model.Performance;
+import dev.studentpp1.streamingservice.movies.application.read.MoviesReadRepository;
+import dev.studentpp1.streamingservice.movies.domain.exception.ActorNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.DirectorNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.MovieNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.PerformanceNotFoundException;
 import dev.studentpp1.streamingservice.movies.presentation.dto.response.*;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.ActorPresentationMapper;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.DirectorPresentationMapper;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.MoviePresentationMapper;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.PerformancePresentationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MoviesQueryHandler {
-    private final MovieService movieService;
-    private final ActorService actorService;
-    private final DirectorService directorService;
-    private final PerformanceService performanceService;
-    private final MoviePresentationMapper movieMapper;
-    private final ActorPresentationMapper actorMapper;
-    private final DirectorPresentationMapper directorMapper;
-    private final PerformancePresentationMapper performanceMapper;
+    private final MoviesReadRepository moviesReadRepository;
 
     public PageResponse<MovieDto> handle(GetAllMoviesQuery query) {
-        PageResult<Movie> result = movieService.getAllMovies(query.page(), query.size());
-        return new PageResponse<>(
-                result.content().stream().map(movieMapper::toDto).toList(),
-                result.page(),
-                result.size(),
-                result.totalElements(),
-                result.totalPages()
-        );
+        return moviesReadRepository.findAllMovies(query.page(), query.size());
     }
 
     public MovieDto handle(GetMovieByIdQuery query) {
-        return movieMapper.toDto(movieService.getMovieById(query.id()));
+        return moviesReadRepository.findMovieById(query.id())
+                .orElseThrow(() -> new MovieNotFoundException(query.id()));
     }
 
     public MovieDetailDto handle(GetMovieDetailsQuery query) {
-        return movieMapper.toDetailDto(movieService.getMovieDetails(query.id()));
+        return moviesReadRepository.findMovieDetails(query.id())
+                .orElseThrow(() -> new MovieNotFoundException(query.id()));
     }
 
     public PageResponse<ActorDto> handle(GetAllActorsQuery query) {
-        PageResult<Actor> result = actorService.getAllActors(query.page(), query.size());
-        return new PageResponse<>(
-                result.content().stream().map(actorMapper::toDto).toList(),
-                result.page(),
-                result.size(),
-                result.totalElements(),
-                result.totalPages()
-        );
+        return moviesReadRepository.findAllActors(query.page(), query.size());
     }
 
     public ActorDto handle(GetActorByIdQuery query) {
-        return actorMapper.toDto(actorService.getActorById(query.id()));
+        return moviesReadRepository.findActorById(query.id())
+                .orElseThrow(() -> new ActorNotFoundException(query.id()));
     }
 
     public ActorDetailDto handle(GetActorDetailsQuery query) {
-        return actorMapper.toDetailDto(actorService.getActorDetails(query.id()));
+        return moviesReadRepository.findActorDetails(query.id())
+                .orElseThrow(() -> new ActorNotFoundException(query.id()));
     }
 
     public PageResponse<DirectorDto> handle(GetAllDirectorsQuery query) {
-        PageResult<Director> result = directorService.getAllDirectors(query.page(), query.size());
-        return new PageResponse<>(
-                result.content().stream().map(directorMapper::toDto).toList(),
-                result.page(),
-                result.size(),
-                result.totalElements(),
-                result.totalPages()
-        );
+        return moviesReadRepository.findAllDirectors(query.page(), query.size());
     }
 
     public DirectorDto handle(GetDirectorByIdQuery query) {
-        return directorMapper.toDto(directorService.getDirectorById(query.id()));
+        return moviesReadRepository.findDirectorById(query.id())
+                .orElseThrow(() -> new DirectorNotFoundException(query.id()));
     }
 
     public DirectorDetailDto handle(GetDirectorDetailsQuery query) {
-        DirectorService.DirectorWithMovies result = directorService.getDirectorDetails(query.id());
-        return directorMapper.toDetailDto(result.director(), movieMapper.toDtoList(result.movies()));
+        return moviesReadRepository.findDirectorDetails(query.id())
+                .orElseThrow(() -> new DirectorNotFoundException(query.id()));
     }
 
     public PerformanceDto handle(GetPerformanceByIdQuery query) {
-        Performance performance = performanceService.getPerformanceById(query.id());
-        return performanceMapper.toDto(performance);
+        return moviesReadRepository.findPerformanceById(query.id())
+                .orElseThrow(() -> new PerformanceNotFoundException(query.id()));
     }
 }

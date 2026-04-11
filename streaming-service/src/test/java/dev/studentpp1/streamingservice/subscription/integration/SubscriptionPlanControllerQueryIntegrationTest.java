@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,13 +15,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContainerTest {
+class SubscriptionPlanControllerQueryIntegrationTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,40 +64,21 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
-    @WithMockUser
-    void createPlan_userRole_returnsForbidden() throws Exception {
-        String json = """
-                {"name":"Basic","description":"Basic plan","price":9.99,"duration":30}
-                """;
+    void getPlanById_returnsDetails() throws Exception {
+        SubscriptionPlanEntity plan = subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Premium")
+                        .description("Premium plan")
+                        .price(BigDecimal.valueOf(19.99))
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
 
-        mockMvc.perform(post("/api/subscription-plans")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void createPlan_admin_returnsCreated() throws Exception {
-        String json = """
-                {"name":"Basic","description":"Basic plan","price":9.99,"duration":30}
-                """;
-
-        mockMvc.perform(post("/api/subscription-plans")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Basic"))
-                .andExpect(jsonPath("$.id").value(1));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void deletePlan_notFound_returns404() throws Exception {
-
-        mockMvc.perform(delete("/api/subscription-plans/99999"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/subscription-plans/{id}", plan.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(plan.getId()))
+                .andExpect(jsonPath("$.name").value("Premium"));
     }
 }

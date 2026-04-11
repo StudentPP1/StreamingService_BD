@@ -49,10 +49,28 @@ class MoviesCommandHandlerUnitTest {
     }
 
     @Test
+    void updateMovie_returnsUpdatedId() {
+        MovieCreateRequest request = new MovieCreateRequest(
+                "Updated", "desc", 2015, BigDecimal.valueOf(8.1), 2L, 1L);
+        when(movieService.updateMovie(5L, request)).thenReturn(movie);
+        when(movie.getId()).thenReturn(5L);
+
+        Long result = handler.handle(new MoviesCqs.UpdateMovieCommand(5L, request));
+
+        assertThat(result).isEqualTo(5L);
+        verify(movieService).updateMovie(5L, request);
+    }
+
+    @Test
     void deletePerformance_delegatesToService() {
         handler.handle(new MoviesCqs.DeletePerformanceCommand(99L));
         verify(performanceService).deletePerformance(99L);
     }
+
+    @Test
+    void deleteMovie_delegatesToService() {
+        handler.handle(new MoviesCqs.DeleteMovieCommand(101L));
+
+        verify(movieService).deleteMovie(101L);
+    }
 }
-
-

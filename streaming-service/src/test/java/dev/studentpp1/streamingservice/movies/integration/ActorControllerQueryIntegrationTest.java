@@ -8,21 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class ActorControllerIntegrationTest extends AbstractPostgresContainerTest {
+class ActorControllerQueryIntegrationTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,21 +55,6 @@ class ActorControllerIntegrationTest extends AbstractPostgresContainerTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void createActor_admin_returnsCreated() throws Exception {
-        String json = """
-                {"name":"Leonardo","surname":"DiCaprio","biography":"bio"}
-                """;
-
-        mockMvc.perform(post("/api/actors")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Leonardo"))
-                .andExpect(jsonPath("$.id").value(1));
-    }
-
 
     @Test
     @WithMockUser
@@ -79,5 +62,16 @@ class ActorControllerIntegrationTest extends AbstractPostgresContainerTest {
 
         mockMvc.perform(get("/api/actors/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void getActorById_returnsActorDto() throws Exception {
+        ActorEntity actor = actorJpaRepository.save(new ActorEntity(null, "Matt", "Damon", "bio", null));
+
+        mockMvc.perform(get("/api/actors/{id}", actor.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(actor.getId()))
+                .andExpect(jsonPath("$.name").value("Matt"));
     }
 }

@@ -52,6 +52,24 @@ class SubscriptionCommandHandlerUnitTest {
         handler.handle(new SubscriptionCqs.CancelSubscriptionCommand(9L, 5L));
         verify(subscriptionService).cancelSubscription(9L, 5L);
     }
+    @Test
+    void updatePlan_returnsUpdatedPlanId() {
+        CreateSubscriptionPlanRequest request = new CreateSubscriptionPlanRequest(
+                "Premium", "Premium plan", BigDecimal.valueOf(19.99), 30, List.of(3L));
+        when(subscriptionPlanService.updatePlan(8L, request))
+                .thenReturn(new SubscriptionPlanService.PlanWithMovies(subscriptionPlan, List.of()));
+        when(subscriptionPlan.getId()).thenReturn(8L);
+
+        Long result = handler.handle(new SubscriptionCqs.UpdatePlanCommand(8L, request));
+
+        assertThat(result).isEqualTo(8L);
+        verify(subscriptionPlanService).updatePlan(8L, request);
+    }
+
+    @Test
+    void deletePlan_delegatesToService() {
+        handler.handle(new SubscriptionCqs.DeletePlanCommand(12L));
+
+        verify(subscriptionPlanService).deletePlan(12L);
+    }
 }
-
-

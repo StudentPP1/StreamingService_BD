@@ -64,4 +64,8 @@ public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, Long>
     int deletePaymentsBefore(@Param("dateTime") LocalDateTime dateTime);
 
     Optional<PaymentEntity> findByProviderSessionId(String sessionId);
+
+    List<PaymentEntity> findAllByUserId(Long userId);
+
+    List<PaymentEntity> findAllByUserIdAndUserSubscriptionId(Long userId, Long userSubscriptionId);
 }

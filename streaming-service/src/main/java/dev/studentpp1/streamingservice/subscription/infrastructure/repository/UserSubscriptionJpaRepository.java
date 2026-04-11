@@ -35,7 +35,7 @@ public interface UserSubscriptionJpaRepository extends JpaRepository<UserSubscri
     @Modifying(clearAutomatically = true)
     @Query("UPDATE UserSubscriptionEntity us SET us.status = 'EXPIRED' "
             + "WHERE us.status = 'ACTIVE' AND us.endTime < :now")
-    int expireOverdueSubscriptions(@Param("now") LocalDateTime now);
+    int expireOverdueSubscriptions(@Param("now" ) LocalDateTime now);
 
     // flushAutomatically = true -> sync all previous changes to db, do cancel & save to db
     @Modifying(flushAutomatically = true)
@@ -45,6 +45,7 @@ public interface UserSubscriptionJpaRepository extends JpaRepository<UserSubscri
 
     Optional<UserSubscriptionEntity> findByUserId(Long userId);
 
+    @EntityGraph(attributePaths = "plan")
     Page<UserSubscriptionEntity> findAllByUserId(Long userId, Pageable pageable);
 
     @Query("""
