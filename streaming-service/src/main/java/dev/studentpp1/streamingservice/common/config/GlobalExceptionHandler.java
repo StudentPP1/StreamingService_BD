@@ -1,22 +1,30 @@
 package dev.studentpp1.streamingservice.common.config;
 
 import dev.studentpp1.streamingservice.common.dto.ErrorResponse;
-import dev.studentpp1.streamingservice.subscription.exception.ActiveSubscriptionAlreadyExistsException;
-import dev.studentpp1.streamingservice.subscription.exception.InvalidFamilyMemberException;
-import dev.studentpp1.streamingservice.subscription.exception.MoviesNotFoundException;
-import dev.studentpp1.streamingservice.subscription.exception.MoviesNotInPlanException;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionAccessDeniedException;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionNotActiveException;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionNotFoundException;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanAlreadyExistsException;
-import dev.studentpp1.streamingservice.subscription.exception.SubscriptionPlanNotFoundException;
-import dev.studentpp1.streamingservice.users.exception.UserAlreadyExistsException;
-import dev.studentpp1.streamingservice.users.exception.UserNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.ActorNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.DirectorNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.MovieDomainException;
+import dev.studentpp1.streamingservice.movies.domain.exception.MovieNotFoundException;
+import dev.studentpp1.streamingservice.movies.domain.exception.OptimisticLockingException;
+import dev.studentpp1.streamingservice.movies.domain.exception.PerformanceNotFoundException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.ActiveSubscriptionAlreadyExistsException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.InvalidFamilyMemberException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.MoviesNotFoundException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.MoviesNotInPlanException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionAccessDeniedException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionNotActiveException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionNotFoundException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanAlreadyExistsException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
+import dev.studentpp1.streamingservice.users.domain.exception.UserAlreadyExistsException;
+import dev.studentpp1.streamingservice.users.domain.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -87,6 +95,51 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDenied(
         RuntimeException ex,
         HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler({
+        ActorNotFoundException.class,
+        MovieNotFoundException.class,
+        DirectorNotFoundException.class,
+        PerformanceNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleMovieNotFound(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(OptimisticLockingException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLocking(
+            OptimisticLockingException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(MovieDomainException.class)
+    public ResponseEntity<ErrorResponse> handleMovieDomain(
+            MovieDomainException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleSpringAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleSpringAuthentication(
+            AuthenticationException ex,
+            HttpServletRequest request
     ) {
         return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
     }
