@@ -14,9 +14,9 @@ public class CreateDirectorHandler {
 
     public void handle(CreateDirectorCommand command) {
         Director director = directorFactory.create(
-                command.request().name(),
-                command.request().surname(),
-                command.request().biography()
+                command.name(),
+                command.surname(),
+                command.biography()
         );
         directorRepository.save(director);
     }

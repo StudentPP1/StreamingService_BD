@@ -2,8 +2,7 @@ package dev.studentpp1.streamingservice.movies.presentation.controller;
 
 import dev.studentpp1.streamingservice.movies.application.command.movie.CreateMovieCommand;
 import dev.studentpp1.streamingservice.movies.application.command.movie.DeleteMovieCommand;
-import dev.studentpp1.streamingservice.movies.application.command.movie.MovieCommandHandler;
-import dev.studentpp1.streamingservice.movies.application.command.movie.MovieCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.command.MovieCommandHandler;
 import dev.studentpp1.streamingservice.movies.application.command.movie.UpdateMovieCommand;
 import dev.studentpp1.streamingservice.movies.application.query.movie.GetAllMoviesQuery;
 import dev.studentpp1.streamingservice.movies.application.query.movie.GetMovieByIdQuery;
@@ -11,6 +10,7 @@ import dev.studentpp1.streamingservice.movies.application.query.movie.GetMovieDe
 import dev.studentpp1.streamingservice.movies.application.query.movie.MovieDetailsReadModel;
 import dev.studentpp1.streamingservice.movies.application.query.movie.MovieQueryHandler;
 import dev.studentpp1.streamingservice.movies.application.query.movie.MovieReadModel;
+import dev.studentpp1.streamingservice.movies.presentation.dto.MovieCreateRequest;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -52,7 +52,13 @@ public class MovieController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> createMovie(@RequestBody @Valid MovieCreateRequest request) {
-        movieCommandHandler.handle(new CreateMovieCommand(request));
+        movieCommandHandler.handle(new CreateMovieCommand(
+                request.title(),
+                request.description(),
+                request.year(),
+                request.rating(),
+                request.directorId()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -60,7 +66,15 @@ public class MovieController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> updateMovie(@PathVariable Long id,
                                             @RequestBody @Valid MovieCreateRequest request) {
-        movieCommandHandler.handle(new UpdateMovieCommand(id, request));
+        movieCommandHandler.handle(new UpdateMovieCommand(
+                id,
+                request.title(),
+                request.description(),
+                request.year(),
+                request.rating(),
+                request.directorId(),
+                request.version()
+        ));
         return ResponseEntity.noContent().build();
     }
 

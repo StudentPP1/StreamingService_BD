@@ -14,10 +14,10 @@ public class CreatePerformanceHandler {
 
     public void handle(CreatePerformanceCommand command) {
         Performance performance = performanceFactory.create(
-                command.request().movieId(),
-                command.request().actorId(),
-                command.request().characterName(),
-                command.request().description()
+                command.movieId(),
+                command.actorId(),
+                command.characterName(),
+                command.description()
         );
         performanceRepository.save(performance);
     }

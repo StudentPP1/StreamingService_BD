@@ -28,10 +28,9 @@ class UpdateMovieHandlerTest {
     void handle_movieNotFound_throwsMovieNotFoundException() {
         when(movieRepository.findById(99L)).thenReturn(Optional.empty());
 
-        MovieCreateRequest request = new MovieCreateRequest(
-                "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, null);
-
-        assertThatThrownBy(() -> handler.handle(new UpdateMovieCommand(99L, request)))
+        assertThatThrownBy(() -> handler.handle(new UpdateMovieCommand(
+                99L, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, null
+        )))
                 .isInstanceOf(MovieNotFoundException.class);
 
         verify(movieRepository, never()).save(any());
@@ -43,10 +42,9 @@ class UpdateMovieHandlerTest {
                 BigDecimal.valueOf(8.8), 1L, 5L);
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
 
-        MovieCreateRequest request = new MovieCreateRequest(
-                "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, 3L);
-
-        assertThatThrownBy(() -> handler.handle(new UpdateMovieCommand(1L, request)))
+        assertThatThrownBy(() -> handler.handle(new UpdateMovieCommand(
+                1L, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, 3L
+        )))
                 .isInstanceOf(OptimisticLockingException.class);
 
         verify(movieRepository, never()).save(any());
@@ -58,10 +56,9 @@ class UpdateMovieHandlerTest {
                 BigDecimal.valueOf(8.8), 1L, 0L);
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
 
-        MovieCreateRequest request = new MovieCreateRequest(
-                "Interstellar", "new desc", 2014, BigDecimal.valueOf(9.0), 2L, 0L);
-
-        handler.handle(new UpdateMovieCommand(1L, request));
+        handler.handle(new UpdateMovieCommand(
+                1L, "Interstellar", "new desc", 2014, BigDecimal.valueOf(9.0), 2L, 0L
+        ));
 
         verify(movieRepository).save(movie);
     }

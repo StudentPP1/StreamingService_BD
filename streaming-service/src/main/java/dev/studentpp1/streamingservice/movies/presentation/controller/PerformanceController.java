@@ -2,11 +2,11 @@ package dev.studentpp1.streamingservice.movies.presentation.controller;
 
 import dev.studentpp1.streamingservice.movies.application.command.performance.CreatePerformanceCommand;
 import dev.studentpp1.streamingservice.movies.application.command.performance.DeletePerformanceCommand;
-import dev.studentpp1.streamingservice.movies.application.command.performance.PerformanceCommandHandler;
-import dev.studentpp1.streamingservice.movies.application.command.performance.PerformanceCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.command.PerformanceCommandHandler;
 import dev.studentpp1.streamingservice.movies.application.query.performance.GetPerformanceByIdQuery;
 import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceQueryHandler;
 import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceReadModel;
+import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceCreateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,12 @@ public class PerformanceController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> createPerformance(@RequestBody @Valid PerformanceCreateRequest request) {
-        performanceCommandHandler.handle(new CreatePerformanceCommand(request));
+        performanceCommandHandler.handle(new CreatePerformanceCommand(
+                request.characterName(),
+                request.description(),
+                request.actorId(),
+                request.movieId()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

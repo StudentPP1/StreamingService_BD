@@ -1,6 +1,10 @@
 package dev.studentpp1.streamingservice.subscription.integration;
 
 import dev.studentpp1.streamingservice.AbstractPostgresContainerTest;
+import dev.studentpp1.streamingservice.movies.infrastructure.entity.DirectorEntity;
+import dev.studentpp1.streamingservice.movies.infrastructure.entity.MovieEntity;
+import dev.studentpp1.streamingservice.movies.infrastructure.repository.DirectorJpaRepository;
+import dev.studentpp1.streamingservice.movies.infrastructure.repository.MovieJpaRepository;
 import dev.studentpp1.streamingservice.subscription.infrastructure.entity.SubscriptionPlanEntity;
 import dev.studentpp1.streamingservice.subscription.infrastructure.repository.SubscriptionPlanJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +34,12 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
     @Autowired
     private SubscriptionPlanJpaRepository subscriptionPlanJpaRepository;
+
+    @Autowired
+    private DirectorJpaRepository directorJpaRepository;
+
+    @Autowired
+    private MovieJpaRepository movieJpaRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -90,8 +100,7 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Basic"))
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(content().string(""));
     }
 
     @Test
@@ -100,5 +109,96 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
         mockMvc.perform(delete("/api/subscription-plans/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllPlans_withSearch_filtersByName() throws Exception {
+        subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Basic")
+                        .description("Basic plan")
+                        .price(BigDecimal.valueOf(9.99))
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
+        subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Premium")
+                        .description("Premium plan")
+                        .price(BigDecimal.valueOf(19.99))
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/subscription-plans")
+                        .param("search", "prem")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Premium"));
+    }
+
+    @Test
+    void getAllPlans_withPagination_returnsPageMetadata() throws Exception {
+        subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Basic")
+                        .description("Basic plan")
+                        .price(BigDecimal.valueOf(9.99))
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
+        subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Premium")
+                        .description("Premium plan")
+                        .price(BigDecimal.valueOf(19.99))
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/subscription-plans")
+                        .param("page", "1")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    void getPlanById_existing_returnsPlanDetailsWithIncludedMovies() throws Exception {
+        DirectorEntity director = directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
+        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
+                null,
+                "Inception",
+                "desc",
+                2010,
+                BigDecimal.valueOf(8.8),
+                director,
+                null,
+                0L
+        ));
+        SubscriptionPlanEntity plan = subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name("Premium")
+                        .description("Premium plan")
+                        .price(BigDecimal.valueOf(19.99))
+                        .duration(30)
+                        .movieIds(Set.of(movie.getId()))
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/subscription-plans/{id}", plan.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Premium"))
+                .andExpect(jsonPath("$.includedMovies.length()").value(1))
+                .andExpect(jsonPath("$.includedMovies[0].title").value("Inception"));
     }
 }

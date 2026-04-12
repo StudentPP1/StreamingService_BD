@@ -15,12 +15,12 @@ public class UpdateMovieHandler {
         Movie movie = movieRepository.findById(command.id())
                 .orElseThrow(() -> new MovieNotFoundException(command.id()));
         movie.update(
-                command.request().title(),
-                command.request().description(),
-                command.request().year(),
-                command.request().rating(),
-                command.request().directorId(),
-                command.request().version()
+                command.title(),
+                command.description(),
+                command.year(),
+                command.rating(),
+                command.directorId(),
+                command.version()
         );
         movieRepository.save(movie);
     }

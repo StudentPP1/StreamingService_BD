@@ -1,0 +1,42 @@
+package dev.studentpp1.streamingservice.subscription.application.command.subscription;
+
+import dev.studentpp1.streamingservice.subscription.domain.exception.ActiveSubscriptionAlreadyExistsException;
+import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
+import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutCommand;
+import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
+import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
+import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
+import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
+import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscriptionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class SubscribeUserHandler {
+
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final UserSubscriptionRepository userSubscriptionRepository;
+    private final SubscriptionPaymentGateway paymentGateway;
+
+    @Transactional
+    public void handle(SubscribeUserCommand command) {
+        SubscriptionPlan plan = subscriptionPlanRepository.findById(command.planId())
+                .orElseThrow(() -> new SubscriptionPlanNotFoundException(command.planId()));
+
+        boolean hasActive = userSubscriptionRepository.existsByUserIdInAndPlanIdAndStatus(
+                List.of(command.userId()), plan.getId(), SubscriptionStatus.ACTIVE);
+        if (hasActive) {
+            throw new ActiveSubscriptionAlreadyExistsException(
+                    "Someone in the provided list already has an active plan: " + plan.getName());
+        }
+
+        paymentGateway.generateCheckout(new CheckoutCommand(
+                plan.getName(), plan.getPrice(), command.userId(), new HashMap<>()));
+    }
+}
+

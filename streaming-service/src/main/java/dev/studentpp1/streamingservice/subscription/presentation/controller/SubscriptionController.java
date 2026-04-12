@@ -2,16 +2,15 @@ package dev.studentpp1.streamingservice.subscription.presentation.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
-import dev.studentpp1.streamingservice.subscription.application.command.CancelSubscriptionCommand;
-import dev.studentpp1.streamingservice.subscription.application.command.CreateFamilySubscriptionCommand;
-import dev.studentpp1.streamingservice.subscription.application.command.SubscribeUserCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.CancelSubscriptionCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.CreateFamilySubscriptionCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.SubscribeUserCommand;
 import dev.studentpp1.streamingservice.subscription.application.command.SubscriptionCommandHandler;
 import dev.studentpp1.streamingservice.subscription.application.query.GetMySubscriptionsQuery;
 import dev.studentpp1.streamingservice.subscription.application.query.SubscriptionQueryHandler;
-import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
-import dev.studentpp1.streamingservice.subscription.application.dto.CreateFamilySubscriptionRequest;
-import dev.studentpp1.streamingservice.subscription.application.dto.SubscribeRequest;
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionService.UserSubscriptionWithPlan;
+import dev.studentpp1.streamingservice.subscription.application.query.readmodel.UserSubscriptionWithPlanReadModel;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.CreateFamilySubscriptionRequest;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscribeRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,23 +31,27 @@ public class SubscriptionController {
     private final SubscriptionQueryHandler subscriptionQueryHandler;
 
     @PostMapping("/subscribe")
-    public ResponseEntity<CheckoutResult> subscribe(
+    public ResponseEntity<Void> subscribe(
             @Valid @RequestBody SubscribeRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        CheckoutResult result = subscriptionCommandHandler.handle(new SubscribeUserCommand(request, currentUser.getId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        subscriptionCommandHandler.handle(new SubscribeUserCommand(request.planId(), currentUser.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/family")
-    public ResponseEntity<CheckoutResult> subscribeFamily(
+    public ResponseEntity<Void> subscribeFamily(
             @Valid @RequestBody CreateFamilySubscriptionRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        CheckoutResult result = subscriptionCommandHandler.handle(new CreateFamilySubscriptionCommand(request, currentUser.getId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        subscriptionCommandHandler.handle(new CreateFamilySubscriptionCommand(
+                request.planId(),
+                request.memberEmails(),
+                currentUser.getId()
+        ));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/my")
-    public ResponseEntity<PageResult<UserSubscriptionWithPlan>> getMySubscriptions(
+    public ResponseEntity<PageResult<UserSubscriptionWithPlanReadModel>> getMySubscriptions(
             @AuthenticationPrincipal AuthenticatedUser currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

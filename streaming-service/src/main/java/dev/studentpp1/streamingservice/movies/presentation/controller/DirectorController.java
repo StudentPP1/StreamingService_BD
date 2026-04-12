@@ -2,8 +2,7 @@ package dev.studentpp1.streamingservice.movies.presentation.controller;
 
 import dev.studentpp1.streamingservice.movies.application.command.director.CreateDirectorCommand;
 import dev.studentpp1.streamingservice.movies.application.command.director.DeleteDirectorCommand;
-import dev.studentpp1.streamingservice.movies.application.command.director.DirectorCommandHandler;
-import dev.studentpp1.streamingservice.movies.application.command.director.DirectorCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.command.DirectorCommandHandler;
 import dev.studentpp1.streamingservice.movies.application.command.director.UpdateDirectorCommand;
 import dev.studentpp1.streamingservice.movies.application.query.director.DirectorDetailsReadModel;
 import dev.studentpp1.streamingservice.movies.application.query.director.DirectorQueryHandler;
@@ -12,6 +11,7 @@ import dev.studentpp1.streamingservice.movies.application.query.director.GetAllD
 import dev.studentpp1.streamingservice.movies.application.query.director.GetDirectorByIdQuery;
 import dev.studentpp1.streamingservice.movies.application.query.director.GetDirectorDetailsQuery;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
+import dev.studentpp1.streamingservice.movies.presentation.dto.DirectorCreateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +52,11 @@ public class DirectorController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> createDirector(@RequestBody @Valid DirectorCreateRequest request) {
-        directorCommandHandler.handle(new CreateDirectorCommand(request));
+        directorCommandHandler.handle(new CreateDirectorCommand(
+                request.name(),
+                request.surname(),
+                request.biography()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -60,7 +64,12 @@ public class DirectorController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> updateDirector(@PathVariable Long id,
                                                @RequestBody @Valid DirectorCreateRequest request) {
-        directorCommandHandler.handle(new UpdateDirectorCommand(id, request));
+        directorCommandHandler.handle(new UpdateDirectorCommand(
+                id,
+                request.name(),
+                request.surname(),
+                request.biography()
+        ));
         return ResponseEntity.noContent().build();
     }
 

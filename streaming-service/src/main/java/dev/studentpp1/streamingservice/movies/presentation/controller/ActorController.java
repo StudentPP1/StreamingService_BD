@@ -1,7 +1,6 @@
 package dev.studentpp1.streamingservice.movies.presentation.controller;
 
-import dev.studentpp1.streamingservice.movies.application.command.actor.ActorCommandHandler;
-import dev.studentpp1.streamingservice.movies.application.command.actor.ActorCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.command.ActorCommandHandler;
 import dev.studentpp1.streamingservice.movies.application.command.actor.CreateActorCommand;
 import dev.studentpp1.streamingservice.movies.application.command.actor.DeleteActorCommand;
 import dev.studentpp1.streamingservice.movies.application.command.actor.UpdateActorCommand;
@@ -12,6 +11,7 @@ import dev.studentpp1.streamingservice.movies.application.query.actor.GetActorBy
 import dev.studentpp1.streamingservice.movies.application.query.actor.GetActorDetailsQuery;
 import dev.studentpp1.streamingservice.movies.application.query.actor.GetAllActorsQuery;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
+import dev.studentpp1.streamingservice.movies.presentation.dto.ActorCreateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +52,11 @@ public class ActorController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> createActor(@RequestBody @Valid ActorCreateRequest request) {
-        actorCommandHandler.handle(new CreateActorCommand(request));
+        actorCommandHandler.handle(new CreateActorCommand(
+                request.name(),
+                request.surname(),
+                request.biography()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -60,7 +64,12 @@ public class ActorController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> updateActor(@PathVariable Long id,
                                             @RequestBody @Valid ActorCreateRequest request) {
-        actorCommandHandler.handle(new UpdateActorCommand(id, request));
+        actorCommandHandler.handle(new UpdateActorCommand(
+                id,
+                request.name(),
+                request.surname(),
+                request.biography()
+        ));
         return ResponseEntity.noContent().build();
     }
 

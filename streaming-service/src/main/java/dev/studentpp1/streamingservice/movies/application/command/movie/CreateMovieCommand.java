@@ -1,4 +1,12 @@
 package dev.studentpp1.streamingservice.movies.application.command.movie;
 
-public record CreateMovieCommand(MovieCreateRequest request) {
+import java.math.BigDecimal;
+
+public record CreateMovieCommand(
+		String title,
+		String description,
+		Integer year,
+		BigDecimal rating,
+		Long directorId
+) {
 }

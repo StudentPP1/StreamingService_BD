@@ -14,11 +14,11 @@ public class CreateMovieHandler {
 
     public void handle(CreateMovieCommand command) {
         Movie movie = movieFactory.create(
-                command.request().title(),
-                command.request().description(),
-                command.request().year(),
-                command.request().rating(),
-                command.request().directorId()
+                command.title(),
+                command.description(),
+                command.year(),
+                command.rating(),
+                command.directorId()
         );
         movieRepository.save(movie);
     }

@@ -14,9 +14,9 @@ public class CreateActorHandler {
 
     public void handle(CreateActorCommand command) {
         Actor actor = actorFactory.create(
-                command.request().name(),
-                command.request().surname(),
-                command.request().biography()
+                command.name(),
+                command.surname(),
+                command.biography()
         );
         actorRepository.save(actor);
     }

@@ -15,9 +15,9 @@ public class UpdateDirectorHandler {
         Director director = directorRepository.findById(command.id())
                 .orElseThrow(() -> new DirectorNotFoundException(command.id()));
         director.update(
-                command.request().name(),
-                command.request().surname(),
-                command.request().biography()
+                command.name(),
+                command.surname(),
+                command.biography()
         );
         directorRepository.save(director);
     }

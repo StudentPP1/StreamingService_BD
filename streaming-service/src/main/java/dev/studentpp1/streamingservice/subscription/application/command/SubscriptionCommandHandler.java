@@ -1,26 +1,44 @@
 package dev.studentpp1.streamingservice.subscription.application.command;
 
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionService;
-import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.*;
+import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
+import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionActivationPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
-public class SubscriptionCommandHandler {
+public class SubscriptionCommandHandler implements SubscriptionActivationPort {
 
-    private final SubscriptionService subscriptionService;
+    private final SubscribeUserHandler subscribeUserHandler;
+    private final CreateFamilySubscriptionHandler createFamilySubscriptionHandler;
+    private final CancelSubscriptionHandler cancelSubscriptionHandler;
+    private final CreateUserSubscriptionAfterPaymentHandler createUserSubscriptionAfterPaymentHandler;
+    private final CreateFamilySubscriptionAfterPaymentHandler createFamilySubscriptionAfterPaymentHandler;
 
-    public CheckoutResult handle(SubscribeUserCommand command) {
-        return subscriptionService.subscribeUser(command.request(), command.userId());
+    @Override
+    public UserSubscription createUserSubscription(String planName, Long userId) {
+        return createUserSubscriptionAfterPaymentHandler.handle(planName, userId);
     }
 
-    public CheckoutResult handle(CreateFamilySubscriptionCommand command) {
-        return subscriptionService.createFamilySubscription(command.request(), command.userId());
+    @Override
+    public List<UserSubscription> createFamilySubscriptionAfterPayment(
+            Long userId, String planName, List<String> memberEmails) {
+        return createFamilySubscriptionAfterPaymentHandler.handle(userId, planName, memberEmails);
+    }
+
+    public void handle(SubscribeUserCommand command) {
+        subscribeUserHandler.handle(command);
+    }
+
+    public void handle(CreateFamilySubscriptionCommand command) {
+        createFamilySubscriptionHandler.handle(command);
     }
 
     public void handle(CancelSubscriptionCommand command) {
-        subscriptionService.cancelSubscription(command.subscriptionId(), command.userId());
+        cancelSubscriptionHandler.handle(command);
     }
 }
 

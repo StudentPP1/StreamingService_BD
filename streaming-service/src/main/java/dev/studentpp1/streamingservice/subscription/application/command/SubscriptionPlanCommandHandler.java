@@ -1,7 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.application.command;
 
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionPlanService;
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionPlanService.PlanWithMovies;
+import dev.studentpp1.streamingservice.subscription.application.command.plan.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,26 +8,30 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SubscriptionPlanCommandHandler {
 
-    private final SubscriptionPlanService subscriptionPlanService;
+    private final CreatePlanHandler createPlanHandler;
+    private final UpdatePlanHandler updatePlanHandler;
+    private final AddMoviesToPlanHandler addMoviesToPlanHandler;
+    private final RemoveMoviesFromPlanHandler removeMoviesFromPlanHandler;
+    private final DeletePlanHandler deletePlanHandler;
 
-    public PlanWithMovies handle(CreatePlanCommand command) {
-        return subscriptionPlanService.createPlan(command.request());
+    public void handle(CreatePlanCommand command) {
+        createPlanHandler.handle(command);
     }
 
-    public PlanWithMovies handle(UpdatePlanCommand command) {
-        return subscriptionPlanService.updatePlan(command.id(), command.request());
+    public void handle(UpdatePlanCommand command) {
+        updatePlanHandler.handle(command);
     }
 
-    public PlanWithMovies handle(AddMoviesToPlanCommand command) {
-        return subscriptionPlanService.addMoviesToPlan(command.id(), command.movieIds());
+    public void handle(AddMoviesToPlanCommand command) {
+        addMoviesToPlanHandler.handle(command);
     }
 
-    public PlanWithMovies handle(RemoveMoviesFromPlanCommand command) {
-        return subscriptionPlanService.removeMoviesFromPlan(command.id(), command.movieIds());
+    public void handle(RemoveMoviesFromPlanCommand command) {
+        removeMoviesFromPlanHandler.handle(command);
     }
 
     public void handle(DeletePlanCommand command) {
-        subscriptionPlanService.deletePlan(command.id());
+        deletePlanHandler.handle(command);
     }
 }
 

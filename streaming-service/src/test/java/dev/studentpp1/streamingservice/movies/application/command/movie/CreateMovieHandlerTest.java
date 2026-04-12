@@ -25,14 +25,14 @@ class CreateMovieHandlerTest {
 
     @Test
     void handle_validCommand_createsAndSavesMovie() {
-        MovieCreateRequest request = new MovieCreateRequest(
-                "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, null);
         Movie movie = Movie.create("Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L);
 
         when(movieFactory.create("Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L))
                 .thenReturn(movie);
 
-        handler.handle(new CreateMovieCommand(request));
+        handler.handle(new CreateMovieCommand(
+                "Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L
+        ));
 
         verify(movieFactory).create("Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L);
         verify(movieRepository).save(movie);

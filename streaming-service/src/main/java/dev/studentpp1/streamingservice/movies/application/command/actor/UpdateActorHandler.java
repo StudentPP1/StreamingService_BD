@@ -15,9 +15,9 @@ public class UpdateActorHandler {
         Actor actor = actorRepository.findById(command.id())
                 .orElseThrow(() -> new ActorNotFoundException(command.id()));
         actor.update(
-                command.request().name(),
-                command.request().surname(),
-                command.request().biography()
+                command.name(),
+                command.surname(),
+                command.biography()
         );
         actorRepository.save(actor);
     }
