@@ -8,7 +8,6 @@ import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.port.PaymentCompletionHandler;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
-import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -106,7 +105,8 @@ public class PaymentWebhookService {
 
             if (familyMemberEmailsJson != null) {
                 try {
-                    familyMemberEmails = objectMapper.readValue(familyMemberEmailsJson, new TypeReference<>() {});
+                    familyMemberEmails = objectMapper.readValue(familyMemberEmailsJson, new TypeReference<>() {
+                    });
                 } catch (Exception e) {
                     log.error("Failed to parse family member emails from metadata", e);
                 }

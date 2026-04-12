@@ -4,7 +4,7 @@ import dev.studentpp1.streamingservice.movies.domain.exception.PerformanceNotFou
 import dev.studentpp1.streamingservice.movies.domain.factory.PerformanceFactory;
 import dev.studentpp1.streamingservice.movies.domain.model.Performance;
 import dev.studentpp1.streamingservice.movies.domain.repository.PerformanceRepository;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.PerformanceCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.dto.PerformanceCreateRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

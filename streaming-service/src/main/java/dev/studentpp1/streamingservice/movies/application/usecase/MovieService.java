@@ -11,7 +11,7 @@ import dev.studentpp1.streamingservice.movies.domain.repository.ActorRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.DirectorRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.MovieRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.PerformanceRepository;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.MovieCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.dto.MovieCreateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

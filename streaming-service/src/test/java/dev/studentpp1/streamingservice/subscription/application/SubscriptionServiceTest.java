@@ -14,7 +14,7 @@ import dev.studentpp1.streamingservice.subscription.domain.port.SubscriberProvid
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
 import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
 import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscriptionRepository;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.request.SubscribeRequest;
+import dev.studentpp1.streamingservice.subscription.application.dto.SubscribeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

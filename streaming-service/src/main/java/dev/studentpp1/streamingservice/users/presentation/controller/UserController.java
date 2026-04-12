@@ -4,7 +4,7 @@ import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.auth.service.AuthService;
 import dev.studentpp1.streamingservice.users.application.usecase.UserService;
 import dev.studentpp1.streamingservice.users.domain.model.User;
-import dev.studentpp1.streamingservice.users.presentation.dto.UpdateUserRequest;
+import dev.studentpp1.streamingservice.users.application.dto.UpdateUserRequest;
 import dev.studentpp1.streamingservice.users.presentation.dto.UserDto;
 import dev.studentpp1.streamingservice.users.presentation.mapper.UserPresentationMapper;
 import jakarta.servlet.http.HttpServletRequest;

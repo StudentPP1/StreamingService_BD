@@ -2,10 +2,10 @@ package dev.studentpp1.streamingservice.movies.presentation.mapper;
 
 import dev.studentpp1.streamingservice.movies.application.usecase.MovieService.MovieDetails;
 import dev.studentpp1.streamingservice.movies.domain.model.Movie;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.DirectorDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.MovieCastDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.MovieDetailDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.MovieDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.DirectorDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.MovieCastDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.MovieDetailDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.MovieDto;
 import org.mapstruct.Mapper;
 
 import java.util.List;

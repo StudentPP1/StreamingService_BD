@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.movies.presentation.dto.request;
+package dev.studentpp1.streamingservice.movies.application.dto;
 
 import jakarta.validation.constraints.*;
 

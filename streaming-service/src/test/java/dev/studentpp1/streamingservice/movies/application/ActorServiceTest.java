@@ -7,7 +7,7 @@ import dev.studentpp1.streamingservice.movies.domain.model.Actor;
 import dev.studentpp1.streamingservice.movies.domain.repository.ActorRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.MovieRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.PerformanceRepository;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.ActorCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.dto.ActorCreateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

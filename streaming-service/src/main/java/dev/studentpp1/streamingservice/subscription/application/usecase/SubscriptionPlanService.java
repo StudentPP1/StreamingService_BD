@@ -10,7 +10,7 @@ import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPla
 import dev.studentpp1.streamingservice.subscription.domain.port.MovieProvider;
 import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
 import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscriptionRepository;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.request.CreateSubscriptionPlanRequest;
+import dev.studentpp1.streamingservice.subscription.application.dto.CreateSubscriptionPlanRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

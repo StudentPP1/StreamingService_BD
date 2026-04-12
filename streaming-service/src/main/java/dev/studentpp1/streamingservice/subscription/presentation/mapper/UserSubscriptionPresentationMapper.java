@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.presentation.mapper;
 
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.response.UserSubscriptionDto;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.UserSubscriptionDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

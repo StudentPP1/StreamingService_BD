@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.presentation.dto.response;
+package dev.studentpp1.streamingservice.subscription.presentation.dto;
 
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
 

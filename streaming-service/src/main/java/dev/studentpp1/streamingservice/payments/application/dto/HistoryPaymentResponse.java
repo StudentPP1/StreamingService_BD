@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.payments.presentation.dto;
+package dev.studentpp1.streamingservice.payments.application.dto;
 
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 
