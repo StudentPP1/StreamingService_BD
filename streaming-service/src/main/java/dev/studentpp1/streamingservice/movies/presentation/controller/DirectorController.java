@@ -4,11 +4,11 @@ import dev.studentpp1.streamingservice.movies.application.usecase.DirectorServic
 import dev.studentpp1.streamingservice.movies.application.usecase.DirectorService.DirectorWithMovies;
 import dev.studentpp1.streamingservice.movies.domain.model.Director;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.DirectorDetailDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.DirectorDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.DirectorCreateRequest;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.MovieDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.PageResponse;
+import dev.studentpp1.streamingservice.movies.presentation.dto.DirectorDetailDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.DirectorDto;
+import dev.studentpp1.streamingservice.movies.application.dto.DirectorCreateRequest;
+import dev.studentpp1.streamingservice.movies.presentation.dto.MovieDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.PageResponse;
 import dev.studentpp1.streamingservice.movies.presentation.mapper.DirectorPresentationMapper;
 import dev.studentpp1.streamingservice.movies.presentation.mapper.MoviePresentationMapper;
 import jakarta.validation.Valid;

@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.users.presentation.dto;
+package dev.studentpp1.streamingservice.users.application.dto;
 
 import java.time.LocalDate;
 

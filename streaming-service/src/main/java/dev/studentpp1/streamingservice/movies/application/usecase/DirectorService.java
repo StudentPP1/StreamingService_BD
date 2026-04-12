@@ -7,7 +7,7 @@ import dev.studentpp1.streamingservice.movies.domain.model.Movie;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
 import dev.studentpp1.streamingservice.movies.domain.repository.DirectorRepository;
 import dev.studentpp1.streamingservice.movies.domain.repository.MovieRepository;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.DirectorCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.dto.DirectorCreateRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

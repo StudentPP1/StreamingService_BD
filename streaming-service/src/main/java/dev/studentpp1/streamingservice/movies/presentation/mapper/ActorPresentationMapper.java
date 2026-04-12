@@ -2,9 +2,9 @@ package dev.studentpp1.streamingservice.movies.presentation.mapper;
 
 import dev.studentpp1.streamingservice.movies.application.usecase.ActorService.ActorDetails;
 import dev.studentpp1.streamingservice.movies.domain.model.Actor;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.ActorDetailDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.ActorDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.ActorFilmographyDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.ActorDetailDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.ActorDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.ActorFilmographyDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

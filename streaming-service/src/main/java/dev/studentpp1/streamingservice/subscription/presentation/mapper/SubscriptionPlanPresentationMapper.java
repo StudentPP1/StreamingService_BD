@@ -2,9 +2,9 @@ package dev.studentpp1.streamingservice.subscription.presentation.mapper;
 
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionMovie;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.response.SubscriptionPlanDetailsDto;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.response.SubscriptionPlanMovieDto;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.response.SubscriptionPlanSummaryDto;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscriptionPlanDetailsDto;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscriptionPlanMovieDto;
+import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscriptionPlanSummaryDto;
 import org.mapstruct.Mapper;
 
 import java.util.List;

@@ -6,7 +6,7 @@ import dev.studentpp1.streamingservice.users.domain.factory.UserFactory;
 import dev.studentpp1.streamingservice.users.domain.model.User;
 import dev.studentpp1.streamingservice.users.domain.model.vo.Email;
 import dev.studentpp1.streamingservice.users.domain.repository.UserRepository;
-import dev.studentpp1.streamingservice.users.presentation.dto.UpdateUserRequest;
+import dev.studentpp1.streamingservice.users.application.dto.UpdateUserRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

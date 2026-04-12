@@ -5,7 +5,7 @@ import dev.studentpp1.streamingservice.payments.domain.factory.PaymentFactory;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentHistoryItem;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
-import dev.studentpp1.streamingservice.payments.presentation.dto.HistoryPaymentResponse;
+import dev.studentpp1.streamingservice.payments.application.dto.HistoryPaymentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

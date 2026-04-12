@@ -15,8 +15,8 @@ import dev.studentpp1.streamingservice.subscription.domain.port.SubscriberProvid
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
 import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
 import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscriptionRepository;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.request.CreateFamilySubscriptionRequest;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.request.SubscribeRequest;
+import dev.studentpp1.streamingservice.subscription.application.dto.CreateFamilySubscriptionRequest;
+import dev.studentpp1.streamingservice.subscription.application.dto.SubscribeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

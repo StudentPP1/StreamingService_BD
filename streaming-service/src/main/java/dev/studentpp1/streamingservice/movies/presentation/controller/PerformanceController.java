@@ -2,8 +2,8 @@ package dev.studentpp1.streamingservice.movies.presentation.controller;
 
 import dev.studentpp1.streamingservice.movies.application.usecase.PerformanceService;
 import dev.studentpp1.streamingservice.movies.domain.model.Performance;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.PerformanceDto;
-import dev.studentpp1.streamingservice.movies.presentation.dto.request.PerformanceCreateRequest;
+import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceDto;
+import dev.studentpp1.streamingservice.movies.application.dto.PerformanceCreateRequest;
 import dev.studentpp1.streamingservice.movies.presentation.mapper.PerformancePresentationMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

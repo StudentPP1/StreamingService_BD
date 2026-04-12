@@ -2,10 +2,7 @@ package dev.studentpp1.streamingservice.payments.presentation.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.payments.application.usecase.PaymentService;
-import dev.studentpp1.streamingservice.payments.presentation.dto.CheckoutRequest;
-import dev.studentpp1.streamingservice.payments.presentation.dto.HistoryPaymentResponse;
-import dev.studentpp1.streamingservice.payments.presentation.dto.PaymentRequest;
-import dev.studentpp1.streamingservice.payments.presentation.dto.PaymentResponse;
+import dev.studentpp1.streamingservice.payments.application.dto.HistoryPaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

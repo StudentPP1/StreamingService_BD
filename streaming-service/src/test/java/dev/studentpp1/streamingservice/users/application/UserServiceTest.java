@@ -9,7 +9,7 @@ import dev.studentpp1.streamingservice.users.domain.model.User;
 import dev.studentpp1.streamingservice.users.domain.model.vo.Email;
 import dev.studentpp1.streamingservice.users.domain.model.vo.HashedPassword;
 import dev.studentpp1.streamingservice.users.domain.repository.UserRepository;
-import dev.studentpp1.streamingservice.users.presentation.dto.UpdateUserRequest;
+import dev.studentpp1.streamingservice.users.application.dto.UpdateUserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

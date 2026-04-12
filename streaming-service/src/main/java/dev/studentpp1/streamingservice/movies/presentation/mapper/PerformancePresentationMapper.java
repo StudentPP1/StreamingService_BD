@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.movies.presentation.mapper;
 
 import dev.studentpp1.streamingservice.movies.domain.model.Performance;
-import dev.studentpp1.streamingservice.movies.presentation.dto.response.PerformanceDto;
+import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
