@@ -3,11 +3,8 @@ package dev.studentpp1.streamingservice.auth.service;
 import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
 import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
-import dev.studentpp1.streamingservice.users.application.usecase.UserService;
-import dev.studentpp1.streamingservice.users.domain.model.Role;
-import dev.studentpp1.streamingservice.users.domain.model.User;
-import dev.studentpp1.streamingservice.users.domain.model.vo.Email;
-import dev.studentpp1.streamingservice.users.domain.model.vo.HashedPassword;
+import dev.studentpp1.streamingservice.users.application.command.CreateUserCommand;
+import dev.studentpp1.streamingservice.users.application.command.UserCommandHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +21,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import java.time.LocalDate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,7 +30,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UserService userService;
+    private UserCommandHandler userCommandHandler;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -49,39 +44,37 @@ class AuthServiceTest {
     @Mock
     private HttpSession httpSession;
 
-    private User testUser;
-
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-        testUser = User.restore(
-                1L,
-                "Ivan",
-                "Ivanov",
-                new Email("test@example.com"),
-                new HashedPassword("encoded_pass"),
-                LocalDate.of(2000, 1, 1),
-                Role.ROLE_USER,
-                false
-        );
     }
 
     @Test
-    void register_createsUserAndSession() throws Exception {
+    void register_createsUserAndSession() {
         RegisterUserRequest request = new RegisterUserRequest(
-                "test@example.com",
-                "password123",
                 "Test",
                 "User",
-                LocalDate.of(2000, 1, 1)
+                "test@example.com",
+                "password123",
+                java.time.LocalDate.of(2000, 1, 1)
         );
 
-        when(userService.createUser(request)).thenReturn(testUser);
+        Authentication authentication = mock(Authentication.class);
+        AuthenticatedUser registeredPrincipal = new AuthenticatedUser(
+                1L,
+                "test@example.com",
+                "encoded_pass",
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+        );
+        when(authentication.getPrincipal()).thenReturn(registeredPrincipal);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(httpServletRequest.getSession(true)).thenReturn(httpSession);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
 
         authService.register(request, httpServletRequest);
 
-        verify(userService).createUser(request);
+        verify(userCommandHandler).handle(any(CreateUserCommand.class));
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
 
         ArgumentCaptor<SecurityContext> contextCaptor = ArgumentCaptor.forClass(SecurityContext.class);
         verify(httpSession).setAttribute(

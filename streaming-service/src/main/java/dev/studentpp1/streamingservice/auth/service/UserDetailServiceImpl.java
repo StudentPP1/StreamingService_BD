@@ -1,9 +1,10 @@
 package dev.studentpp1.streamingservice.auth.service;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
-import dev.studentpp1.streamingservice.users.application.usecase.UserService;
 import dev.studentpp1.streamingservice.users.domain.model.User;
+import dev.studentpp1.streamingservice.users.domain.port.UserQueryPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,11 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class UserDetailServiceImpl implements UserDetailsService {
-    private final UserService userService;
+    private final UserQueryPort userQueryPort;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByEmail(username);
+    public @NonNull UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
+        User user = userQueryPort.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         return new AuthenticatedUser(
                 user.getId(),
                 user.getEmail(),

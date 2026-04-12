@@ -1,7 +1,8 @@
 package dev.studentpp1.streamingservice.users.application.query;
 
-import dev.studentpp1.streamingservice.users.application.usecase.UserService;
-import dev.studentpp1.streamingservice.users.domain.model.User;
+import dev.studentpp1.streamingservice.users.application.query.readmodel.UserReadModel;
+import dev.studentpp1.streamingservice.users.application.query.repo.UserReadRepository;
+import dev.studentpp1.streamingservice.users.domain.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,10 +10,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserQueryHandler {
 
-    private final UserService userService;
+    private final UserReadRepository userReadRepository;
 
-    public User handle(GetCurrentUserInfoQuery query) {
-        return userService.getInfo(query.currentUserEmail());
+    public UserReadModel handle(GetCurrentUserInfoQuery query) {
+        return userReadRepository.findByEmail(query.currentUserEmail())
+                .orElseThrow(() -> new UserNotFoundException(query.currentUserEmail()));
     }
 }
 
