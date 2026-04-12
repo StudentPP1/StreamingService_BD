@@ -1,0 +1,8 @@
+package dev.studentpp1.streamingservice.movies.application.command.actor;
+
+public record CreateActorCommand(
+		String name,
+		String surname,
+		String biography
+) {
+}

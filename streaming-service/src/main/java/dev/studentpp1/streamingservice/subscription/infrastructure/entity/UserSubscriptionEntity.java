@@ -1,7 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.infrastructure.entity;
 
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
-import dev.studentpp1.streamingservice.users.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import lombok.*;
@@ -41,9 +40,8 @@ public class UserSubscriptionEntity {
     @JoinColumn(name = "subscription_plan_id")
     private SubscriptionPlanEntity plan;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @AssertTrue(message = "End time must be after start time")
     private boolean isEndTimeAfterStartTime() {

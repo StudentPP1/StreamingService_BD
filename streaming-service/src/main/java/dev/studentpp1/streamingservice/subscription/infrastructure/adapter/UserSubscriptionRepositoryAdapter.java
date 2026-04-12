@@ -9,7 +9,6 @@ import dev.studentpp1.streamingservice.subscription.infrastructure.entity.UserSu
 import dev.studentpp1.streamingservice.subscription.infrastructure.mapper.UserSubscriptionPersistenceMapper;
 import dev.studentpp1.streamingservice.subscription.infrastructure.repository.SubscriptionPlanJpaRepository;
 import dev.studentpp1.streamingservice.subscription.infrastructure.repository.UserSubscriptionJpaRepository;
-import dev.studentpp1.streamingservice.users.infrastructure.repository.UserJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -23,17 +22,14 @@ public class UserSubscriptionRepositoryAdapter implements UserSubscriptionReposi
 
     private final UserSubscriptionJpaRepository jpaRepository;
     private final SubscriptionPlanJpaRepository planJpaRepository;
-    private final UserJpaRepository userJpaRepository;
     private final UserSubscriptionPersistenceMapper mapper;
 
     public UserSubscriptionRepositoryAdapter(
             UserSubscriptionJpaRepository jpaRepository,
             SubscriptionPlanJpaRepository planJpaRepository,
-            UserJpaRepository userJpaRepository,
             UserSubscriptionPersistenceMapper mapper) {
         this.jpaRepository = jpaRepository;
         this.planJpaRepository = planJpaRepository;
-        this.userJpaRepository = userJpaRepository;
         this.mapper = mapper;
     }
 
@@ -70,14 +66,10 @@ public class UserSubscriptionRepositoryAdapter implements UserSubscriptionReposi
     @Override
     public UserSubscription save(UserSubscription domain) {
         UserSubscriptionEntity entity = mapper.toEntity(domain);
-
-        if (domain.getUserId() != null) {
-            entity.setUser(userJpaRepository.findById(domain.getUserId()).orElseThrow());
-        }
+        entity.setUserId(domain.getUserId());
         if (domain.getPlanId() != null) {
             entity.setPlan(planJpaRepository.findById(domain.getPlanId()).orElseThrow());
         }
-
         return mapper.toDomain(jpaRepository.save(entity));
     }
 
@@ -86,14 +78,11 @@ public class UserSubscriptionRepositoryAdapter implements UserSubscriptionReposi
         List<UserSubscriptionEntity> entities = subscriptions.stream()
                 .map(domain -> {
                     UserSubscriptionEntity entity = mapper.toEntity(domain);
-                    entity.setUser(
-                            userJpaRepository.findById(domain.getUserId()).orElseThrow());
-                    entity.setPlan(
-                            planJpaRepository.findById(domain.getPlanId()).orElseThrow());
+                    entity.setUserId(domain.getUserId());
+                    entity.setPlan(planJpaRepository.findById(domain.getPlanId()).orElseThrow());
                     return entity;
                 })
                 .toList();
-
         return jpaRepository.saveAll(entities).stream()
                 .map(mapper::toDomain)
                 .toList();

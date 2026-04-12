@@ -51,14 +51,14 @@ public class PerformanceRepositoryAdapter implements PerformanceRepository {
 
     @Override
     public List<Performance> findByMovieId(Long movieId) {
-        return jpaRepository.findByMovieEntityId(movieId).stream()
+        return jpaRepository.findAllByMovieEntityId(movieId).stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Performance> findByActorId(Long actorId) {
-        return jpaRepository.findByActorEntityId(actorId).stream()
+        return jpaRepository.findAllByActorEntityId(actorId).stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }

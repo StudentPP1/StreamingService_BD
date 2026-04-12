@@ -1,10 +1,12 @@
 package dev.studentpp1.streamingservice.movies.presentation.controller;
 
-import dev.studentpp1.streamingservice.movies.application.usecase.PerformanceService;
-import dev.studentpp1.streamingservice.movies.domain.model.Performance;
-import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceDto;
-import dev.studentpp1.streamingservice.movies.application.dto.PerformanceCreateRequest;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.PerformancePresentationMapper;
+import dev.studentpp1.streamingservice.movies.application.command.performance.CreatePerformanceCommand;
+import dev.studentpp1.streamingservice.movies.application.command.performance.DeletePerformanceCommand;
+import dev.studentpp1.streamingservice.movies.application.command.PerformanceCommandHandler;
+import dev.studentpp1.streamingservice.movies.application.query.performance.GetPerformanceByIdQuery;
+import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceQueryHandler;
+import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceReadModel;
+import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceCreateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,33 +17,36 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/performances")
 public class PerformanceController {
 
-    private final PerformanceService performanceService;
-    private final PerformancePresentationMapper performanceMapper;
+    private final PerformanceCommandHandler performanceCommandHandler;
+    private final PerformanceQueryHandler performanceQueryHandler;
 
-    public PerformanceController(PerformanceService performanceService,
-                                 PerformancePresentationMapper performanceMapper) {
-        this.performanceService = performanceService;
-        this.performanceMapper = performanceMapper;
+    public PerformanceController(PerformanceCommandHandler performanceCommandHandler,
+                                 PerformanceQueryHandler performanceQueryHandler) {
+        this.performanceCommandHandler = performanceCommandHandler;
+        this.performanceQueryHandler = performanceQueryHandler;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PerformanceDto> getPerformanceById(@PathVariable Long id) {
-        Performance performance = performanceService.getPerformanceById(id);
-        return ResponseEntity.ok(performanceMapper.toDto(performance));
+    public ResponseEntity<PerformanceReadModel> getPerformanceById(@PathVariable Long id) {
+        return ResponseEntity.ok(performanceQueryHandler.handle(new GetPerformanceByIdQuery(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PerformanceDto> createPerformance(
-            @RequestBody @Valid PerformanceCreateRequest request) {
-        Performance performance = performanceService.createPerformance(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(performanceMapper.toDto(performance));
+    public ResponseEntity<Void> createPerformance(@RequestBody @Valid PerformanceCreateRequest request) {
+        performanceCommandHandler.handle(new CreatePerformanceCommand(
+                request.characterName(),
+                request.description(),
+                request.actorId(),
+                request.movieId()
+        ));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePerformance(@PathVariable Long id) {
-        performanceService.deletePerformance(id);
+        performanceCommandHandler.handle(new DeletePerformanceCommand(id));
         return ResponseEntity.noContent().build();
     }
 }

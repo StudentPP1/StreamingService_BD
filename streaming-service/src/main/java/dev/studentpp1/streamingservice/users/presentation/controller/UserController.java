@@ -2,11 +2,13 @@ package dev.studentpp1.streamingservice.users.presentation.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.auth.service.AuthService;
-import dev.studentpp1.streamingservice.users.application.usecase.UserService;
-import dev.studentpp1.streamingservice.users.domain.model.User;
-import dev.studentpp1.streamingservice.users.application.dto.UpdateUserRequest;
-import dev.studentpp1.streamingservice.users.presentation.dto.UserDto;
-import dev.studentpp1.streamingservice.users.presentation.mapper.UserPresentationMapper;
+import dev.studentpp1.streamingservice.users.application.command.DeleteUserCommand;
+import dev.studentpp1.streamingservice.users.application.command.UpdateUserCommand;
+import dev.studentpp1.streamingservice.users.application.command.UserCommandHandler;
+import dev.studentpp1.streamingservice.users.application.query.GetCurrentUserInfoQuery;
+import dev.studentpp1.streamingservice.users.application.query.UserQueryHandler;
+import dev.studentpp1.streamingservice.users.application.query.readmodel.UserReadModel;
+import dev.studentpp1.streamingservice.users.presentation.dto.UpdateUserRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,30 +20,34 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserCommandHandler userCommandHandler;
+    private final UserQueryHandler userQueryHandler;
     private final AuthService authService;
-    private final UserPresentationMapper userMapper;
 
     @PostMapping("/update")
-    public ResponseEntity<UserDto> updateUser(
+    public ResponseEntity<Void> updateUser(
             @RequestBody UpdateUserRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        User user = userService.updateUser(request, currentUser.getUsername());
-        return ResponseEntity.ok(userMapper.toDto(user));
+        userCommandHandler.handle(new UpdateUserCommand(
+                request.name(),
+                request.surname(),
+                currentUser.getUsername()
+        ));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/info")
-    public ResponseEntity<UserDto> getInfo(
+    public ResponseEntity<UserReadModel> getInfo(
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        User user = userService.getInfo(currentUser.getUsername());
-        return ResponseEntity.ok(userMapper.toDto(user));
+        UserReadModel user = userQueryHandler.handle(new GetCurrentUserInfoQuery(currentUser.getUsername()));
+        return ResponseEntity.ok(user);
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteUser(
             HttpServletRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        userService.softDeleteUser(currentUser.getUsername());
+        userCommandHandler.handle(new DeleteUserCommand(currentUser.getUsername()));
         authService.logout(request);
         return ResponseEntity.ok().build();
     }

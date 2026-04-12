@@ -6,29 +6,22 @@ import dev.studentpp1.streamingservice.subscription.domain.repository.Subscripti
 import dev.studentpp1.streamingservice.subscription.infrastructure.entity.SubscriptionPlanEntity;
 import dev.studentpp1.streamingservice.subscription.infrastructure.mapper.SubscriptionPlanPersistenceMapper;
 import dev.studentpp1.streamingservice.subscription.infrastructure.repository.SubscriptionPlanJpaRepository;
-import dev.studentpp1.streamingservice.movies.infrastructure.repository.MovieJpaRepository;
-import dev.studentpp1.streamingservice.movies.infrastructure.entity.MovieEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class SubscriptionPlanRepositoryAdapter implements SubscriptionPlanRepository {
 
     private final SubscriptionPlanJpaRepository jpaRepository;
-    private final MovieJpaRepository movieJpaRepository;
     private final SubscriptionPlanPersistenceMapper mapper;
 
     public SubscriptionPlanRepositoryAdapter(
             SubscriptionPlanJpaRepository jpaRepository,
-            MovieJpaRepository movieJpaRepository,
             SubscriptionPlanPersistenceMapper mapper) {
         this.jpaRepository = jpaRepository;
-        this.movieJpaRepository = movieJpaRepository;
         this.mapper = mapper;
     }
 

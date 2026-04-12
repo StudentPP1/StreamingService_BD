@@ -10,7 +10,7 @@ public class UserSubscriptionPersistenceMapper {
     public UserSubscription toDomain(UserSubscriptionEntity entity) {
         return UserSubscription.restore(
                 entity.getId(),
-                entity.getUser() != null ? entity.getUser().getId() : null,
+                entity.getUserId(),
                 entity.getPlan() != null ? entity.getPlan().getId() : null,
                 entity.getStartTime(),
                 entity.getEndTime(),

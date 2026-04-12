@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.infrastructure.adapter;
 
-import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentCommand;
-import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentResult;
+import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentRequest;
+import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentResponse;
 import dev.studentpp1.streamingservice.payments.domain.port.PaymentCheckoutGateway;
 import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutCommand;
 import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
@@ -17,7 +17,7 @@ public class PaymentServiceAdapter implements SubscriptionPaymentGateway {
 
     @Override
     public CheckoutResult generateCheckout(CheckoutCommand command) {
-        CheckoutPaymentResult response = paymentCheckoutGateway.checkout(new CheckoutPaymentCommand(
+        CheckoutPaymentResponse response = paymentCheckoutGateway.checkout(new CheckoutPaymentRequest(
                 command.productName(),
                 command.price(),
                 command.userId(),
@@ -26,7 +26,7 @@ public class PaymentServiceAdapter implements SubscriptionPaymentGateway {
         return mapToCheckoutResult(response);
     }
 
-    private CheckoutResult mapToCheckoutResult(CheckoutPaymentResult response) {
+    private CheckoutResult mapToCheckoutResult(CheckoutPaymentResponse response) {
         return new CheckoutResult(
                 response.status(),
                 response.message(),

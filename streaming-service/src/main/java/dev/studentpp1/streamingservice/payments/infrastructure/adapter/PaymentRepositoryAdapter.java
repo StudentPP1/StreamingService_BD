@@ -1,6 +1,5 @@
 package dev.studentpp1.streamingservice.payments.infrastructure.adapter;
 
-import dev.studentpp1.streamingservice.payments.domain.model.PaymentHistoryItem;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -44,15 +42,6 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
                 .map(mapper::toDomain);
     }
 
-    @Override
-    public List<PaymentHistoryItem> getPaymentByUserId(Long userId) {
-        return jpaRepository.getPaymentByUserId(userId);
-    }
-
-    @Override
-    public List<PaymentHistoryItem> getPaymentByUserSubscription(Long userId, Long userSubscriptionId) {
-        return jpaRepository.getPaymentByUserSubscription(userId, userSubscriptionId);
-    }
 
     @Override
     public int deletePaymentsBefore(LocalDateTime dateTime) {
