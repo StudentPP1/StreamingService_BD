@@ -1,9 +1,17 @@
 package dev.studentpp1.streamingservice.subscription.presentation.controller;
 
 import dev.studentpp1.streamingservice.common.dto.PageResult;
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionPlanService;
-import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionPlanService.PlanWithMovies;
+import dev.studentpp1.streamingservice.subscription.application.command.AddMoviesToPlanCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.CreatePlanCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.DeletePlanCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.RemoveMoviesFromPlanCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.SubscriptionPlanCommandHandler;
+import dev.studentpp1.streamingservice.subscription.application.command.UpdatePlanCommand;
+import dev.studentpp1.streamingservice.subscription.application.query.GetAllPlansQuery;
+import dev.studentpp1.streamingservice.subscription.application.query.GetPlanByIdQuery;
+import dev.studentpp1.streamingservice.subscription.application.query.SubscriptionPlanQueryHandler;
 import dev.studentpp1.streamingservice.subscription.application.dto.CreateSubscriptionPlanRequest;
+import dev.studentpp1.streamingservice.subscription.application.usecase.SubscriptionPlanService.PlanWithMovies;
 import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscriptionPlanDetailsDto;
 import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscriptionPlanSummaryDto;
 import dev.studentpp1.streamingservice.subscription.presentation.mapper.SubscriptionPlanPresentationMapper;
@@ -23,7 +31,8 @@ import java.util.List;
 @Validated
 public class SubscriptionPlanController {
 
-    private final SubscriptionPlanService subscriptionPlanService;
+    private final SubscriptionPlanCommandHandler subscriptionPlanCommandHandler;
+    private final SubscriptionPlanQueryHandler subscriptionPlanQueryHandler;
     private final SubscriptionPlanPresentationMapper mapper;
 
     @GetMapping
@@ -32,7 +41,7 @@ public class SubscriptionPlanController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        var plans = subscriptionPlanService.getAllPlans(search, page, size);
+        var plans = subscriptionPlanQueryHandler.handle(new GetAllPlansQuery(search, page, size));
 
         List<SubscriptionPlanSummaryDto> content = plans.content().stream()
                 .map(mapper::toSummaryDto)
@@ -46,7 +55,7 @@ public class SubscriptionPlanController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionPlanDetailsDto> getPlan(@PathVariable Long id) {
-        PlanWithMovies planWithMovies = subscriptionPlanService.getPlanById(id);
+        PlanWithMovies planWithMovies = subscriptionPlanQueryHandler.handle(new GetPlanByIdQuery(id));
         return ResponseEntity.ok(mapper.toDetailsDto(planWithMovies.plan(), planWithMovies.movies()));
     }
 
@@ -55,7 +64,7 @@ public class SubscriptionPlanController {
     public ResponseEntity<SubscriptionPlanDetailsDto> createPlan(
             @Valid @RequestBody CreateSubscriptionPlanRequest request) {
 
-        PlanWithMovies created = subscriptionPlanService.createPlan(request);
+        PlanWithMovies created = subscriptionPlanCommandHandler.handle(new CreatePlanCommand(request));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(mapper.toDetailsDto(created.plan(), created.movies()));
     }
@@ -66,7 +75,7 @@ public class SubscriptionPlanController {
             @PathVariable Long id,
             @Valid @RequestBody CreateSubscriptionPlanRequest request) {
 
-        PlanWithMovies updated = subscriptionPlanService.updatePlan(id, request);
+        PlanWithMovies updated = subscriptionPlanCommandHandler.handle(new UpdatePlanCommand(id, request));
         return ResponseEntity.ok(mapper.toDetailsDto(updated.plan(), updated.movies()));
     }
 
@@ -76,7 +85,7 @@ public class SubscriptionPlanController {
             @PathVariable Long id,
             @RequestBody List<Long> movieIds) {
 
-        PlanWithMovies updated = subscriptionPlanService.addMoviesToPlan(id, movieIds);
+        PlanWithMovies updated = subscriptionPlanCommandHandler.handle(new AddMoviesToPlanCommand(id, movieIds));
         return ResponseEntity.ok(mapper.toDetailsDto(updated.plan(), updated.movies()));
     }
 
@@ -86,14 +95,14 @@ public class SubscriptionPlanController {
             @PathVariable Long id,
             @RequestBody List<Long> movieIds) {
 
-        PlanWithMovies updated = subscriptionPlanService.removeMoviesFromPlan(id, movieIds);
+        PlanWithMovies updated = subscriptionPlanCommandHandler.handle(new RemoveMoviesFromPlanCommand(id, movieIds));
         return ResponseEntity.ok(mapper.toDetailsDto(updated.plan(), updated.movies()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlan(@PathVariable Long id) {
-        subscriptionPlanService.deletePlan(id);
+        subscriptionPlanCommandHandler.handle(new DeletePlanCommand(id));
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,7 +2,11 @@ package dev.studentpp1.streamingservice.users.presentation.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.auth.service.AuthService;
-import dev.studentpp1.streamingservice.users.application.usecase.UserService;
+import dev.studentpp1.streamingservice.users.application.command.DeleteUserCommand;
+import dev.studentpp1.streamingservice.users.application.command.UpdateUserCommand;
+import dev.studentpp1.streamingservice.users.application.command.UserCommandHandler;
+import dev.studentpp1.streamingservice.users.application.query.GetCurrentUserInfoQuery;
+import dev.studentpp1.streamingservice.users.application.query.UserQueryHandler;
 import dev.studentpp1.streamingservice.users.domain.model.User;
 import dev.studentpp1.streamingservice.users.application.dto.UpdateUserRequest;
 import dev.studentpp1.streamingservice.users.presentation.dto.UserDto;
@@ -18,7 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserCommandHandler userCommandHandler;
+    private final UserQueryHandler userQueryHandler;
     private final AuthService authService;
     private final UserPresentationMapper userMapper;
 
@@ -26,14 +31,14 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(
             @RequestBody UpdateUserRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        User user = userService.updateUser(request, currentUser.getUsername());
+        User user = userCommandHandler.handle(new UpdateUserCommand(request, currentUser.getUsername()));
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
     @GetMapping("/info")
     public ResponseEntity<UserDto> getInfo(
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        User user = userService.getInfo(currentUser.getUsername());
+        User user = userQueryHandler.handle(new GetCurrentUserInfoQuery(currentUser.getUsername()));
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
@@ -41,7 +46,7 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(
             HttpServletRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        userService.softDeleteUser(currentUser.getUsername());
+        userCommandHandler.handle(new DeleteUserCommand(currentUser.getUsername()));
         authService.logout(request);
         return ResponseEntity.ok().build();
     }

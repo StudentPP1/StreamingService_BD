@@ -1,7 +1,13 @@
 package dev.studentpp1.streamingservice.movies.presentation.controller;
 
-import dev.studentpp1.streamingservice.movies.application.usecase.DirectorService;
-import dev.studentpp1.streamingservice.movies.application.usecase.DirectorService.DirectorWithMovies;
+import dev.studentpp1.streamingservice.movies.application.command.CreateDirectorCommand;
+import dev.studentpp1.streamingservice.movies.application.command.DeleteDirectorCommand;
+import dev.studentpp1.streamingservice.movies.application.command.DirectorCommandHandler;
+import dev.studentpp1.streamingservice.movies.application.command.UpdateDirectorCommand;
+import dev.studentpp1.streamingservice.movies.application.query.DirectorQueryHandler;
+import dev.studentpp1.streamingservice.movies.application.query.GetAllDirectorsQuery;
+import dev.studentpp1.streamingservice.movies.application.query.GetDirectorByIdQuery;
+import dev.studentpp1.streamingservice.movies.application.query.GetDirectorDetailsQuery;
 import dev.studentpp1.streamingservice.movies.domain.model.Director;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
 import dev.studentpp1.streamingservice.movies.presentation.dto.DirectorDetailDto;
@@ -23,14 +29,17 @@ import java.util.List;
 @RequestMapping("/api/directors")
 public class DirectorController {
 
-    private final DirectorService directorService;
+    private final DirectorCommandHandler directorCommandHandler;
+    private final DirectorQueryHandler directorQueryHandler;
     private final DirectorPresentationMapper directorMapper;
     private final MoviePresentationMapper movieMapper;
 
-    public DirectorController(DirectorService directorService,
+    public DirectorController(DirectorCommandHandler directorCommandHandler,
+                              DirectorQueryHandler directorQueryHandler,
                               DirectorPresentationMapper directorMapper,
                               MoviePresentationMapper movieMapper) {
-        this.directorService = directorService;
+        this.directorCommandHandler = directorCommandHandler;
+        this.directorQueryHandler = directorQueryHandler;
         this.directorMapper = directorMapper;
         this.movieMapper = movieMapper;
     }
@@ -40,7 +49,7 @@ public class DirectorController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        PageResult<Director> result = directorService.getAllDirectors(page, size);
+        PageResult<Director> result = directorQueryHandler.handle(new GetAllDirectorsQuery(page, size));
         PageResponse<DirectorDto> response = new PageResponse<>(
                 result.content().stream().map(directorMapper::toDto).toList(),
                 result.page(),
@@ -53,13 +62,13 @@ public class DirectorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<DirectorDto> getDirectorById(@PathVariable Long id) {
-        Director director = directorService.getDirectorById(id);
+        Director director = directorQueryHandler.handle(new GetDirectorByIdQuery(id));
         return ResponseEntity.ok(directorMapper.toDto(director));
     }
 
     @GetMapping("/{id}/details")
     public ResponseEntity<DirectorDetailDto> getDirectorDetails(@PathVariable Long id) {
-        DirectorWithMovies result = directorService.getDirectorDetails(id);
+        var result = directorQueryHandler.handle(new GetDirectorDetailsQuery(id));
         List<MovieDto> movieDtos = movieMapper.toDtoList(result.movies());
         return ResponseEntity.ok(directorMapper.toDetailDto(result.director(), movieDtos));
     }
@@ -67,7 +76,7 @@ public class DirectorController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DirectorDto> createDirector(@RequestBody @Valid DirectorCreateRequest request) {
-        Director director = directorService.createDirector(request);
+        Director director = directorCommandHandler.handle(new CreateDirectorCommand(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(directorMapper.toDto(director));
     }
 
@@ -75,14 +84,14 @@ public class DirectorController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DirectorDto> updateDirector(@PathVariable Long id,
                                                       @RequestBody @Valid DirectorCreateRequest request) {
-        Director director = directorService.updateDirector(id, request);
+        Director director = directorCommandHandler.handle(new UpdateDirectorCommand(id, request));
         return ResponseEntity.ok(directorMapper.toDto(director));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDirector(@PathVariable Long id) {
-        directorService.deleteDirector(id);
+        directorCommandHandler.handle(new DeleteDirectorCommand(id));
         return ResponseEntity.noContent().build();
     }
 }

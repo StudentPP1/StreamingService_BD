@@ -1,5 +1,13 @@
 package dev.studentpp1.streamingservice.movies.presentation.controller;
 
+import dev.studentpp1.streamingservice.movies.application.command.ActorCommandHandler;
+import dev.studentpp1.streamingservice.movies.application.command.CreateActorCommand;
+import dev.studentpp1.streamingservice.movies.application.command.DeleteActorCommand;
+import dev.studentpp1.streamingservice.movies.application.command.UpdateActorCommand;
+import dev.studentpp1.streamingservice.movies.application.query.ActorQueryHandler;
+import dev.studentpp1.streamingservice.movies.application.query.GetActorByIdQuery;
+import dev.studentpp1.streamingservice.movies.application.query.GetActorDetailsQuery;
+import dev.studentpp1.streamingservice.movies.application.query.GetAllActorsQuery;
 import dev.studentpp1.streamingservice.movies.application.usecase.ActorService;
 import dev.studentpp1.streamingservice.movies.domain.model.Actor;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
@@ -18,12 +26,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/actors")
 public class ActorController {
 
-    private final ActorService actorService;
+    private final ActorCommandHandler actorCommandHandler;
+    private final ActorQueryHandler actorQueryHandler;
     private final ActorPresentationMapper actorMapper;
 
-    public ActorController(ActorService actorService,
+    public ActorController(ActorCommandHandler actorCommandHandler,
+                           ActorQueryHandler actorQueryHandler,
                            ActorPresentationMapper actorMapper) {
-        this.actorService = actorService;
+        this.actorCommandHandler = actorCommandHandler;
+        this.actorQueryHandler = actorQueryHandler;
         this.actorMapper = actorMapper;
     }
 
@@ -32,7 +43,7 @@ public class ActorController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        PageResult<Actor> result = actorService.getAllActors(page, size);
+        PageResult<Actor> result = actorQueryHandler.handle(new GetAllActorsQuery(page, size));
         PageResponse<ActorDto> response = new PageResponse<>(
                 result.content().stream().map(actorMapper::toDto).toList(),
                 result.page(),
@@ -45,19 +56,19 @@ public class ActorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ActorDto> getActorById(@PathVariable Long id) {
-        Actor actor = actorService.getActorById(id);
+        Actor actor = actorQueryHandler.handle(new GetActorByIdQuery(id));
         return ResponseEntity.ok(actorMapper.toDto(actor));
     }
 
     @GetMapping("/{id}/details")
     public ResponseEntity<ActorDetailDto> getActorDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(actorMapper.toDetailDto(actorService.getActorDetails(id)));
+        return ResponseEntity.ok(actorMapper.toDetailDto(actorQueryHandler.handle(new GetActorDetailsQuery(id))));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> createActor(@RequestBody @Valid ActorCreateRequest request) {
-        Actor actor = actorService.createActor(request);
+        Actor actor = actorCommandHandler.handle(new CreateActorCommand(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(actorMapper.toDto(actor));
     }
 
@@ -65,14 +76,14 @@ public class ActorController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> updateActor(@PathVariable Long id,
                                                 @RequestBody @Valid ActorCreateRequest request) {
-        Actor actor = actorService.updateActor(id, request);
+        Actor actor = actorCommandHandler.handle(new UpdateActorCommand(id, request));
         return ResponseEntity.ok(actorMapper.toDto(actor));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteActor(@PathVariable Long id) {
-        actorService.deleteActor(id);
+        actorCommandHandler.handle(new DeleteActorCommand(id));
         return ResponseEntity.noContent().build();
     }
 }
