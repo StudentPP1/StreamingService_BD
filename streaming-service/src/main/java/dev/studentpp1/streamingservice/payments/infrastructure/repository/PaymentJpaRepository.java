@@ -1,6 +1,5 @@
 package dev.studentpp1.streamingservice.payments.infrastructure.repository;
 
-import dev.studentpp1.streamingservice.payments.domain.model.PaymentHistoryItem;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.infrastructure.entity.PaymentEntity;
 import jakarta.persistence.LockModeType;
@@ -12,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, Long> {
@@ -29,31 +27,9 @@ public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, Long>
     int deleteByStatusAndCreatedAtBefore(@Param("status") PaymentStatus status,
                                          @Param("threshold") LocalDateTime threshold);
 
-    @Query("""
-            select new dev.studentpp1.streamingservice.payments.domain.model.PaymentHistoryItem(
-                p.status,
-                p.paidAt,
-                p.amount,
-                p.productName
-            )
-            from PaymentEntity p
-            where p.userId = :userId
-            """)
-    List<PaymentHistoryItem> getPaymentByUserId(@Param("userId") Long userId);
+    java.util.List<PaymentEntity> findAllByUserId(Long userId);
 
-    @Query("""
-            select new dev.studentpp1.streamingservice.payments.domain.model.PaymentHistoryItem(
-                p.status,
-                p.paidAt,
-                p.amount,
-                p.productName
-            )
-            from PaymentEntity p
-            where p.userId = :userId
-              and p.userSubscriptionId = :userSubscriptionId
-            """)
-    List<PaymentHistoryItem> getPaymentByUserSubscription(@Param("userId") Long userId,
-                                                          @Param("userSubscriptionId") Long userSubscriptionId);
+    java.util.List<PaymentEntity> findAllByUserIdAndUserSubscriptionId(Long userId, Long userSubscriptionId);
 
     // Modifying: bulk-delete -> already in db (SQL)
     // clearAutomatically -> clear 1st level cache in current Transaction (delete old payments)

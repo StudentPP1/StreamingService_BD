@@ -12,6 +12,7 @@ import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPla
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriberProvider;
+import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionActivationPort;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
 import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
 import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscriptionRepository;
@@ -32,7 +33,7 @@ import java.util.Map;
 @PreAuthorize("isAuthenticated()")
 @Service
 @RequiredArgsConstructor
-public class SubscriptionService {
+public class SubscriptionService implements SubscriptionActivationPort {
     public static final String FAMILY_MEMBER_EMAILS_KEY = "familyMemberEmails";
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final UserSubscriptionRepository userSubscriptionRepository;

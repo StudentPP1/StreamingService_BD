@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.payments.application.usecase;
+package dev.studentpp1.streamingservice.payments.application.command.webhook;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,16 +11,16 @@ import dev.studentpp1.streamingservice.payments.domain.repository.PaymentReposit
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class PaymentWebhookService {
+public class PaymentWebhookCommandHandler {
 
     private static final String EVENT_SESSION_COMPLETED = "checkout.session.completed";
     private static final String EVENT_SESSION_EXPIRED = "checkout.session.expired";
@@ -32,6 +32,11 @@ public class PaymentWebhookService {
     private final PaymentRepository paymentRepository;
     private final PaymentCompletionHandler paymentCompletionHandler;
     private final ObjectMapper objectMapper;
+
+    @Transactional
+    public void handle(HandlePaymentWebhookCommand command) {
+        handlePaymentEvent(command.event());
+    }
 
     @Transactional
     public void handlePaymentEvent(Event event) {
@@ -46,11 +51,15 @@ public class PaymentWebhookService {
 
     private void handleSuccess(Event event) {
         SessionPayload payload = parse(event);
-        if (payload == null) return;
+        if (payload == null) {
+            return;
+        }
         Payment payment = paymentRepository
                 .findByProviderSessionIdForUpdate(payload.sessionId())
                 .orElseThrow(() -> new IllegalStateException("Payment not found"));
-        if (payment.getStatus() == PaymentStatus.COMPLETED) return;
+        if (payment.getStatus() == PaymentStatus.COMPLETED) {
+            return;
+        }
         Long subscriptionId = paymentCompletionHandler.handleSuccess(
                 Long.valueOf(payload.userId()),
                 payload.planName(),
@@ -88,17 +97,20 @@ public class PaymentWebhookService {
             JsonNode root = objectMapper.readTree(rawJson);
 
             String sessionId = root.path("id").asText(null);
-            if (sessionId == null) return null;
+            if (sessionId == null) {
+                return null;
+            }
 
             JsonNode metadata = root.path("metadata");
             String userId = metadata.path(METADATA_USER_ID).asText(null);
             String planName = metadata.path(METADATA_PLAN_NAME).asText(null);
             if (planName == null) {
-                // Backward/forward compatibility between payment and subscription metadata names.
                 planName = metadata.path(METADATA_PRODUCT_NAME).asText(null);
             }
 
-            if (userId == null || planName == null) return null;
+            if (userId == null || planName == null) {
+                return null;
+            }
 
             String familyMemberEmailsJson = metadata.path(METADATA_FAMILY_MEMBER_EMAILS).asText(null);
             List<String> familyMemberEmails = null;
@@ -132,3 +144,5 @@ public class PaymentWebhookService {
                           String planName, List<String> familyMemberEmails) {
     }
 }
+
+

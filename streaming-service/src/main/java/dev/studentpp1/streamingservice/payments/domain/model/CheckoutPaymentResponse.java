@@ -1,9 +1,10 @@
-package dev.studentpp1.streamingservice.payments.presentation.dto;
+package dev.studentpp1.streamingservice.payments.domain.model;
 
-public record PaymentResponse(
+public record CheckoutPaymentResponse(
         String status,
         String message,
         String sessionId,
         String sessionUrl
 ) {
 }
+

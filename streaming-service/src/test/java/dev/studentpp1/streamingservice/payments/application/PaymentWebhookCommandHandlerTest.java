@@ -2,7 +2,7 @@ package dev.studentpp1.streamingservice.payments.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
-import dev.studentpp1.streamingservice.payments.application.usecase.PaymentWebhookService;
+import dev.studentpp1.streamingservice.payments.application.command.webhook.PaymentWebhookCommandHandler;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.model.vo.Money;
@@ -18,17 +18,17 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class PaymentWebhookServiceTest {
+class PaymentWebhookCommandHandlerTest {
 
     private PaymentRepository paymentRepository;
     private PaymentCompletionHandler paymentCompletionHandler;
-    private PaymentWebhookService webhookService;
+    private PaymentWebhookCommandHandler webhookService;
 
     @BeforeEach
     void setUp() {
         paymentRepository = mock(PaymentRepository.class);
         paymentCompletionHandler = mock(PaymentCompletionHandler.class);
-        webhookService = new PaymentWebhookService(
+        webhookService = new PaymentWebhookCommandHandler(
                 paymentRepository, paymentCompletionHandler, new ObjectMapper());
     }
 

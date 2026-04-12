@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.infrastructure.adapter;
 
 import dev.studentpp1.streamingservice.movies.domain.model.Movie;
-import dev.studentpp1.streamingservice.movies.domain.repository.MovieRepository;
+import dev.studentpp1.streamingservice.movies.domain.port.MovieQueryPort;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionMovie;
 import dev.studentpp1.streamingservice.subscription.domain.port.MovieProvider;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieProviderAdapter implements MovieProvider {
 
-    private final MovieRepository movieRepository;
+    private final MovieQueryPort movieQueryPort;
 
     @Override
     public List<SubscriptionMovie> findAllById(List<Long> ids) {
@@ -21,7 +21,7 @@ public class MovieProviderAdapter implements MovieProvider {
             return List.of();
         }
 
-        List<Movie> movies = movieRepository.findAllById(ids);
+        List<Movie> movies = movieQueryPort.findAllById(ids);
 
         return movies.stream()
                 .map(m -> new SubscriptionMovie(

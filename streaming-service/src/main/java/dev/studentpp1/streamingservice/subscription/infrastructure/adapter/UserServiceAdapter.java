@@ -4,7 +4,7 @@ import dev.studentpp1.streamingservice.subscription.domain.model.SubscriberConte
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriberProvider;
 import dev.studentpp1.streamingservice.users.domain.exception.UserNotFoundException;
 import dev.studentpp1.streamingservice.users.domain.model.User;
-import dev.studentpp1.streamingservice.users.domain.repository.UserRepository;
+import dev.studentpp1.streamingservice.users.domain.port.UserQueryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,18 +12,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserServiceAdapter implements SubscriberProvider {
 
-    private final UserRepository userRepository;
+    private final UserQueryPort userQueryPort;
 
     @Override
     public SubscriberContext getById(Long id) {
-        User user = userRepository.findById(id)
+        User user = userQueryPort.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         return mapToContext(user);
     }
 
     @Override
     public SubscriberContext getByEmail(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userQueryPort.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
         return mapToContext(user);
     }

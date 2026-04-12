@@ -3,7 +3,6 @@ package dev.studentpp1.streamingservice.subscription.infrastructure.repository;
 import dev.studentpp1.streamingservice.subscription.infrastructure.entity.SubscriptionPlanEntity;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
 import dev.studentpp1.streamingservice.subscription.infrastructure.entity.UserSubscriptionEntity;
-import dev.studentpp1.streamingservice.users.infrastructure.entity.UserEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +16,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserSubscriptionJpaRepository extends JpaRepository<UserSubscriptionEntity, Long> {
-    List<UserSubscriptionEntity> findByUser(UserEntity user);
-
-    // join with SubscriptionPlan table, prevent N+1
-    @EntityGraph(attributePaths = "plan")
-    Page<UserSubscriptionEntity> findAllByUser(UserEntity user, Pageable pageable);
-
     List<UserSubscriptionEntity> findAllByStatusAndEndTimeBefore(SubscriptionStatus status, LocalDateTime dateTime);
 
     // block raw in db while current transaction is not completing
@@ -50,7 +43,7 @@ public interface UserSubscriptionJpaRepository extends JpaRepository<UserSubscri
     @Query("""
     SELECT COUNT(u) > 0
     FROM UserSubscriptionEntity u
-    WHERE u.user.id IN :userIds
+    WHERE u.userId IN :userIds
       AND u.plan.id = :planId
       AND u.status = :status
     """)

@@ -1,30 +1,31 @@
-package dev.studentpp1.streamingservice.payments.application.usecase;
+package dev.studentpp1.streamingservice.payments.application.command.checkout;
 
 import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import dev.studentpp1.streamingservice.payments.domain.factory.PaymentFactory;
-import dev.studentpp1.streamingservice.payments.domain.model.*;
+import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentRequest;
+import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentResponse;
+import dev.studentpp1.streamingservice.payments.domain.model.Payment;
+import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.port.PaymentCheckoutGateway;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
-import dev.studentpp1.streamingservice.payments.application.dto.HistoryPaymentResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class PaymentService implements PaymentCheckoutGateway {
+public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
 
     public static final String SESSION_CREATED = "Payment session created";
     public static final String METADATA_USER_ID = "userId";
@@ -51,7 +52,7 @@ public class PaymentService implements PaymentCheckoutGateway {
 
     @Override
     @Transactional
-    public CheckoutPaymentResult checkout(CheckoutPaymentCommand command) {
+    public CheckoutPaymentResponse checkout(CheckoutPaymentRequest command) {
         Session session = createCheckoutSession(command);
         Payment payment = paymentFactory.createNewPayment(
                 session.getId(),
@@ -64,7 +65,7 @@ public class PaymentService implements PaymentCheckoutGateway {
         Payment saved = paymentRepository.save(payment);
         log.info("Payment record created: id={}, sessionId={}, userId={}, product={}",
                 saved.getId(), session.getId(), command.userId(), command.productName());
-        return new CheckoutPaymentResult(
+        return new CheckoutPaymentResponse(
                 PaymentStatus.PENDING.name(),
                 SESSION_CREATED,
                 session.getId(),
@@ -72,7 +73,7 @@ public class PaymentService implements PaymentCheckoutGateway {
         );
     }
 
-    private Session createCheckoutSession(CheckoutPaymentCommand command) {
+    private Session createCheckoutSession(CheckoutPaymentRequest command) {
         SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(successUrl)
@@ -110,18 +111,6 @@ public class PaymentService implements PaymentCheckoutGateway {
                 .build();
     }
 
-    public List<HistoryPaymentResponse> getUserPayments(Long userId) {
-        return paymentRepository.getPaymentByUserId(userId).stream()
-                .map(this::toHistoryResponse)
-                .toList();
-    }
-
-    public List<HistoryPaymentResponse> getPaymentsBySubscription(Long userId, Long subscriptionId) {
-        return paymentRepository.getPaymentByUserSubscription(userId, subscriptionId).stream()
-                .map(this::toHistoryResponse)
-                .toList();
-    }
-
     @Scheduled(cron = "0 30 3 * * *")
     public void deleteOldPayments() {
         LocalDateTime threshold = LocalDateTime.now().minusYears(1);
@@ -130,20 +119,14 @@ public class PaymentService implements PaymentCheckoutGateway {
     }
 
     private Long parseSubscriptionId(Map<String, String> metadata) {
-        if (metadata == null || !metadata.containsKey("planId")) return null;
+        if (metadata == null || !metadata.containsKey("planId")) {
+            return null;
+        }
         try {
             return Long.parseLong(metadata.get("planId"));
         } catch (NumberFormatException e) {
             return null;
         }
     }
-
-    private HistoryPaymentResponse toHistoryResponse(PaymentHistoryItem item) {
-        return new HistoryPaymentResponse(
-                item.status(),
-                item.paidAt(),
-                item.amount(),
-                item.subscriptionName()
-        );
-    }
 }
+
