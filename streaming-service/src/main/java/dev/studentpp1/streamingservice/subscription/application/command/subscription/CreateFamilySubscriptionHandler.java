@@ -6,10 +6,7 @@ import dev.studentpp1.streamingservice.subscription.domain.exception.ActiveSubsc
 import dev.studentpp1.streamingservice.subscription.domain.exception.InvalidFamilyMemberException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SerializationException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
-import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutCommand;
-import dev.studentpp1.streamingservice.subscription.domain.model.SubscriberContext;
-import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
-import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
+import dev.studentpp1.streamingservice.subscription.domain.model.*;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriberProvider;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
 import dev.studentpp1.streamingservice.subscription.domain.repository.SubscriptionPlanRepository;
@@ -35,7 +32,7 @@ public class CreateFamilySubscriptionHandler {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void handle(CreateFamilySubscriptionCommand command) {
+    public CheckoutResult handle(CreateFamilySubscriptionCommand command) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(command.planId())
                 .orElseThrow(() -> new SubscriptionPlanNotFoundException(command.planId()));
 
@@ -62,7 +59,7 @@ public class CreateFamilySubscriptionHandler {
         }
 
         Map<String, String> metadata = Map.of(FAMILY_MEMBER_EMAILS_KEY, memberEmailsJson);
-        paymentGateway.generateCheckout(new CheckoutCommand(
+        return paymentGateway.generateCheckout(new CheckoutCommand(
                 plan.getName(),
                 plan.getPrice(),
                 command.userId(),

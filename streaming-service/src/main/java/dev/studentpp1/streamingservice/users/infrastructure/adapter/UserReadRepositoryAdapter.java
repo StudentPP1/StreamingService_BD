@@ -31,7 +31,6 @@ public class UserReadRepositoryAdapter implements UserReadRepository {
                 entity.getName(),
                 entity.getSurname(),
                 entity.getEmail(),
-                entity.getPassword(),
                 entity.getBirthday(),
                 entity.getRole(),
                 entity.isDeleted()

@@ -1,6 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.application.command;
 
 import dev.studentpp1.streamingservice.subscription.application.command.subscription.*;
+import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionActivationPort;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,12 @@ public class SubscriptionCommandHandler implements SubscriptionActivationPort {
         return createFamilySubscriptionAfterPaymentHandler.handle(userId, planName, memberEmails);
     }
 
-    public void handle(SubscribeUserCommand command) {
-        subscribeUserHandler.handle(command);
+    public CheckoutResult handle(SubscribeUserCommand command) {
+        return subscribeUserHandler.handle(command);
     }
 
-    public void handle(CreateFamilySubscriptionCommand command) {
-        createFamilySubscriptionHandler.handle(command);
+    public CheckoutResult handle(CreateFamilySubscriptionCommand command) {
+        return createFamilySubscriptionHandler.handle(command);
     }
 
     public void handle(CancelSubscriptionCommand command) {

@@ -3,6 +3,7 @@ package dev.studentpp1.streamingservice.subscription.application.command.subscri
 import dev.studentpp1.streamingservice.subscription.domain.exception.ActiveSubscriptionAlreadyExistsException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutCommand;
+import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionPaymentGateway;
@@ -24,7 +25,7 @@ public class SubscribeUserHandler {
     private final SubscriptionPaymentGateway paymentGateway;
 
     @Transactional
-    public void handle(SubscribeUserCommand command) {
+    public CheckoutResult handle(SubscribeUserCommand command) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(command.planId())
                 .orElseThrow(() -> new SubscriptionPlanNotFoundException(command.planId()));
 
@@ -35,7 +36,7 @@ public class SubscribeUserHandler {
                     "Someone in the provided list already has an active plan: " + plan.getName());
         }
 
-        paymentGateway.generateCheckout(new CheckoutCommand(
+        return paymentGateway.generateCheckout(new CheckoutCommand(
                 plan.getName(), plan.getPrice(), command.userId(), new HashMap<>()));
     }
 }

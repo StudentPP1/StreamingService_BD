@@ -9,6 +9,7 @@ import dev.studentpp1.streamingservice.subscription.application.command.Subscrip
 import dev.studentpp1.streamingservice.subscription.application.query.GetMySubscriptionsQuery;
 import dev.studentpp1.streamingservice.subscription.application.query.SubscriptionQueryHandler;
 import dev.studentpp1.streamingservice.subscription.application.query.readmodel.UserSubscriptionWithPlanReadModel;
+import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
 import dev.studentpp1.streamingservice.subscription.presentation.dto.CreateFamilySubscriptionRequest;
 import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscribeRequest;
 import jakarta.validation.Valid;
@@ -31,23 +32,23 @@ public class SubscriptionController {
     private final SubscriptionQueryHandler subscriptionQueryHandler;
 
     @PostMapping("/subscribe")
-    public ResponseEntity<Void> subscribe(
+    public ResponseEntity<CheckoutResult> subscribe(
             @Valid @RequestBody SubscribeRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        subscriptionCommandHandler.handle(new SubscribeUserCommand(request.planId(), currentUser.getId()));
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        CheckoutResult result = subscriptionCommandHandler.handle(new SubscribeUserCommand(request.planId(), currentUser.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PostMapping("/family")
-    public ResponseEntity<Void> subscribeFamily(
+    public ResponseEntity<CheckoutResult> subscribeFamily(
             @Valid @RequestBody CreateFamilySubscriptionRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        subscriptionCommandHandler.handle(new CreateFamilySubscriptionCommand(
+        CheckoutResult result = subscriptionCommandHandler.handle(new CreateFamilySubscriptionCommand(
                 request.planId(),
                 request.memberEmails(),
                 currentUser.getId()
         ));
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/my")
