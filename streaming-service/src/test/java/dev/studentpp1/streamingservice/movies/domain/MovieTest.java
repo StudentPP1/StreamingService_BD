@@ -54,7 +54,7 @@ class MovieTest {
                 BigDecimal.valueOf(8.8), 1L, 0L);
 
         movie.update("Interstellar", "new desc", 2014,
-                BigDecimal.valueOf(9.0), 2L);
+                BigDecimal.valueOf(9.0), 2L, null);
 
         assertThat(movie.getTitle()).isEqualTo("Interstellar");
         assertThat(movie.getRating()).isEqualByComparingTo(BigDecimal.valueOf(9.0));
@@ -66,7 +66,37 @@ class MovieTest {
                 BigDecimal.valueOf(8.8), 1L, 0L);
 
         assertThatThrownBy(() ->
-                movie.update("Inception", "desc", 2010, BigDecimal.valueOf(15.0), 1L))
+                movie.update("Inception", "desc", 2010, BigDecimal.valueOf(15.0), 1L, null))
+                .isInstanceOf(InvalidRatingException.class);
+    }
+
+    @Test
+    void update_versionMismatch_throwsOptimisticLockingException() {
+        Movie movie = Movie.restore(1L, "Inception", "desc", 2010,
+                BigDecimal.valueOf(8.8), 1L, 5L);
+
+        assertThatThrownBy(() ->
+                movie.update("Inception", "desc", 2010, BigDecimal.valueOf(8.8), 1L, 3L))
+                .isInstanceOf(dev.studentpp1.streamingservice.movies.domain.exception.OptimisticLockingException.class);
+    }
+
+    @Test
+    void update_nullVersion_skipsVersionCheck() {
+        Movie movie = Movie.restore(1L, "Inception", "desc", 2010,
+                BigDecimal.valueOf(8.8), 1L, 5L);
+
+        movie.update("Inception Updated", "desc", 2010, BigDecimal.valueOf(8.8), 1L, null);
+
+        assertThat(movie.getTitle()).isEqualTo("Inception Updated");
+    }
+
+    @Test
+    void update_nullRating_throwsInvalidRatingException() {
+        Movie movie = Movie.restore(1L, "Inception", "desc", 2010,
+                BigDecimal.valueOf(8.8), 1L, 0L);
+
+        assertThatThrownBy(() ->
+                movie.update("Inception", "desc", 2010, null, 1L, null))
                 .isInstanceOf(InvalidRatingException.class);
     }
 }

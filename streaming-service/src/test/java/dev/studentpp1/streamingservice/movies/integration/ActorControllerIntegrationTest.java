@@ -65,9 +65,7 @@ class ActorControllerIntegrationTest extends AbstractPostgresContainerTest {
         mockMvc.perform(post("/api/actors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Leonardo"))
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(status().isCreated());
     }
 
 

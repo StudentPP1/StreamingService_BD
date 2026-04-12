@@ -79,9 +79,7 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
         mockMvc.perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Inception"))
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -110,5 +108,34 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
 
         mockMvc.perform(delete("/api/movies/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void getMovieById_exists_returnsOk() throws Exception {
+        DirectorEntity director = directorJpaRepository.save(
+                new DirectorEntity(null, "Chris", "Nolan", "bio", null)
+        );
+        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
+                null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L
+        ));
+
+        mockMvc.perform(get("/api/movies/" + movie.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Inception"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteMovie_exists_returnsNoContent() throws Exception {
+        DirectorEntity director = directorJpaRepository.save(
+                new DirectorEntity(null, "Chris", "Nolan", "bio", null)
+        );
+        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
+                null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L
+        ));
+
+        mockMvc.perform(delete("/api/movies/" + movie.getId()))
+                .andExpect(status().isNoContent());
     }
 }

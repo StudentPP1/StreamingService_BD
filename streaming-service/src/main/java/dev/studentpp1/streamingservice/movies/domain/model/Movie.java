@@ -2,6 +2,7 @@ package dev.studentpp1.streamingservice.movies.domain.model;
 
 import dev.studentpp1.streamingservice.movies.domain.exception.InvalidRatingException;
 import dev.studentpp1.streamingservice.movies.domain.exception.MovieDomainException;
+import dev.studentpp1.streamingservice.movies.domain.exception.OptimisticLockingException;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -38,7 +39,10 @@ public class Movie {
     }
 
     public void update(String title, String description,
-                       int year, BigDecimal rating, Long directorId) {
+                       int year, BigDecimal rating, Long directorId, Long expectedVersion) {
+        if (expectedVersion != null && !expectedVersion.equals(this.version)) {
+            throw new OptimisticLockingException("Movie data was modified by another user. Please refresh.");
+        }
         validate(title, year, rating);
         this.title = title;
         this.description = description;
@@ -52,9 +56,9 @@ public class Movie {
             throw new MovieDomainException("Movie title cannot be blank") {};
         if (year < 1888 || year > Year.now().getValue() + 5)
             throw new MovieDomainException("Invalid movie year: " + year) {};
-        if (rating.compareTo(BigDecimal.ZERO) < 0 ||
+        if (rating == null || rating.compareTo(BigDecimal.ZERO) < 0 ||
                 rating.compareTo(BigDecimal.TEN) > 0)
-            throw new InvalidRatingException(rating.doubleValue());
+            throw new InvalidRatingException(rating != null ? rating.doubleValue() : null);
     }
 
     public Long getId() { return id; }

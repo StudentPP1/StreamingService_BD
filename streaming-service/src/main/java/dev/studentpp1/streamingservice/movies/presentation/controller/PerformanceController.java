@@ -1,14 +1,12 @@
 package dev.studentpp1.streamingservice.movies.presentation.controller;
 
-import dev.studentpp1.streamingservice.movies.application.command.CreatePerformanceCommand;
-import dev.studentpp1.streamingservice.movies.application.command.DeletePerformanceCommand;
-import dev.studentpp1.streamingservice.movies.application.command.PerformanceCommandHandler;
-import dev.studentpp1.streamingservice.movies.application.query.GetPerformanceByIdQuery;
-import dev.studentpp1.streamingservice.movies.application.query.PerformanceQueryHandler;
-import dev.studentpp1.streamingservice.movies.domain.model.Performance;
-import dev.studentpp1.streamingservice.movies.presentation.dto.PerformanceDto;
-import dev.studentpp1.streamingservice.movies.application.dto.PerformanceCreateRequest;
-import dev.studentpp1.streamingservice.movies.presentation.mapper.PerformancePresentationMapper;
+import dev.studentpp1.streamingservice.movies.application.command.performance.CreatePerformanceCommand;
+import dev.studentpp1.streamingservice.movies.application.command.performance.DeletePerformanceCommand;
+import dev.studentpp1.streamingservice.movies.application.command.performance.PerformanceCommandHandler;
+import dev.studentpp1.streamingservice.movies.application.command.performance.PerformanceCreateRequest;
+import dev.studentpp1.streamingservice.movies.application.query.performance.GetPerformanceByIdQuery;
+import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceQueryHandler;
+import dev.studentpp1.streamingservice.movies.application.query.performance.PerformanceReadModel;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,28 +19,23 @@ public class PerformanceController {
 
     private final PerformanceCommandHandler performanceCommandHandler;
     private final PerformanceQueryHandler performanceQueryHandler;
-    private final PerformancePresentationMapper performanceMapper;
 
     public PerformanceController(PerformanceCommandHandler performanceCommandHandler,
-                                 PerformanceQueryHandler performanceQueryHandler,
-                                 PerformancePresentationMapper performanceMapper) {
+                                 PerformanceQueryHandler performanceQueryHandler) {
         this.performanceCommandHandler = performanceCommandHandler;
         this.performanceQueryHandler = performanceQueryHandler;
-        this.performanceMapper = performanceMapper;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PerformanceDto> getPerformanceById(@PathVariable Long id) {
-        Performance performance = performanceQueryHandler.handle(new GetPerformanceByIdQuery(id));
-        return ResponseEntity.ok(performanceMapper.toDto(performance));
+    public ResponseEntity<PerformanceReadModel> getPerformanceById(@PathVariable Long id) {
+        return ResponseEntity.ok(performanceQueryHandler.handle(new GetPerformanceByIdQuery(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PerformanceDto> createPerformance(
-            @RequestBody @Valid PerformanceCreateRequest request) {
-        Performance performance = performanceCommandHandler.handle(new CreatePerformanceCommand(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(performanceMapper.toDto(performance));
+    public ResponseEntity<Void> createPerformance(@RequestBody @Valid PerformanceCreateRequest request) {
+        performanceCommandHandler.handle(new CreatePerformanceCommand(request));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/{id}")
