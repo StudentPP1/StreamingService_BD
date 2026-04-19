@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -29,6 +28,7 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
 
     public static final String SESSION_CREATED = "Payment session created";
     public static final String METADATA_USER_ID = "userId";
+    public static final String METADATA_USER_EMAIL = "userEmail";
     public static final String METADATA_PRODUCT_NAME = "productName";
     public static final long QUANTITY = 1L;
     public static final BigDecimal TO_CENTS_MULTIPLIER = new BigDecimal(100);
@@ -59,8 +59,7 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
                 command.price(),
                 currency,
                 command.userId(),
-                command.productName(),
-                parseSubscriptionId(command.metadata())
+                command.productName()
         );
         Payment saved = paymentRepository.save(payment);
         log.info("Payment record created: id={}, sessionId={}, userId={}, product={}",
@@ -74,19 +73,18 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
     }
 
     private Session createCheckoutSession(CheckoutPaymentRequest command) {
-        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
+        SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
                 .setClientReferenceId(command.userId().toString())
                 .addLineItem(buildLineItem(command.productName(), command.price()))
                 .putMetadata(METADATA_USER_ID, command.userId().toString())
-                .putMetadata(METADATA_PRODUCT_NAME, command.productName());
-        if (command.metadata() != null) {
-            command.metadata().forEach(paramsBuilder::putMetadata);
-        }
+                .putMetadata(METADATA_USER_EMAIL, command.userEmail())
+                .putMetadata(METADATA_PRODUCT_NAME, command.productName())
+                .build();
         try {
-            return Session.create(paramsBuilder.build());
+            return Session.create(params);
         } catch (Exception e) {
             log.error("Failed to create Stripe session for user={}", command.userId(), e);
             throw new RuntimeException("Stripe integration error", e);
@@ -117,16 +115,4 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
         int deleted = paymentRepository.deletePaymentsBefore(threshold);
         log.info("Cleanup: deleted {} payments older than {}", deleted, threshold);
     }
-
-    private Long parseSubscriptionId(Map<String, String> metadata) {
-        if (metadata == null || !metadata.containsKey("planId")) {
-            return null;
-        }
-        try {
-            return Long.parseLong(metadata.get("planId"));
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
 }
-

@@ -21,7 +21,7 @@ public class PaymentServiceAdapter implements SubscriptionPaymentGateway {
                 command.productName(),
                 command.price(),
                 command.userId(),
-                command.metadata()
+                command.userEmail()
         ));
         return mapToCheckoutResult(response);
     }

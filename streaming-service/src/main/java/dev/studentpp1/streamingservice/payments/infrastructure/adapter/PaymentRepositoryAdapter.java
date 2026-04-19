@@ -24,13 +24,6 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
     }
 
     @Override
-    public Payment saveWithSubscription(Payment payment, Long userSubscriptionId) {
-        var entity = mapper.toEntity(payment);
-        entity.setUserSubscriptionId(userSubscriptionId);
-        return mapper.toDomain(jpaRepository.save(entity));
-    }
-
-    @Override
     public Optional<Payment> findByProviderSessionId(String sessionId) {
         return jpaRepository.findByProviderSessionId(sessionId)
                 .map(mapper::toDomain);
@@ -41,7 +34,6 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
         return jpaRepository.findByProviderPaymentIdForUpdate(sessionId)
                 .map(mapper::toDomain);
     }
-
 
     @Override
     public int deletePaymentsBefore(LocalDateTime dateTime) {

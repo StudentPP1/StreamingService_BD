@@ -39,7 +39,7 @@ class SubscribeUserHandlerTest {
     void handle_planNotFound_throwsSubscriptionPlanNotFoundException() {
         when(subscriptionPlanRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> handler.handle(new SubscribeUserCommand(99L, 1L)))
+        assertThatThrownBy(() -> handler.handle(new SubscribeUserCommand(99L, 1L, "user@test.com")))
                 .isInstanceOf(SubscriptionPlanNotFoundException.class);
 
         verifyNoInteractions(paymentGateway);
@@ -54,7 +54,7 @@ class SubscribeUserHandlerTest {
                 java.util.List.of(1L), 10L, SubscriptionStatus.ACTIVE
         )).thenReturn(true);
 
-        assertThatThrownBy(() -> handler.handle(new SubscribeUserCommand(10L, 1L)))
+        assertThatThrownBy(() -> handler.handle(new SubscribeUserCommand(10L, 1L, "user@test.com")))
                 .isInstanceOf(ActiveSubscriptionAlreadyExistsException.class);
 
         verifyNoInteractions(paymentGateway);
@@ -69,7 +69,7 @@ class SubscribeUserHandlerTest {
                 java.util.List.of(1L), 10L, SubscriptionStatus.ACTIVE
         )).thenReturn(false);
 
-        handler.handle(new SubscribeUserCommand(10L, 1L));
+        handler.handle(new SubscribeUserCommand(10L, 1L, "user@test.com"));
 
         ArgumentCaptor<CheckoutCommand> captor = ArgumentCaptor.forClass(CheckoutCommand.class);
         verify(paymentGateway).generateCheckout(captor.capture());
@@ -78,7 +78,7 @@ class SubscribeUserHandlerTest {
         assertThat(checkout.productName()).isEqualTo("Basic");
         assertThat(checkout.price()).isEqualByComparingTo("9.99");
         assertThat(checkout.userId()).isEqualTo(1L);
-        assertThat(checkout.metadata()).isEmpty();
+        assertThat(checkout.userEmail()).isEqualTo("user@test.com");
     }
 }
 

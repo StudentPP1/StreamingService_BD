@@ -133,6 +133,12 @@
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>3.0.0</version>
     </dependency>
+      <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-mail</artifactId>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <build>

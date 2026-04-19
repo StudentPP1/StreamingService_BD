@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -28,16 +27,12 @@ public class SubscribeUserHandler {
     public CheckoutResult handle(SubscribeUserCommand command) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(command.planId())
                 .orElseThrow(() -> new SubscriptionPlanNotFoundException(command.planId()));
-
         boolean hasActive = userSubscriptionRepository.existsByUserIdInAndPlanIdAndStatus(
                 List.of(command.userId()), plan.getId(), SubscriptionStatus.ACTIVE);
         if (hasActive) {
-            throw new ActiveSubscriptionAlreadyExistsException(
-                    "Someone in the provided list already has an active plan: " + plan.getName());
+            throw new ActiveSubscriptionAlreadyExistsException("User already has an active plan: " + plan.getName());
         }
-
         return paymentGateway.generateCheckout(new CheckoutCommand(
-                plan.getName(), plan.getPrice(), command.userId(), new HashMap<>()));
+                plan.getName(), plan.getPrice(), command.userId(), command.userEmail()));
     }
 }
-

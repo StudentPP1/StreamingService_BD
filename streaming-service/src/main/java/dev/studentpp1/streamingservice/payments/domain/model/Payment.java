@@ -11,10 +11,10 @@ public class Payment {
     private final Long id;
     private final String providerSessionId;
     private PaymentStatus status;
-    private final Money money; // Наш Value Object
+    private final Money money;
     private final LocalDateTime createdAt;
     private LocalDateTime paidAt;
-    private final Long userSubscriptionId;
+    private Long userSubscriptionId;
     private final Long userId;
     private final String productName;
 
@@ -52,9 +52,9 @@ public class Payment {
                 money, LocalDateTime.now(), null, null, userId, productName);
     }
 
-    public Payment withSubscriptionId(Long subscriptionId) {
-        return new Payment(id, providerSessionId, status, money,
-                createdAt, paidAt, subscriptionId, userId, productName);
+    public void assignSubscription(Long subscriptionId) {
+        if (subscriptionId == null) throw new PaymentDomainException("Subscription ID cannot be null");
+        this.userSubscriptionId = subscriptionId;
     }
 
     public void markAsPaid() {

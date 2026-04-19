@@ -2,15 +2,13 @@ package dev.studentpp1.streamingservice.subscription.presentation.controller;
 
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
 import dev.studentpp1.streamingservice.common.dto.PageResult;
-import dev.studentpp1.streamingservice.subscription.application.command.subscription.CancelSubscriptionCommand;
-import dev.studentpp1.streamingservice.subscription.application.command.subscription.CreateFamilySubscriptionCommand;
-import dev.studentpp1.streamingservice.subscription.application.command.subscription.SubscribeUserCommand;
 import dev.studentpp1.streamingservice.subscription.application.command.SubscriptionCommandHandler;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.CancelSubscriptionCommand;
+import dev.studentpp1.streamingservice.subscription.application.command.subscription.SubscribeUserCommand;
 import dev.studentpp1.streamingservice.subscription.application.query.GetMySubscriptionsQuery;
 import dev.studentpp1.streamingservice.subscription.application.query.SubscriptionQueryHandler;
 import dev.studentpp1.streamingservice.subscription.application.query.readmodel.UserSubscriptionWithPlanReadModel;
 import dev.studentpp1.streamingservice.subscription.domain.model.CheckoutResult;
-import dev.studentpp1.streamingservice.subscription.presentation.dto.CreateFamilySubscriptionRequest;
 import dev.studentpp1.streamingservice.subscription.presentation.dto.SubscribeRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,19 +33,7 @@ public class SubscriptionController {
     public ResponseEntity<CheckoutResult> subscribe(
             @Valid @RequestBody SubscribeRequest request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        CheckoutResult result = subscriptionCommandHandler.handle(new SubscribeUserCommand(request.planId(), currentUser.getId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PostMapping("/family")
-    public ResponseEntity<CheckoutResult> subscribeFamily(
-            @Valid @RequestBody CreateFamilySubscriptionRequest request,
-            @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        CheckoutResult result = subscriptionCommandHandler.handle(new CreateFamilySubscriptionCommand(
-                request.planId(),
-                request.memberEmails(),
-                currentUser.getId()
-        ));
+        CheckoutResult result = subscriptionCommandHandler.handle(new SubscribeUserCommand(request.planId(), currentUser.getId(), currentUser.getUsername()));
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

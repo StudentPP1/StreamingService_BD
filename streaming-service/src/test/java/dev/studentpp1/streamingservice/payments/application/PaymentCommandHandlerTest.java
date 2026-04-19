@@ -10,7 +10,6 @@ import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentResp
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -23,7 +22,7 @@ class PaymentCommandHandlerTest {
         PaymentWebhookCommandHandler webhookCommandHandler = mock(PaymentWebhookCommandHandler.class);
         PaymentCommandHandler commandHandler = new PaymentCommandHandler(checkoutPaymentHandler, webhookCommandHandler);
 
-        CheckoutPaymentRequest command = new CheckoutPaymentRequest("Basic", BigDecimal.TEN, 1L, Map.of());
+        CheckoutPaymentRequest command = new CheckoutPaymentRequest("Basic", BigDecimal.TEN, 1L, "user@test.com");
         CheckoutPaymentResponse expected = new CheckoutPaymentResponse("PENDING", "ok", "sess", "url");
 
         when(checkoutPaymentHandler.checkout(command)).thenReturn(expected);

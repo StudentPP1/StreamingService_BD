@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface PaymentRepository {
     Payment save(Payment payment);
-    Payment saveWithSubscription(Payment payment, Long userSubscriptionId);
     Optional<Payment> findByProviderSessionId(String sessionId);
     Optional<Payment> findByProviderSessionIdForUpdate(String sessionId);
     int deletePaymentsBefore(LocalDateTime dateTime);

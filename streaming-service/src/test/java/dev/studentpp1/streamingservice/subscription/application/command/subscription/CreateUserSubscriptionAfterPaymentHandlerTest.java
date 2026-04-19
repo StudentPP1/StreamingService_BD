@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.application.command.subscription;
 
+import dev.studentpp1.streamingservice.subscription.application.event.handler.CreateUserSubscriptionAfterPaymentHandler;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
-import dev.studentpp1.streamingservice.subscription.domain.factory.UserSubscriptionFactory;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
@@ -23,18 +23,15 @@ class CreateUserSubscriptionAfterPaymentHandlerTest {
 
     private SubscriptionPlanRepository subscriptionPlanRepository;
     private UserSubscriptionRepository userSubscriptionRepository;
-    private UserSubscriptionFactory userSubscriptionFactory;
     private CreateUserSubscriptionAfterPaymentHandler handler;
 
     @BeforeEach
     void setUp() {
         subscriptionPlanRepository = mock(SubscriptionPlanRepository.class);
         userSubscriptionRepository = mock(UserSubscriptionRepository.class);
-        userSubscriptionFactory = mock(UserSubscriptionFactory.class);
         handler = new CreateUserSubscriptionAfterPaymentHandler(
                 subscriptionPlanRepository,
-                userSubscriptionRepository,
-                userSubscriptionFactory
+                userSubscriptionRepository
         );
     }
 
@@ -45,7 +42,6 @@ class CreateUserSubscriptionAfterPaymentHandlerTest {
         assertThatThrownBy(() -> handler.handle("Basic", 1L))
                 .isInstanceOf(SubscriptionPlanNotFoundException.class);
 
-        verifyNoInteractions(userSubscriptionFactory);
         verify(userSubscriptionRepository, never()).save(any());
     }
 
@@ -59,15 +55,14 @@ class CreateUserSubscriptionAfterPaymentHandlerTest {
                 5L, 1L, 10L, created.getStartTime(), created.getEndTime(), SubscriptionStatus.ACTIVE);
 
         when(subscriptionPlanRepository.findByName("Basic")).thenReturn(Optional.of(plan));
-        when(userSubscriptionFactory.create(eq(1L), eq(10L), any(LocalDateTime.class), eq(30))).thenReturn(created);
-        when(userSubscriptionRepository.save(created)).thenReturn(saved);
+        when(userSubscriptionRepository.save(any(UserSubscription.class))).thenReturn(saved);
 
         UserSubscription result = handler.handle("Basic", 1L);
 
         assertThat(result.getId()).isEqualTo(5L);
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getPlanId()).isEqualTo(10L);
-        verify(userSubscriptionRepository).save(created);
+        verify(userSubscriptionRepository).save(any(UserSubscription.class));
     }
 }
 

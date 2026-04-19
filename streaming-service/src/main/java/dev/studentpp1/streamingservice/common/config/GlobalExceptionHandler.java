@@ -8,7 +8,6 @@ import dev.studentpp1.streamingservice.movies.domain.exception.MovieNotFoundExce
 import dev.studentpp1.streamingservice.movies.domain.exception.OptimisticLockingException;
 import dev.studentpp1.streamingservice.movies.domain.exception.PerformanceNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.ActiveSubscriptionAlreadyExistsException;
-import dev.studentpp1.streamingservice.subscription.domain.exception.InvalidFamilyMemberException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.MoviesNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.MoviesNotInPlanException;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionAccessDeniedException;
@@ -80,7 +79,6 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler({
-        InvalidFamilyMemberException.class,
         SubscriptionNotActiveException.class,
         MoviesNotInPlanException.class
     })

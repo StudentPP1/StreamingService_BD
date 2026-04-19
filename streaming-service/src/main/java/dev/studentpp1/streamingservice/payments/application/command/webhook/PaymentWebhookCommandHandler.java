@@ -1,21 +1,22 @@
 package dev.studentpp1.streamingservice.payments.application.command.webhook;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
+import dev.studentpp1.streamingservice.payments.domain.event.PaymentFailed;
+import dev.studentpp1.streamingservice.payments.domain.event.PaymentSucceeded;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
-import dev.studentpp1.streamingservice.payments.domain.port.PaymentCompletionHandler;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -25,12 +26,12 @@ public class PaymentWebhookCommandHandler {
     private static final String EVENT_SESSION_COMPLETED = "checkout.session.completed";
     private static final String EVENT_SESSION_EXPIRED = "checkout.session.expired";
     private static final String METADATA_USER_ID = "userId";
+    private static final String METADATA_USER_EMAIL = "userEmail";
     private static final String METADATA_PLAN_NAME = "planName";
     private static final String METADATA_PRODUCT_NAME = "productName";
-    private static final String METADATA_FAMILY_MEMBER_EMAILS = "familyMemberEmails";
 
     private final PaymentRepository paymentRepository;
-    private final PaymentCompletionHandler paymentCompletionHandler;
+    private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -60,13 +61,16 @@ public class PaymentWebhookCommandHandler {
         if (payment.getStatus() == PaymentStatus.COMPLETED) {
             return;
         }
-        Long subscriptionId = paymentCompletionHandler.handleSuccess(
-                Long.valueOf(payload.userId()),
-                payload.planName(),
-                payload.familyMemberEmails()
-        );
         payment.markAsPaid();
-        paymentRepository.saveWithSubscription(payment, subscriptionId);
+        paymentRepository.save(payment);
+        eventPublisher.publishEvent(new PaymentSucceeded(
+                payment.getId(),
+                Long.valueOf(payload.userId()),
+                payload.userEmail(),
+                payload.planName(),
+                payload.sessionId(),
+                Instant.now()
+        ));
         log.info("Payment processed successfully for sessionId={}", payload.sessionId());
     }
 
@@ -85,6 +89,19 @@ public class PaymentWebhookCommandHandler {
                     payload.sessionId());
             return;
         }
+        if (payment.getStatus() == PaymentStatus.FAILED) {
+            log.info("Ignoring duplicate FAILED event, sessionId={}", payload.sessionId());
+            return;
+        }
+        eventPublisher.publishEvent(new PaymentFailed(
+                payment.getId(),
+                Long.valueOf(payload.userId()),
+                payload.userEmail(),
+                payload.planName(),
+                payload.sessionId(),
+                payment.getUserSubscriptionId(),
+                "Payment was not completed"
+        ));
         payment.markAsFailed();
         paymentRepository.save(payment);
         log.info("Payment FAILED, sessionId={}, userId={}, plan={}",
@@ -95,36 +112,21 @@ public class PaymentWebhookCommandHandler {
         try {
             String rawJson = event.getDataObjectDeserializer().getRawJson();
             JsonNode root = objectMapper.readTree(rawJson);
-
             String sessionId = root.path("id").asText(null);
             if (sessionId == null) {
                 return null;
             }
-
             JsonNode metadata = root.path("metadata");
             String userId = metadata.path(METADATA_USER_ID).asText(null);
+            String userEmail = metadata.path(METADATA_USER_EMAIL).asText(null);
             String planName = metadata.path(METADATA_PLAN_NAME).asText(null);
             if (planName == null) {
                 planName = metadata.path(METADATA_PRODUCT_NAME).asText(null);
             }
-
             if (userId == null || planName == null) {
                 return null;
             }
-
-            String familyMemberEmailsJson = metadata.path(METADATA_FAMILY_MEMBER_EMAILS).asText(null);
-            List<String> familyMemberEmails = null;
-
-            if (familyMemberEmailsJson != null) {
-                try {
-                    familyMemberEmails = objectMapper.readValue(familyMemberEmailsJson, new TypeReference<>() {
-                    });
-                } catch (Exception e) {
-                    log.error("Failed to parse family member emails from metadata", e);
-                }
-            }
-
-            return new SessionPayload(sessionId, userId, planName, familyMemberEmails);
+            return new SessionPayload(sessionId, userId, userEmail, planName);
         } catch (Exception e) {
             log.error("Failed to parse Stripe event payload", e);
             return null;
@@ -140,9 +142,5 @@ public class PaymentWebhookCommandHandler {
         log.info("Deleted {} stale PENDING payments older than {}", deleted, threshold);
     }
 
-    record SessionPayload(String sessionId, String userId,
-                          String planName, List<String> familyMemberEmails) {
-    }
+    record SessionPayload(String sessionId, String userId, String userEmail, String planName) {}
 }
-
-

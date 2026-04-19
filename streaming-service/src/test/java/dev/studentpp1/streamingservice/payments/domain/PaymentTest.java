@@ -85,13 +85,12 @@ class PaymentTest {
     }
 
     @Test
-    void withSubscriptionId_returnsNewPaymentWithSubscriptionId() {
+    void assignSubscription_setsSubscriptionId() {
         Payment payment = Payment.createPending("session_abc", MONEY, 1L, "Premium Plan");
 
-        Payment linked = payment.withSubscriptionId(42L);
+        payment.assignSubscription(42L);
 
-        assertThat(linked.getUserSubscriptionId()).isEqualTo(42L);
-        assertThat(payment.getUserSubscriptionId()).isNull();
+        assertThat(payment.getUserSubscriptionId()).isEqualTo(42L);
     }
 
     @Test

@@ -12,18 +12,8 @@ public class PaymentFactory {
             BigDecimal amount,
             String currency,
             Long userId,
-            String productName,
-            Long subscriptionId) {
+            String productName) {
         Money money = new Money(amount, currency);
-        Payment payment = Payment.createPending(
-                sessionId,
-                money,
-                userId,
-                productName
-        );
-        if (subscriptionId != null) {
-            return payment.withSubscriptionId(subscriptionId);
-        }
-        return payment;
+        return Payment.createPending(sessionId, money, userId, productName);
     }
 }
