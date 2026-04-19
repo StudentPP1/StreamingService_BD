@@ -23,6 +23,8 @@ import static org.mockito.Mockito.*;
 
 class PaymentWebhookCommandHandlerTest {
 
+    private static final Money DEFAULT_MONEY = new Money(BigDecimal.valueOf(9.99), "USD");
+
     private PaymentRepository paymentRepository;
     private ApplicationEventPublisher eventPublisher;
     private PaymentWebhookCommandHandler webhookService;
@@ -47,23 +49,8 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionExpired_marksPaymentAsFailed() {
-        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
-        Payment payment = Payment.restore(
-                1L, "sess_abc", PaymentStatus.PENDING,
-                money, LocalDateTime.now(), null, null, 1L, "Basic Plan");
-
-        Event event = buildMockEvent(
-                "checkout.session.expired",
-                """
-                {
-                    "id": "sess_abc",
-                    "metadata": {
-                        "userId": "1",
-                        "planName": "Basic Plan"
-                    }
-                }
-                """
-        );
+        Payment payment = payment("sess_abc", PaymentStatus.PENDING, 1L, "Basic Plan", null);
+        Event event = expiredEvent("sess_abc", 1L, "Basic Plan");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_abc"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -77,23 +64,8 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionCompleted_marksPaymentAsPaidAndPublishesSuccessEvent() {
-        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
-        Payment payment = Payment.restore(
-                1L, "sess_xyz", PaymentStatus.PENDING,
-                money, LocalDateTime.now(), null, null, 2L, "Premium Plan");
-
-        Event event = buildMockEvent(
-                "checkout.session.completed",
-                """
-                {
-                    "id": "sess_xyz",
-                    "metadata": {
-                        "userId": "2",
-                        "planName": "Premium Plan"
-                    }
-                }
-                """
-        );
+        Payment payment = payment("sess_xyz", PaymentStatus.PENDING, 2L, "Premium Plan", null);
+        Event event = completedEvent("sess_xyz", 2L, "Premium Plan");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_xyz"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -109,23 +81,10 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionCompleted_usesProductNameMetadataAsFallback() {
-        Money money = new Money(BigDecimal.valueOf(4.99), "USD");
         Payment payment = Payment.restore(
                 1L, "sess_product", PaymentStatus.PENDING,
-                money, LocalDateTime.now(), null, null, 2L, "Basic");
-
-        Event event = buildMockEvent(
-                "checkout.session.completed",
-                """
-                {
-                    "id": "sess_product",
-                    "metadata": {
-                        "userId": "2",
-                        "productName": "Basic"
-                    }
-                }
-                """
-        );
+                new Money(BigDecimal.valueOf(4.99), "USD"), LocalDateTime.now(), null, null, 2L, "Basic");
+        Event event = completedEventWithProductName("sess_product", 2L, "Basic");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_product"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -139,23 +98,8 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionCompleted_alreadyCompleted_skipsProcessing() {
-        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
-        Payment payment = Payment.restore(
-                1L, "sess_done", PaymentStatus.COMPLETED,
-                money, LocalDateTime.now(), LocalDateTime.now(), 5L, 1L, "Basic Plan");
-
-        Event event = buildMockEvent(
-                "checkout.session.completed",
-                """
-                {
-                    "id": "sess_done",
-                    "metadata": {
-                        "userId": "1",
-                        "planName": "Basic Plan"
-                    }
-                }
-                """
-        );
+        Payment payment = payment("sess_done", PaymentStatus.COMPLETED, 1L, "Basic Plan", 5L);
+        Event event = completedEvent("sess_done", 1L, "Basic Plan");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_done"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -168,23 +112,8 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionCompleted_syncSubscriberFails_propagatesException() {
-        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
-        Payment payment = Payment.restore(
-                1L, "sess_sync_fail", PaymentStatus.PENDING,
-                money, LocalDateTime.now(), null, null, 2L, "Premium Plan");
-
-        Event event = buildMockEvent(
-                "checkout.session.completed",
-                """
-                {
-                    "id": "sess_sync_fail",
-                    "metadata": {
-                        "userId": "2",
-                        "planName": "Premium Plan"
-                    }
-                }
-                """
-        );
+        Payment payment = payment("sess_sync_fail", PaymentStatus.PENDING, 2L, "Premium Plan", null);
+        Event event = completedEvent("sess_sync_fail", 2L, "Premium Plan");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_sync_fail"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -198,23 +127,8 @@ class PaymentWebhookCommandHandlerTest {
 
     @Test
     void handlePaymentEvent_sessionExpired_alreadyFailed_skipsDuplicateProcessing() {
-        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
-        Payment payment = Payment.restore(
-                1L, "sess_failed", PaymentStatus.FAILED,
-                money, LocalDateTime.now(), null, null, 1L, "Basic Plan");
-
-        Event event = buildMockEvent(
-                "checkout.session.expired",
-                """
-                {
-                    "id": "sess_failed",
-                    "metadata": {
-                        "userId": "1",
-                        "planName": "Basic Plan"
-                    }
-                }
-                """
-        );
+        Payment payment = payment("sess_failed", PaymentStatus.FAILED, 1L, "Basic Plan", null);
+        Event event = expiredEvent("sess_failed", 1L, "Basic Plan");
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_failed"))
                 .thenReturn(java.util.Optional.of(payment));
@@ -250,5 +164,44 @@ class PaymentWebhookCommandHandlerTest {
         when(event.getDataObjectDeserializer()).thenReturn(deserializer);
 
         return event;
+    }
+
+    private Payment payment(String sessionId, PaymentStatus status, Long userId, String planName, Long subscriptionId) {
+        LocalDateTime paidAt = status == PaymentStatus.COMPLETED ? LocalDateTime.now() : null;
+        return Payment.restore(
+                1L,
+                sessionId,
+                status,
+                DEFAULT_MONEY,
+                LocalDateTime.now(),
+                paidAt,
+                subscriptionId,
+                userId,
+                planName
+        );
+    }
+
+    private Event completedEvent(String sessionId, long userId, String planName) {
+        return buildMockEvent("checkout.session.completed", metadataPayload(sessionId, userId, "planName", planName));
+    }
+
+    private Event completedEventWithProductName(String sessionId, long userId, String productName) {
+        return buildMockEvent("checkout.session.completed", metadataPayload(sessionId, userId, "productName", productName));
+    }
+
+    private Event expiredEvent(String sessionId, long userId, String planName) {
+        return buildMockEvent("checkout.session.expired", metadataPayload(sessionId, userId, "planName", planName));
+    }
+
+    private String metadataPayload(String sessionId, long userId, String valueKey, String value) {
+        return """
+                {
+                    "id": "%s",
+                    "metadata": {
+                        "userId": "%s",
+                        "%s": "%s"
+                    }
+                }
+                """.formatted(sessionId, userId, valueKey, value);
     }
 }

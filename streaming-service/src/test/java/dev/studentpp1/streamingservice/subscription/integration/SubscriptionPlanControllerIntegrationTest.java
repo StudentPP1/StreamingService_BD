@@ -29,6 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContainerTest {
 
+    private static final String CREATE_PLAN_JSON = """
+            {"name":"Basic","description":"Basic plan","price":9.99,"duration":30}
+            """;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -51,15 +55,7 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
     @Test
     void getAllPlans_noAuth_returnsOk() throws Exception {
-        subscriptionPlanJpaRepository.save(
-                SubscriptionPlanEntity.builder()
-                        .name("Basic")
-                        .description("Basic plan")
-                        .price(BigDecimal.valueOf(9.99))
-                        .duration(30)
-                        .movieIds(Set.of())
-                        .build()
-        );
+        savePlan("Basic", BigDecimal.valueOf(9.99));
 
         mockMvc.perform(get("/api/subscription-plans")
                         .param("page", "0")
@@ -79,26 +75,18 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
     @Test
     @WithMockUser
     void createPlan_userRole_returnsForbidden() throws Exception {
-        String json = """
-                {"name":"Basic","description":"Basic plan","price":9.99,"duration":30}
-                """;
-
         mockMvc.perform(post("/api/subscription-plans")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(CREATE_PLAN_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void createPlan_admin_returnsCreated() throws Exception {
-        String json = """
-                {"name":"Basic","description":"Basic plan","price":9.99,"duration":30}
-                """;
-
         mockMvc.perform(post("/api/subscription-plans")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(CREATE_PLAN_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(""));
     }
@@ -113,24 +101,8 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
     @Test
     void getAllPlans_withSearch_filtersByName() throws Exception {
-        subscriptionPlanJpaRepository.save(
-                SubscriptionPlanEntity.builder()
-                        .name("Basic")
-                        .description("Basic plan")
-                        .price(BigDecimal.valueOf(9.99))
-                        .duration(30)
-                        .movieIds(Set.of())
-                        .build()
-        );
-        subscriptionPlanJpaRepository.save(
-                SubscriptionPlanEntity.builder()
-                        .name("Premium")
-                        .description("Premium plan")
-                        .price(BigDecimal.valueOf(19.99))
-                        .duration(30)
-                        .movieIds(Set.of())
-                        .build()
-        );
+        savePlan("Basic", BigDecimal.valueOf(9.99));
+        savePlan("Premium", BigDecimal.valueOf(19.99));
 
         mockMvc.perform(get("/api/subscription-plans")
                         .param("search", "prem")
@@ -143,24 +115,8 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
     @Test
     void getAllPlans_withPagination_returnsPageMetadata() throws Exception {
-        subscriptionPlanJpaRepository.save(
-                SubscriptionPlanEntity.builder()
-                        .name("Basic")
-                        .description("Basic plan")
-                        .price(BigDecimal.valueOf(9.99))
-                        .duration(30)
-                        .movieIds(Set.of())
-                        .build()
-        );
-        subscriptionPlanJpaRepository.save(
-                SubscriptionPlanEntity.builder()
-                        .name("Premium")
-                        .description("Premium plan")
-                        .price(BigDecimal.valueOf(19.99))
-                        .duration(30)
-                        .movieIds(Set.of())
-                        .build()
-        );
+        savePlan("Basic", BigDecimal.valueOf(9.99));
+        savePlan("Premium", BigDecimal.valueOf(19.99));
 
         mockMvc.perform(get("/api/subscription-plans")
                         .param("page", "1")
@@ -174,17 +130,8 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
 
     @Test
     void getPlanById_existing_returnsPlanDetailsWithIncludedMovies() throws Exception {
-        DirectorEntity director = directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
-        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
-                null,
-                "Inception",
-                "desc",
-                2010,
-                BigDecimal.valueOf(8.8),
-                director,
-                null,
-                0L
-        ));
+        DirectorEntity director = saveDirector();
+        MovieEntity movie = movieJpaRepository.save(newMovie(director));
         SubscriptionPlanEntity plan = subscriptionPlanJpaRepository.save(
                 SubscriptionPlanEntity.builder()
                         .name("Premium")
@@ -200,5 +147,25 @@ class SubscriptionPlanControllerIntegrationTest extends AbstractPostgresContaine
                 .andExpect(jsonPath("$.name").value("Premium"))
                 .andExpect(jsonPath("$.includedMovies.length()").value(1))
                 .andExpect(jsonPath("$.includedMovies[0].title").value("Inception"));
+    }
+
+    private SubscriptionPlanEntity savePlan(String name, BigDecimal price) {
+        return subscriptionPlanJpaRepository.save(
+                SubscriptionPlanEntity.builder()
+                        .name(name)
+                        .description(name + " plan")
+                        .price(price)
+                        .duration(30)
+                        .movieIds(Set.of())
+                        .build()
+        );
+    }
+
+    private DirectorEntity saveDirector() {
+        return directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
+    }
+
+    private MovieEntity newMovie(DirectorEntity director) {
+        return new MovieEntity(null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L);
     }
 }
