@@ -19,6 +19,8 @@ import static org.mockito.Mockito.*;
 
 class PaymentSubscriptionLinkListenerTest {
 
+    private static final Money DEFAULT_MONEY = new Money(BigDecimal.valueOf(9.99), "USD");
+
     private PaymentRepository paymentRepository;
     private PaymentSubscriptionLinkListener listener;
 
@@ -30,17 +32,7 @@ class PaymentSubscriptionLinkListenerTest {
 
     @Test
     void onSubscriptionLinked_assignsSubscriptionIdAndSavesPayment() {
-        Payment payment = Payment.restore(
-                5L,
-                "sess_1",
-                PaymentStatus.COMPLETED,
-                new Money(BigDecimal.valueOf(9.99), "USD"),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                1L,
-                "Premium"
-        );
+        Payment payment = completedPayment("sess_1", null);
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_1")).thenReturn(Optional.of(payment));
 
         listener.onSubscriptionLinked(new SubscriptionLinkedToPaymentEvent(5L, "sess_1", 44L, Instant.now()));
@@ -51,22 +43,26 @@ class PaymentSubscriptionLinkListenerTest {
 
     @Test
     void onSubscriptionLinked_sameLinkTwice_isIdempotent() {
-        Payment payment = Payment.restore(
-                5L,
-                "sess_1",
-                PaymentStatus.COMPLETED,
-                new Money(BigDecimal.valueOf(9.99), "USD"),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                44L,
-                1L,
-                "Premium"
-        );
+        Payment payment = completedPayment("sess_1", 44L);
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_1")).thenReturn(Optional.of(payment));
 
         listener.onSubscriptionLinked(new SubscriptionLinkedToPaymentEvent(5L, "sess_1", 44L, Instant.now()));
 
         verify(paymentRepository, never()).save(any());
+    }
+
+    private Payment completedPayment(String sessionId, Long subscriptionId) {
+        return Payment.restore(
+                5L,
+                sessionId,
+                PaymentStatus.COMPLETED,
+                DEFAULT_MONEY,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                subscriptionId,
+                1L,
+                "Premium"
+        );
     }
 }
 

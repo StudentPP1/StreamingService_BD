@@ -25,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
 
+    private static final String CREATE_MOVIE_JSON = """
+            {"title":"Inception","description":"desc","year":2010,"rating":8.8,"directorId":1}
+            """;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -45,19 +49,8 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     @Test
     @WithMockUser
     void getAllMovies_authenticated_returnsOk() throws Exception {
-        DirectorEntity director = directorJpaRepository.save(
-                new DirectorEntity(null, "Chris", "Nolan", "bio", null)
-        );
-        movieJpaRepository.save(new MovieEntity(
-                null,
-                "Inception",
-                "desc",
-                2010,
-                BigDecimal.valueOf(8.8),
-                director,
-                null,
-                0L
-        ));
+        DirectorEntity director = saveDirector();
+        movieJpaRepository.save(newMovie(director));
 
         mockMvc.perform(get("/api/movies")
                         .param("page", "0")
@@ -70,28 +63,20 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createMovie_admin_returnsCreated() throws Exception {
-        directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
-
-        String json = """
-                {"title":"Inception","description":"desc","year":2010,"rating":8.8,"directorId":1}
-                """;
+        saveDirector();
 
         mockMvc.perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(CREATE_MOVIE_JSON))
                 .andExpect(status().isCreated());
     }
 
     @Test
     @WithMockUser
     void createMovie_userRole_returnsForbidden() throws Exception {
-        String json = """
-                {"title":"Inception","description":"desc","year":2010,"rating":8.8,"directorId":1}
-                """;
-
         mockMvc.perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(CREATE_MOVIE_JSON))
                 .andExpect(status().isForbidden());
     }
 
@@ -113,12 +98,8 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     @Test
     @WithMockUser
     void getMovieById_exists_returnsOk() throws Exception {
-        DirectorEntity director = directorJpaRepository.save(
-                new DirectorEntity(null, "Chris", "Nolan", "bio", null)
-        );
-        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
-                null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L
-        ));
+        DirectorEntity director = saveDirector();
+        MovieEntity movie = movieJpaRepository.save(newMovie(director));
 
         mockMvc.perform(get("/api/movies/" + movie.getId()))
                 .andExpect(status().isOk())
@@ -128,14 +109,18 @@ class MovieControllerIntegrationTest extends AbstractPostgresContainerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteMovie_exists_returnsNoContent() throws Exception {
-        DirectorEntity director = directorJpaRepository.save(
-                new DirectorEntity(null, "Chris", "Nolan", "bio", null)
-        );
-        MovieEntity movie = movieJpaRepository.save(new MovieEntity(
-                null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L
-        ));
+        DirectorEntity director = saveDirector();
+        MovieEntity movie = movieJpaRepository.save(newMovie(director));
 
         mockMvc.perform(delete("/api/movies/" + movie.getId()))
                 .andExpect(status().isNoContent());
+    }
+
+    private DirectorEntity saveDirector() {
+        return directorJpaRepository.save(new DirectorEntity(null, "Chris", "Nolan", "bio", null));
+    }
+
+    private MovieEntity newMovie(DirectorEntity director) {
+        return new MovieEntity(null, "Inception", "desc", 2010, BigDecimal.valueOf(8.8), director, null, 0L);
     }
 }
