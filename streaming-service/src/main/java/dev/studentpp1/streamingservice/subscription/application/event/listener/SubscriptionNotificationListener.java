@@ -9,13 +9,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * ASYNCHRONOUS communication demo:
- *   Subscribes to domain events published by SubscriptionCommandHandler.
- *   Runs in a separate thread pool (@Async), so the main operation (subscription creation)
- *   completes without waiting for notification delivery.
- *   Failure here does NOT roll back the subscription.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

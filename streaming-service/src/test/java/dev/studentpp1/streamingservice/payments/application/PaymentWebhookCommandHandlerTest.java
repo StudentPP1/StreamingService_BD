@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class PaymentWebhookCommandHandlerTest {
@@ -163,6 +164,36 @@ class PaymentWebhookCommandHandlerTest {
 
         verifyNoInteractions(eventPublisher);
         verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void handlePaymentEvent_sessionCompleted_syncSubscriberFails_propagatesException() {
+        Money money = new Money(BigDecimal.valueOf(9.99), "USD");
+        Payment payment = Payment.restore(
+                1L, "sess_sync_fail", PaymentStatus.PENDING,
+                money, LocalDateTime.now(), null, null, 2L, "Premium Plan");
+
+        Event event = buildMockEvent(
+                "checkout.session.completed",
+                """
+                {
+                    "id": "sess_sync_fail",
+                    "metadata": {
+                        "userId": "2",
+                        "planName": "Premium Plan"
+                    }
+                }
+                """
+        );
+
+        when(paymentRepository.findByProviderSessionIdForUpdate("sess_sync_fail"))
+                .thenReturn(java.util.Optional.of(payment));
+        doThrow(new RuntimeException("subscription sync handler failed"))
+                .when(eventPublisher).publishEvent(any(PaymentSucceeded.class));
+
+        assertThatThrownBy(() -> webhookService.handlePaymentEvent(event))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("sync handler failed");
     }
 
     @Test
