@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.application.command;
 
 import dev.studentpp1.streamingservice.subscription.application.event.listener.SubscriptionNotificationListener;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionFailed;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionFailedEvent;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionNotification;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ class SubscriptionNotificationAsyncFailureBehaviorTest {
 
     @Test
     void asyncListenerFailure_doesNotBreakPublisherThread() {
-        assertThatCode(() -> publisher.publishEvent(new SubscriptionFailed(
+        assertThatCode(() -> publisher.publishEvent(new SubscriptionFailedEvent(
                 1L,
                 "user@test.com",
                 "Premium",

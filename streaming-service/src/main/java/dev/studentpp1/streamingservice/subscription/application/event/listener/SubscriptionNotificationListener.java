@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.subscription.application.event.listener;
 
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionActivated;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionFailed;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionActivatedEvent;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionFailedEvent;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +9,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * ASYNCHRONOUS communication demo:
- *   Subscribes to domain events published by SubscriptionCommandHandler.
- *   Runs in a separate thread pool (@Async), so the main operation (subscription creation)
- *   completes without waiting for notification delivery.
- *   Failure here does NOT roll back the subscription.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,15 +18,13 @@ public class SubscriptionNotificationListener {
 
     @Async
     @EventListener
-    public void onActivated(SubscriptionActivated event) {
-        log.debug("Async notification: subscriptionId={}", event.subscriptionId());
+    public void onActivated(SubscriptionActivatedEvent event) {
         notificationService.notifyActivated(event.userEmail(), event.planName(), event.expiresAt());
     }
 
     @Async
     @EventListener
-    public void onFailed(SubscriptionFailed event) {
-        log.debug("Async notification: userId={}", event.userId());
+    public void onFailed(SubscriptionFailedEvent event) {
         notificationService.notifyFailed(event.userEmail(), event.planName(), event.reason());
     }
 }

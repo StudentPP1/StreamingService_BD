@@ -152,3 +152,16 @@ mvn -Dtest=PaymentRepositoryTest#deletePaymentsBefore_removesOnlyOlderPayments t
 
 > **Note:** All examples use `localhost:8081` as the base URL.  
 > This port is defined in `application.yml` (`server.port` parameter) and can be changed as needed.
+
+## Modular monolith (Lab 5)
+
+The project includes explicit module contracts for cross-context communication:
+
+- `payments.api.event.*`
+- `subscription.api.event.*`
+- `analytics.api.*`
+
+The `analytics` bounded context is read-only and updates projections from async events.
+
+- Endpoint: `GET /api/analytics/summary`
+

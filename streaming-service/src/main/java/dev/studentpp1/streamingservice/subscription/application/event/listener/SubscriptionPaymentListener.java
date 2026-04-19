@@ -1,12 +1,12 @@
 package dev.studentpp1.streamingservice.subscription.application.event.listener;
 
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentFailed;
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentSucceeded;
+import dev.studentpp1.streamingservice.payments.api.event.PaymentFailedEvent;
+import dev.studentpp1.streamingservice.payments.api.event.PaymentSucceededEvent;
 import dev.studentpp1.streamingservice.subscription.application.event.handler.CancelSubscriptionAfterPaymentFailureHandler;
 import dev.studentpp1.streamingservice.subscription.application.event.handler.CreateUserSubscriptionAfterPaymentHandler;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionActivated;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionFailed;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionLinkedToPayment;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionActivatedEvent;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionFailedEvent;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionLinkedToPaymentEvent;
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,16 +26,16 @@ public class SubscriptionPaymentListener {
 
     @EventListener
     @Transactional
-    public void onPaymentSucceeded(PaymentSucceeded event) {
+    public void onPaymentSucceeded(PaymentSucceededEvent event) {
         UserSubscription subscription = createUserSubscriptionAfterPaymentHandler
                 .handle(event.planName(), event.userId());
-        eventPublisher.publishEvent(new SubscriptionLinkedToPayment(
+        eventPublisher.publishEvent(new SubscriptionLinkedToPaymentEvent(
                 event.paymentId(),
                 event.providerSessionId(),
                 subscription.getId(),
                 Instant.now()
         ));
-        eventPublisher.publishEvent(new SubscriptionActivated(
+        eventPublisher.publishEvent(new SubscriptionActivatedEvent(
                 subscription.getId(),
                 event.userId(),
                 event.userEmail(),
@@ -47,11 +47,11 @@ public class SubscriptionPaymentListener {
 
     @EventListener
     @Transactional
-    public void onPaymentFailed(PaymentFailed event) {
+    public void onPaymentFailed(PaymentFailedEvent event) {
         if (event.userSubscriptionId() != null) {
             cancelSubscriptionAfterPaymentFailureHandler.handle(event.userSubscriptionId());
         }
-        eventPublisher.publishEvent(new SubscriptionFailed(
+        eventPublisher.publishEvent(new SubscriptionFailedEvent(
                 event.userId(),
                 event.userEmail(),
                 event.planName(),
@@ -60,4 +60,3 @@ public class SubscriptionPaymentListener {
         ));
     }
 }
-

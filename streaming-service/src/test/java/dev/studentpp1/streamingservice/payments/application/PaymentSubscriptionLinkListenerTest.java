@@ -5,7 +5,7 @@ import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.model.vo.Money;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionLinkedToPayment;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionLinkedToPaymentEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ class PaymentSubscriptionLinkListenerTest {
         );
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_1")).thenReturn(Optional.of(payment));
 
-        listener.onSubscriptionLinked(new SubscriptionLinkedToPayment(5L, "sess_1", 44L, Instant.now()));
+        listener.onSubscriptionLinked(new SubscriptionLinkedToPaymentEvent(5L, "sess_1", 44L, Instant.now()));
 
         assertThat(payment.getUserSubscriptionId()).isEqualTo(44L);
         verify(paymentRepository).save(payment);
@@ -64,7 +64,7 @@ class PaymentSubscriptionLinkListenerTest {
         );
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_1")).thenReturn(Optional.of(payment));
 
-        listener.onSubscriptionLinked(new SubscriptionLinkedToPayment(5L, "sess_1", 44L, Instant.now()));
+        listener.onSubscriptionLinked(new SubscriptionLinkedToPaymentEvent(5L, "sess_1", 44L, Instant.now()));
 
         verify(paymentRepository, never()).save(any());
     }

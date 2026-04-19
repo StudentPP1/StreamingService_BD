@@ -1,8 +1,8 @@
 package dev.studentpp1.streamingservice.subscription.application.command;
 
 import dev.studentpp1.streamingservice.subscription.application.event.listener.SubscriptionNotificationListener;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionActivated;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionFailed;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionActivatedEvent;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionFailedEvent;
 import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionNotification;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ class SubscriptionNotificationAdapterListenerTest {
         SubscriptionNotification notification = mock(SubscriptionNotification.class);
         SubscriptionNotificationListener handler = new SubscriptionNotificationListener(notification);
 
-        handler.onActivated(new SubscriptionActivated(
+        handler.onActivated(new SubscriptionActivatedEvent(
                 1L,
                 2L,
                 "user@test.com",
@@ -35,7 +35,7 @@ class SubscriptionNotificationAdapterListenerTest {
         SubscriptionNotification notification = mock(SubscriptionNotification.class);
         SubscriptionNotificationListener handler = new SubscriptionNotificationListener(notification);
 
-        handler.onFailed(new SubscriptionFailed(
+        handler.onFailed(new SubscriptionFailedEvent(
                 2L,
                 "user@test.com",
                 "Premium",

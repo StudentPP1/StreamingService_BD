@@ -2,7 +2,7 @@ package dev.studentpp1.streamingservice.payments.application.event.listener;
 
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
-import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionLinkedToPayment;
+import dev.studentpp1.streamingservice.subscription.api.event.SubscriptionLinkedToPaymentEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -18,7 +18,7 @@ public class PaymentSubscriptionLinkListener {
 
     @EventListener
     @Transactional
-    public void onSubscriptionLinked(SubscriptionLinkedToPayment event) {
+    public void onSubscriptionLinked(SubscriptionLinkedToPaymentEvent event) {
         Payment payment = paymentRepository
                 .findByProviderSessionIdForUpdate(event.providerSessionId())
                 .orElseThrow(() -> new IllegalStateException(

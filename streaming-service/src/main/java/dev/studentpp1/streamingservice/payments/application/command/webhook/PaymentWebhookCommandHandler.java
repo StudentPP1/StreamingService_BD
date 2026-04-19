@@ -3,8 +3,8 @@ package dev.studentpp1.streamingservice.payments.application.command.webhook;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentFailed;
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentSucceeded;
+import dev.studentpp1.streamingservice.payments.api.event.PaymentFailedEvent;
+import dev.studentpp1.streamingservice.payments.api.event.PaymentSucceededEvent;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
@@ -63,12 +63,14 @@ public class PaymentWebhookCommandHandler {
         }
         payment.markAsPaid();
         paymentRepository.save(payment);
-        eventPublisher.publishEvent(new PaymentSucceeded(
+        eventPublisher.publishEvent(new PaymentSucceededEvent(
                 payment.getId(),
                 Long.valueOf(payload.userId()),
                 payload.userEmail(),
                 payload.planName(),
                 payload.sessionId(),
+                payment.getMoney().amount(),
+                payment.getMoney().currency(),
                 Instant.now()
         ));
         log.info("Payment processed successfully for sessionId={}", payload.sessionId());
@@ -93,14 +95,17 @@ public class PaymentWebhookCommandHandler {
             log.info("Ignoring duplicate FAILED event, sessionId={}", payload.sessionId());
             return;
         }
-        eventPublisher.publishEvent(new PaymentFailed(
+        eventPublisher.publishEvent(new PaymentFailedEvent(
                 payment.getId(),
                 Long.valueOf(payload.userId()),
                 payload.userEmail(),
                 payload.planName(),
                 payload.sessionId(),
                 payment.getUserSubscriptionId(),
-                "Payment was not completed"
+                "Payment was not completed",
+                payment.getMoney().amount(),
+                payment.getMoney().currency(),
+                Instant.now()
         ));
         payment.markAsFailed();
         paymentRepository.save(payment);

@@ -1,9 +1,10 @@
 package dev.studentpp1.streamingservice.subscription.infrastructure.adapter;
 
-import dev.studentpp1.streamingservice.movies.domain.model.Movie;
-import dev.studentpp1.streamingservice.movies.domain.port.MovieQueryPort;
+import dev.studentpp1.streamingservice.movies.api.query.MovieView;
+import dev.studentpp1.streamingservice.movies.api.query.MoviesQueryApi;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionMovie;
 import dev.studentpp1.streamingservice.subscription.domain.port.MovieProvider;
+import dev.studentpp1.streamingservice.subscription.internal.acl.SubscriptionMoviesAclTranslator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieProviderAdapter implements MovieProvider {
 
-    private final MovieQueryPort movieQueryPort;
+    private final MoviesQueryApi moviesQueryApi;
+    private final SubscriptionMoviesAclTranslator aclTranslator;
 
     @Override
     public List<SubscriptionMovie> findAllById(List<Long> ids) {
@@ -21,16 +23,10 @@ public class MovieProviderAdapter implements MovieProvider {
             return List.of();
         }
 
-        List<Movie> movies = movieQueryPort.findAllById(ids);
+        List<MovieView> movies = moviesQueryApi.findViewsById(ids);
 
         return movies.stream()
-                .map(m -> new SubscriptionMovie(
-                        m.getId(),
-                        m.getTitle(),
-                        m.getDescription(),
-                        m.getYear(),
-                        m.getRating()
-                ))
+                .map(aclTranslator::toInternalMovie)
                 .toList();
     }
 }

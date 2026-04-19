@@ -19,27 +19,24 @@ public class SubscriptionNotificationAdapter implements SubscriptionNotification
 
     @Override
     public void notifyActivated(String email, String planName, LocalDateTime expiresAt) {
-        log.info("[NOTIFICATION] Subscription activated: email={}, plan={}, expires={}",
+        log.info("Subscription activated: email={}, plan={}, expires={}",
                 email, planName, expiresAt);
-        javaMailSender.send(mimeMessage -> {
-            mimeMessage.setFrom("no-reply@example.com");
-            mimeMessage.setRecipients(TO, email);
-            mimeMessage.setSubject("Your subscription is activated!");
-            mimeMessage.setText(String.format("Congratulations! Your subscription to the %s plan is now active and will expire on %s.",
-                    planName, expiresAt.toString()));
-        });
+        sendEmail(email, "Your subscription is activated!", "Congratulations! Your subscription to the %s plan is now active and will expire on %s.", planName, expiresAt.toString());
     }
 
     @Override
     public void notifyFailed(String email, String planName, String reason) {
-        log.warn("[NOTIFICATION] Subscription failed: email={}, plan={}, reason={}",
+        log.warn("Subscription failed: email={}, plan={}, reason={}",
                 email, planName, reason);
+        sendEmail(email, "Your subscription activation failed", "Unfortunately, your subscription to the %s plan could not be activated. Reason: %s. Please try again or contact support.", planName, reason);
+    }
+
+    private void sendEmail(String email, String title, String content, String planName, String reason) {
         javaMailSender.send(mimeMessage -> {
             mimeMessage.setFrom("no-reply@example.com");
             mimeMessage.setRecipients(TO, email);
-            mimeMessage.setSubject("Your subscription activation failed");
-            mimeMessage.setText(String.format("Unfortunately, your subscription to the %s plan could not be activated. Reason: %s. Please try again or contact support.",
-                    planName, reason));
+            mimeMessage.setSubject(title);
+            mimeMessage.setText(String.format(content, planName, reason));
         });
     }
 }

@@ -1,6 +1,5 @@
 package dev.studentpp1.streamingservice.subscription.infrastructure.entity;
 
-import dev.studentpp1.streamingservice.movies.infrastructure.entity.MovieEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
