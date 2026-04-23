@@ -36,6 +36,12 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
     }
 
     @Override
+    public Optional<Payment> findByUserIdAndStatusForUpdate(Long userId, PaymentStatus status) {
+        return jpaRepository.findByUserIdAndStatusForUpdate(userId, status)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public int deletePaymentsBefore(LocalDateTime dateTime) {
         return jpaRepository.deletePaymentsBefore(dateTime);
     }

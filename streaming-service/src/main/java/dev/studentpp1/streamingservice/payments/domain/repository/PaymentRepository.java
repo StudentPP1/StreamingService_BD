@@ -10,6 +10,7 @@ public interface PaymentRepository {
     Payment save(Payment payment);
     Optional<Payment> findByProviderSessionId(String sessionId);
     Optional<Payment> findByProviderSessionIdForUpdate(String sessionId);
+    Optional<Payment> findByUserIdAndStatusForUpdate(Long userId, PaymentStatus status);
     int deletePaymentsBefore(LocalDateTime dateTime);
     int deleteByStatusAndCreatedAtBefore(PaymentStatus status, LocalDateTime threshold);
 }

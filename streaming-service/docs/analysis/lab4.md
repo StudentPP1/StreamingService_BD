@@ -1,59 +1,44 @@
 # Аналіз лабораторної 4
 
-## 1. Що змінилося порівняно з лабораторною 3
+## Що змінилося порівняно з лабораторною 3
+- Виділено окремий допоміжний компонент нотифікацій (`notification`).
+- Для успішної оплати використано асинхронний сценарій: публікація `SubscriptionActivated` у `EventBus`.
+- Для неуспішної оплати використано синхронний сценарій: прямий виклик `SubscriptionNotification.notifyFailed` через порт.
 
-- У лабораторній 3 був CQS (`CommandHandler`/`QueryHandler`) без явної міжкомпонентної взаємодії подіями.
-- У лабораторній 4 додано подієву комунікацію:
-  - sync: `PaymentSucceeded`/`PaymentFailed` -> `SubscriptionPaymentListener`
-  - async: `SubscriptionActivated`/`SubscriptionFailed` -> `SubscriptionNotificationListener`
-- Для збереження зв'язку платежу і підписки додано подію `SubscriptionLinkedToPayment`.
+## Які побічні операції виділено і чому
+1. Нотифікація про успішну оплату (не блокує основну операцію, тому асинхронно).
+2. Нотифікація про неуспішну оплату (у поточній реалізації виконується синхронно в тому ж потоці).
 
-## 2. Які побічні операції виділено
-
-- **Реакція підписок на оплату**: створення/скасування підписки після статусу платежу.
-- **Нотифікації**: повідомлення користувача про успіх/помилку підписки.
-
-Окремі компоненти:
-
-- `subscription.application.event.listener.SubscriptionPaymentListener` 
-    + контракти: `PaymentSucceeded`, `PaymentFailed`).
-- `subscription.application.event.listener.SubscriptionNotificationListener` 
-    + порт `subscription.domain.port.SubscriptionNotification` 
-    + контракти: `SubscriptionActivated`, `SubscriptionFailed`
-
-## 3. Sync vs Async
-
+## Порівняння синхронного та асинхронного підходів
 ### Час відповіді API
+- Для асинхронного сценарію
+  2026-04-24T00:15:44.328+03:00  INFO 21800 --- [nio-8081-exec-1] s.s.p.a.c.w.PaymentWebhookCommandHandler : Received Stripe event type=checkout.session.completed
+  2026-04-24T00:15:44.355+03:00  INFO 21800 --- [nio-8081-exec-1] reateUserSubscriptionAfterPaymentHandler : Subscription created: userId=7, plan=Premium
+  2026-04-24T00:15:44.357+03:00  INFO 21800 --- [onPool-worker-1] .s.s.n.a.SubscriptionNotificationAdapter : Subscription activated: email=mishamakytonin@gmail.com, plan=Premium, expires=2026-05-24T00:15:44.345813500
+  2026-04-24T00:15:44.358+03:00  INFO 21800 --- [nio-8081-exec-1] s.s.p.a.c.w.PaymentWebhookCommandHandler : Payment processed successfully for sessionId=cs_test_a1mQWtxxI5Zk7LoM9AzFpeavENpUGVcJnnJsjWXs0zuIi2VfBJ8XaizOnc
+Не блокує основний потік, нотифікація відправляється в фоновому режимі після обробки платежу.
 
-- Sync-шлях довший: бізнес-ланцюг виконується в одному потоці.
-- Async-шлях коротший: API не чекає обробку нотифікацій.
+- Для синхронного сценарію
+ 2026-04-24T00:13:49.490+03:00  WARN 21800 --- [nio-8081-exec-2] .s.s.n.a.SubscriptionNotificationAdapter : Subscription failed: email=mishamakytonin@gmail.com, plan=Premium, reason=Payment attempt failed
+ 2026-04-24T00:14:01.244+03:00  INFO 21800 --- [nio-8081-exec-2] s.s.p.a.c.w.PaymentWebhookCommandHandler : Payment attempt FAILED via payment_intent for userId=7, plan=Premium
+Основний потік блокується до завершення нотифікації, що може збільшити latency і вплинути на користувацький досвід.
 
 ### Поведінка при збоях
+- Асинхронно: збій у обробнику не ламає основну операцію (перевірено тестом на виняток у listener).
+- Синхронно: виняток із `notifyFailed(...)` йде вгору (перевірено в `onPaymentFailed_propagatesNotificationError_syncBehavior`).
 
-- Sync: збій у `SubscriptionPaymentListener` зриває обробку основного write-flow.
-- Async: збій у `SubscriptionNotificationListener` не відкочує вже завершену бізнес-операцію.
+### Зв'язаність між компонентами
+- Асинхронний варіант зменшує зв'язаність: модулі взаємодіють через подію.
+- Синхронний варіант підвищує зв'язаність: є прямий виклик контракту нотифікації.
 
-### Зв'язаність
+### Складність реалізації та тестування
+- Асинхронний підхід складніший у відлагодженні та тестуванні (потрібно враховувати фонове виконання).
+- Синхронний підхід простіший для трасування, але гірший за ізоляцією збоїв і latency.
 
-- Немає прямого виклику між контекстами; взаємодія через типізовані події.
-- Залежність на канал нотифікацій ізольована портом `SubscriptionNotification`.
+## Який підхід обрано для production і чому
+Для побічних ефектів (нотифікацій) пріоритетний асинхронний підхід, бо він не блокує основний бізнес-флоу.
+У поточній реалізації використано змішаний варіант: success -> async, failed -> sync.
 
-## 4. Що обрано для production
-
-- Обрано **гібрид**:
-  - sync для критичних бізнес-наслідків (платіж => підписка);
-  - async для побічних ефектів (нотифікації).
-
-Причина: баланс між узгодженістю домену і швидкою відповіддю API.
-
-## 5. Ідемпотентність
-
-- `PaymentWebhookCommandHandler` ігнорує дублікати за статусом (`COMPLETED`/`FAILED`).
-- `CancelSubscriptionAfterPaymentFailureHandler` не скасовує повторно неактивні підписки.
-- `PaymentSubscriptionLinkListener` ідемпотентний для однакового `subscriptionId`.
-
-## 6. Підсумок
-
-- Вимоги лабораторної виконано: є окремі допоміжні компоненти, sync і async комунікація, події в past tense, покриття тестами.
-- DDD/CQS збережено: домен без залежностей на Spring/HTTP/ORM, orchestration у `application`, контракти через порти та події.
-
+## Що буде при повторній доставці тієї самої події (ідемпотентність)
+- Повторна обробка частково стримується на рівні payment-flow (перевірки статусів/стану платежу).
+- Окремого dedup-механізму в notification-компоненті немає, тому при повторній доставці можливе повторне надсилання повідомлення.

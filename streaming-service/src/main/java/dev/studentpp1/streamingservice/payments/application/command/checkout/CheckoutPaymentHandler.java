@@ -82,6 +82,13 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
                 .putMetadata(METADATA_USER_ID, command.userId().toString())
                 .putMetadata(METADATA_USER_EMAIL, command.userEmail())
                 .putMetadata(METADATA_PRODUCT_NAME, command.productName())
+                .setPaymentIntentData(
+                        SessionCreateParams.PaymentIntentData.builder()
+                                .putMetadata(METADATA_USER_ID, command.userId().toString())
+                                .putMetadata(METADATA_USER_EMAIL, command.userEmail())
+                                .putMetadata(METADATA_PRODUCT_NAME, command.productName())
+                                .build()
+                )
                 .build();
         try {
             return Session.create(params);

@@ -3,16 +3,14 @@ package dev.studentpp1.streamingservice.payments.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
 import dev.studentpp1.streamingservice.payments.application.command.webhook.PaymentWebhookCommandHandler;
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentFailed;
-import dev.studentpp1.streamingservice.payments.domain.event.PaymentSucceeded;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
 import dev.studentpp1.streamingservice.payments.domain.model.vo.Money;
+import dev.studentpp1.streamingservice.payments.domain.port.SubscriptionAfterPaymentPort;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,14 +22,14 @@ import static org.mockito.Mockito.*;
 class PaymentWebhookCommandHandlerTest {
 
     private PaymentRepository paymentRepository;
-    private ApplicationEventPublisher eventPublisher;
+    private SubscriptionAfterPaymentPort subscriptionPort;
     private PaymentWebhookCommandHandler webhookService;
 
     @BeforeEach
     void setUp() {
         paymentRepository = mock(PaymentRepository.class);
-        eventPublisher = mock(ApplicationEventPublisher.class);
-        webhookService = new PaymentWebhookCommandHandler(paymentRepository, eventPublisher, new ObjectMapper());
+        subscriptionPort = mock(SubscriptionAfterPaymentPort.class);
+        webhookService = new PaymentWebhookCommandHandler(paymentRepository, subscriptionPort, new ObjectMapper());
     }
 
     @Test
@@ -42,7 +40,7 @@ class PaymentWebhookCommandHandlerTest {
         webhookService.handlePaymentEvent(event);
 
         verifyNoInteractions(paymentRepository);
-        verifyNoInteractions(eventPublisher);
+        verifyNoInteractions(subscriptionPort);
     }
 
     @Test
@@ -71,12 +69,12 @@ class PaymentWebhookCommandHandlerTest {
         webhookService.handlePaymentEvent(event);
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
-        verify(eventPublisher).publishEvent(any(PaymentFailed.class));
+        verify(subscriptionPort).onPaymentFailed(eq(1L), any(), eq("Basic Plan"), isNull(), anyString());
         verify(paymentRepository).save(payment);
     }
 
     @Test
-    void handlePaymentEvent_sessionCompleted_marksPaymentAsPaidAndPublishesSuccessEvent() {
+    void handlePaymentEvent_sessionCompleted_marksPaymentAsPaidAndLinksSubscription() {
         Money money = new Money(BigDecimal.valueOf(9.99), "USD");
         Payment payment = Payment.restore(
                 1L, "sess_xyz", PaymentStatus.PENDING,
@@ -97,13 +95,13 @@ class PaymentWebhookCommandHandlerTest {
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_xyz"))
                 .thenReturn(java.util.Optional.of(payment));
+        when(subscriptionPort.onPaymentSucceeded(1L, 2L, null, "Premium Plan")).thenReturn(44L);
 
         webhookService.handlePaymentEvent(event);
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.COMPLETED);
-        assertThat(payment.getUserSubscriptionId()).isNull();
+        assertThat(payment.getUserSubscriptionId()).isEqualTo(44L);
         assertThat(payment.getPaidAt()).isNotNull();
-        verify(eventPublisher).publishEvent(any(PaymentSucceeded.class));
         verify(paymentRepository).save(payment);
     }
 
@@ -129,11 +127,12 @@ class PaymentWebhookCommandHandlerTest {
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_product"))
                 .thenReturn(java.util.Optional.of(payment));
+        when(subscriptionPort.onPaymentSucceeded(1L, 2L, null, "Basic")).thenReturn(55L);
 
         webhookService.handlePaymentEvent(event);
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.COMPLETED);
-        verify(eventPublisher).publishEvent(any(PaymentSucceeded.class));
+        assertThat(payment.getUserSubscriptionId()).isEqualTo(55L);
         verify(paymentRepository).save(payment);
     }
 
@@ -162,12 +161,12 @@ class PaymentWebhookCommandHandlerTest {
 
         webhookService.handlePaymentEvent(event);
 
-        verifyNoInteractions(eventPublisher);
+        verifyNoInteractions(subscriptionPort);
         verify(paymentRepository, never()).save(any());
     }
 
     @Test
-    void handlePaymentEvent_sessionCompleted_syncSubscriberFails_propagatesException() {
+    void handlePaymentEvent_sessionCompleted_subscriptionPortFails_propagatesException() {
         Money money = new Money(BigDecimal.valueOf(9.99), "USD");
         Payment payment = Payment.restore(
                 1L, "sess_sync_fail", PaymentStatus.PENDING,
@@ -188,12 +187,12 @@ class PaymentWebhookCommandHandlerTest {
 
         when(paymentRepository.findByProviderSessionIdForUpdate("sess_sync_fail"))
                 .thenReturn(java.util.Optional.of(payment));
-        doThrow(new RuntimeException("subscription sync handler failed"))
-                .when(eventPublisher).publishEvent(any(PaymentSucceeded.class));
+        when(subscriptionPort.onPaymentSucceeded(anyLong(), anyLong(), any(), anyString()))
+                .thenThrow(new RuntimeException("subscription creation failed"));
 
         assertThatThrownBy(() -> webhookService.handlePaymentEvent(event))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("sync handler failed");
+                .hasMessageContaining("subscription creation failed");
     }
 
     @Test
@@ -221,7 +220,7 @@ class PaymentWebhookCommandHandlerTest {
 
         webhookService.handlePaymentEvent(event);
 
-        verifyNoInteractions(eventPublisher);
+        verifyNoInteractions(subscriptionPort);
         verify(paymentRepository, never()).save(any());
     }
 

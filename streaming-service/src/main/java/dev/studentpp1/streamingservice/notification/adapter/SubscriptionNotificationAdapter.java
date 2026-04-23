@@ -1,6 +1,6 @@
-package dev.studentpp1.streamingservice.subscription.infrastructure.adapter;
+package dev.studentpp1.streamingservice.notification.adapter;
 
-import dev.studentpp1.streamingservice.subscription.domain.port.SubscriptionNotification;
+import dev.studentpp1.streamingservice.notification.port.SubscriptionNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,26 +19,26 @@ public class SubscriptionNotificationAdapter implements SubscriptionNotification
 
     @Override
     public void notifyActivated(String email, String planName, LocalDateTime expiresAt) {
-        log.info("[NOTIFICATION] Subscription activated: email={}, plan={}, expires={}",
-                email, planName, expiresAt);
+        log.info("Subscription activated: email={}, plan={}, expires={}", email, planName, expiresAt);
         javaMailSender.send(mimeMessage -> {
             mimeMessage.setFrom("no-reply@example.com");
             mimeMessage.setRecipients(TO, email);
             mimeMessage.setSubject("Your subscription is activated!");
-            mimeMessage.setText(String.format("Congratulations! Your subscription to the %s plan is now active and will expire on %s.",
-                    planName, expiresAt.toString()));
+            mimeMessage.setText(String.format(
+                    "Congratulations! Your subscription to the %s plan is now active and will expire on %s.",
+                    planName, expiresAt));
         });
     }
 
     @Override
     public void notifyFailed(String email, String planName, String reason) {
-        log.warn("[NOTIFICATION] Subscription failed: email={}, plan={}, reason={}",
-                email, planName, reason);
+        log.warn("Subscription failed: email={}, plan={}, reason={}", email, planName, reason);
         javaMailSender.send(mimeMessage -> {
             mimeMessage.setFrom("no-reply@example.com");
             mimeMessage.setRecipients(TO, email);
             mimeMessage.setSubject("Your subscription activation failed");
-            mimeMessage.setText(String.format("Unfortunately, your subscription to the %s plan could not be activated. Reason: %s. Please try again or contact support.",
+            mimeMessage.setText(String.format(
+                    "Unfortunately, your subscription to the %s plan could not be activated. Reason: %s.",
                     planName, reason));
         });
     }
