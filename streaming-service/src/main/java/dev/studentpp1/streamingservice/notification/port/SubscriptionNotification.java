@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.domain.port;
+package dev.studentpp1.streamingservice.notification.port;
 
 import java.time.LocalDateTime;
 

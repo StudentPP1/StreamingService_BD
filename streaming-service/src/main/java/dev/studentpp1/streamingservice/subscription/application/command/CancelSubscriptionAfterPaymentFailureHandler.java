@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.application.event.handler;
+package dev.studentpp1.streamingservice.subscription.application.command;
 
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;
@@ -29,4 +29,3 @@ public class CancelSubscriptionAfterPaymentFailureHandler {
         log.info("Subscription cancelled due to payment failure: subscriptionId={}", subscriptionId);
     }
 }
-

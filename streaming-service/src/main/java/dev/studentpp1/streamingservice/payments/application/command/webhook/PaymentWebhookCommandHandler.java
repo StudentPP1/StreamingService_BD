@@ -3,14 +3,15 @@ package dev.studentpp1.streamingservice.payments.application.command.webhook;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.Event;
+import dev.studentpp1.streamingservice.common.event.EventBus;
 import dev.studentpp1.streamingservice.payments.api.event.PaymentFailedEvent;
 import dev.studentpp1.streamingservice.payments.api.event.PaymentSucceededEvent;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
+import dev.studentpp1.streamingservice.payments.domain.port.SubscriptionAfterPaymentPort;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +26,15 @@ public class PaymentWebhookCommandHandler {
 
     private static final String EVENT_SESSION_COMPLETED = "checkout.session.completed";
     private static final String EVENT_SESSION_EXPIRED = "checkout.session.expired";
+    private static final String EVENT_PAYMENT_INTENT_FAILED = "payment_intent.payment_failed";
     private static final String METADATA_USER_ID = "userId";
     private static final String METADATA_USER_EMAIL = "userEmail";
     private static final String METADATA_PLAN_NAME = "planName";
     private static final String METADATA_PRODUCT_NAME = "productName";
 
     private final PaymentRepository paymentRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final SubscriptionAfterPaymentPort subscriptionPort;
+    private final EventBus eventBus;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -46,6 +49,7 @@ public class PaymentWebhookCommandHandler {
         switch (type) {
             case EVENT_SESSION_COMPLETED -> handleSuccess(event);
             case EVENT_SESSION_EXPIRED -> handleFailed(event);
+            case EVENT_PAYMENT_INTENT_FAILED -> handlePaymentIntentFailed(event);
             default -> log.info("Ignored Stripe event type={}", type);
         }
     }
@@ -62,16 +66,15 @@ public class PaymentWebhookCommandHandler {
             return;
         }
         payment.markAsPaid();
+        Long subscriptionId = subscriptionPort.onPaymentSucceeded(
+                payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(), payload.planName()
+        );
+        payment.assignSubscription(subscriptionId);
         paymentRepository.save(payment);
-        eventPublisher.publishEvent(new PaymentSucceededEvent(
-                payment.getId(),
-                Long.valueOf(payload.userId()),
-                payload.userEmail(),
-                payload.planName(),
-                payload.sessionId(),
-                payment.getMoney().amount(),
-                payment.getMoney().currency(),
-                Instant.now()
+        eventBus.publish(new PaymentSucceededEvent(
+                payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(),
+                payload.planName(), payload.sessionId(),
+                payment.getMoney().amount(), payment.getMoney().currency(), Instant.now()
         ));
         log.info("Payment processed successfully for sessionId={}", payload.sessionId());
     }
@@ -87,30 +90,48 @@ public class PaymentWebhookCommandHandler {
                 .orElseThrow(() -> new IllegalStateException(
                         "Payment not found for sessionId=" + payload.sessionId()));
         if (payment.getStatus() == PaymentStatus.COMPLETED) {
-            log.info("Ignoring FAILED event for COMPLETED payment, sessionId={}",
-                    payload.sessionId());
+            log.info("Ignoring FAILED event for COMPLETED payment, sessionId={}", payload.sessionId());
             return;
         }
         if (payment.getStatus() == PaymentStatus.FAILED) {
             log.info("Ignoring duplicate FAILED event, sessionId={}", payload.sessionId());
             return;
         }
-        eventPublisher.publishEvent(new PaymentFailedEvent(
-                payment.getId(),
-                Long.valueOf(payload.userId()),
-                payload.userEmail(),
-                payload.planName(),
-                payload.sessionId(),
-                payment.getUserSubscriptionId(),
-                "Payment was not completed",
-                payment.getMoney().amount(),
-                payment.getMoney().currency(),
-                Instant.now()
-        ));
+        subscriptionPort.onPaymentFailed(
+                Long.valueOf(payload.userId()), payload.userEmail(), payload.planName(),
+                payment.getUserSubscriptionId(), "Payment was not completed"
+        );
         payment.markAsFailed();
         paymentRepository.save(payment);
+        eventBus.publish(new PaymentFailedEvent(
+                payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(),
+                payload.planName(), payload.sessionId(), payment.getUserSubscriptionId(),
+                "Payment was not completed", payment.getMoney().amount(),
+                payment.getMoney().currency(), Instant.now()
+        ));
         log.info("Payment FAILED, sessionId={}, userId={}, plan={}",
                 payload.sessionId(), payload.userId(), payload.planName());
+    }
+
+    private void handlePaymentIntentFailed(Event event) {
+        SessionPayload payload = parse(event);
+        if (payload == null) {
+            log.warn("{} skipped: payload is null", EVENT_PAYMENT_INTENT_FAILED);
+            return;
+        }
+        Payment payment = paymentRepository
+                .findByUserIdAndStatusForUpdate(Long.valueOf(payload.userId()), PaymentStatus.PENDING)
+                .orElse(null);
+        if (payment == null) {
+            log.warn("No PENDING payment found for userId={}, skipping", payload.userId());
+            return;
+        }
+        subscriptionPort.onPaymentFailed(
+                Long.valueOf(payload.userId()), payload.userEmail(), payload.planName(),
+                payment.getUserSubscriptionId(), "Payment attempt failed"
+        );
+        log.info("Payment attempt FAILED via payment_intent for userId={}, plan={}",
+                payload.userId(), payload.planName());
     }
 
     private SessionPayload parse(Event event) {

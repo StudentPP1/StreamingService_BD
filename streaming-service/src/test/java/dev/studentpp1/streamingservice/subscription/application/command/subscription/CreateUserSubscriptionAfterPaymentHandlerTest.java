@@ -1,6 +1,6 @@
 package dev.studentpp1.streamingservice.subscription.application.command.subscription;
 
-import dev.studentpp1.streamingservice.subscription.application.event.handler.CreateUserSubscriptionAfterPaymentHandler;
+import dev.studentpp1.streamingservice.subscription.application.command.CreateUserSubscriptionAfterPaymentHandler;
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionStatus;

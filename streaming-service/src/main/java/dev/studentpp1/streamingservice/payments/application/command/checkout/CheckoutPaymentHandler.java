@@ -122,10 +122,6 @@ public class CheckoutPaymentHandler implements PaymentCheckoutApi {
         }
     }
 
-    private Session createCheckoutSession(CheckoutPaymentRequest command) {
-        return createCheckoutSession(command.productName(), command.price(), command.userId(), command.userEmail());
-    }
-
     private SessionCreateParams.LineItem buildLineItem(String name, BigDecimal price) {
         long amountInCents = price.multiply(TO_CENTS_MULTIPLIER).longValue();
         return SessionCreateParams.LineItem.builder()

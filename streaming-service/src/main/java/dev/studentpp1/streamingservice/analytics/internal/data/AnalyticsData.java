@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.analytics.internal.projection;
+package dev.studentpp1.streamingservice.analytics.internal.data;
 
 import dev.studentpp1.streamingservice.analytics.api.AnalyticsSummaryView;
 import dev.studentpp1.streamingservice.analytics.internal.model.PaymentMetric;
@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
-public class AnalyticsProjectionStore {
+public class AnalyticsData {
     private final AtomicLong successfulPayments = new AtomicLong(0);
     private final AtomicLong failedPayments = new AtomicLong(0);
     private final AtomicLong activatedSubscriptions = new AtomicLong(0);
     private final AtomicLong failedSubscriptions = new AtomicLong(0);
+
     public void apply(PaymentMetric metric) {
         if (metric.successful()) {
             successfulPayments.incrementAndGet();
@@ -20,6 +21,7 @@ public class AnalyticsProjectionStore {
             failedPayments.incrementAndGet();
         }
     }
+
     public void apply(SubscriptionMetric metric) {
         if (metric.activated()) {
             activatedSubscriptions.incrementAndGet();
@@ -27,6 +29,7 @@ public class AnalyticsProjectionStore {
             failedSubscriptions.incrementAndGet();
         }
     }
+
     public AnalyticsSummaryView view() {
         return new AnalyticsSummaryView(
                 successfulPayments.get(),

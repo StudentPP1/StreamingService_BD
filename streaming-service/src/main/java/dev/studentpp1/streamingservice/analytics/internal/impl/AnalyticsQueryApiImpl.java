@@ -1,8 +1,8 @@
-package dev.studentpp1.streamingservice.analytics.internal.api;
+package dev.studentpp1.streamingservice.analytics.internal.impl;
 
 import dev.studentpp1.streamingservice.analytics.api.AnalyticsQueryApi;
 import dev.studentpp1.streamingservice.analytics.api.AnalyticsSummaryView;
-import dev.studentpp1.streamingservice.analytics.internal.projection.AnalyticsProjectionStore;
+import dev.studentpp1.streamingservice.analytics.internal.data.AnalyticsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AnalyticsQueryApiImpl implements AnalyticsQueryApi {
 
-    private final AnalyticsProjectionStore projectionStore;
+    private final AnalyticsData projectionStore;
 
     @Override
     public AnalyticsSummaryView getSummary() {

@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.subscription.application.event.handler;
+package dev.studentpp1.streamingservice.subscription.application.command;
 
 import dev.studentpp1.streamingservice.subscription.domain.exception.SubscriptionPlanNotFoundException;
 import dev.studentpp1.streamingservice.subscription.domain.model.SubscriptionPlan;
