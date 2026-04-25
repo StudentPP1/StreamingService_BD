@@ -66,11 +66,13 @@ public class PaymentWebhookCommandHandler {
             return;
         }
         payment.markAsPaid();
+        // strong consistency in one transaction & same thread
         Long subscriptionId = subscriptionPort.onPaymentSucceeded(
                 payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(), payload.planName()
         );
         payment.assignSubscription(subscriptionId);
         paymentRepository.save(payment);
+        // eventual consistency for events
         eventBus.publish(new PaymentSucceededEvent(
                 payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(),
                 payload.planName(), payload.sessionId(),
@@ -97,12 +99,14 @@ public class PaymentWebhookCommandHandler {
             log.info("Ignoring duplicate FAILED event, sessionId={}", payload.sessionId());
             return;
         }
+        // strong consistency in one transaction & same thread
         subscriptionPort.onPaymentFailed(
                 Long.valueOf(payload.userId()), payload.userEmail(), payload.planName(),
                 payment.getUserSubscriptionId(), "Payment was not completed"
         );
         payment.markAsFailed();
         paymentRepository.save(payment);
+        // eventual consistency for events
         eventBus.publish(new PaymentFailedEvent(
                 payment.getId(), Long.valueOf(payload.userId()), payload.userEmail(),
                 payload.planName(), payload.sessionId(), payment.getUserSubscriptionId(),
@@ -126,6 +130,7 @@ public class PaymentWebhookCommandHandler {
             log.warn("No PENDING payment found for userId={}, skipping", payload.userId());
             return;
         }
+        // eventual consistency for events
         subscriptionPort.onPaymentFailed(
                 Long.valueOf(payload.userId()), payload.userEmail(), payload.planName(),
                 payment.getUserSubscriptionId(), "Payment attempt failed"
