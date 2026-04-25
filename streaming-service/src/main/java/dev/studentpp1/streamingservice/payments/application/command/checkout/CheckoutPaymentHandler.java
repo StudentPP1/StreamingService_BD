@@ -8,7 +8,6 @@ import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentRequ
 import dev.studentpp1.streamingservice.payments.domain.model.CheckoutPaymentResponse;
 import dev.studentpp1.streamingservice.payments.domain.model.Payment;
 import dev.studentpp1.streamingservice.payments.domain.model.PaymentStatus;
-import dev.studentpp1.streamingservice.payments.domain.port.PaymentCheckoutGateway;
 import dev.studentpp1.streamingservice.payments.domain.repository.PaymentRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
+public class CheckoutPaymentHandler {
 
     public static final String SESSION_CREATED = "Payment session created";
     public static final String METADATA_USER_ID = "userId";
@@ -50,7 +49,6 @@ public class CheckoutPaymentHandler implements PaymentCheckoutGateway {
         Stripe.apiKey = secretKey;
     }
 
-    @Override
     @Transactional
     public CheckoutPaymentResponse checkout(CheckoutPaymentRequest command) {
         Session session = createCheckoutSession(command);
