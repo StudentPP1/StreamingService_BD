@@ -2,7 +2,6 @@ package dev.studentpp1.streamingservice.movies.infrastructure.adapter;
 
 import dev.studentpp1.streamingservice.movies.api.query.MovieView;
 import dev.studentpp1.streamingservice.movies.api.query.MoviesQueryApi;
-import dev.studentpp1.streamingservice.movies.domain.model.Movie;
 import dev.studentpp1.streamingservice.movies.domain.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
