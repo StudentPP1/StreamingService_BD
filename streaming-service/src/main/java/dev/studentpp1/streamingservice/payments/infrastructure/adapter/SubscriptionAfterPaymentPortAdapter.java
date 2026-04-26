@@ -5,7 +5,7 @@ import dev.studentpp1.streamingservice.subscription.api.payment.SubscriptionAfte
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("paymentSubscriptionAfterPaymentPortAdapter")
 @RequiredArgsConstructor
 public class SubscriptionAfterPaymentPortAdapter implements SubscriptionAfterPaymentPort {
 

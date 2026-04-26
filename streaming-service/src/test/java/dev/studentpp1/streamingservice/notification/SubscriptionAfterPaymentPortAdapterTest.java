@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -75,18 +75,19 @@ class SubscriptionAfterPaymentPortAdapterTest {
     }
 
     @Test
-    void onPaymentFailed_propagatesNotificationError_syncBehavior() {
+    void onPaymentFailed_swallowsNotificationError_doesNotPropagateException() {
         CreateUserSubscriptionAfterPaymentHandler createHandler = mock(CreateUserSubscriptionAfterPaymentHandler.class);
         CancelSubscriptionAfterPaymentFailureHandler cancelHandler = mock(CancelSubscriptionAfterPaymentFailureHandler.class);
         EventBus eventBus = mock(EventBus.class);
         SubscriptionNotification notification = mock(SubscriptionNotification.class);
-        RuntimeException ex = new RuntimeException("notification down");
-        doThrow(ex).when(notification).notifyFailed("user@test.com", "Premium", "Payment was not completed");
+        doThrow(new RuntimeException("notification down"))
+                .when(notification).notifyFailed("user@test.com", "Premium", "Payment was not completed");
         SubscriptionAfterPaymentPortAdapter adapter = new SubscriptionAfterPaymentPortAdapter(
                 createHandler, cancelHandler, eventBus, notification
         );
-        assertThatThrownBy(() -> adapter.onPaymentFailed(
+        assertThatNoException().isThrownBy(() -> adapter.onPaymentFailed(
                 7L, "user@test.com", "Premium", null, "Payment was not completed"
-        )).isSameAs(ex);
+        ));
+        verify(notification).notifyFailed("user@test.com", "Premium", "Payment was not completed");
     }
 }

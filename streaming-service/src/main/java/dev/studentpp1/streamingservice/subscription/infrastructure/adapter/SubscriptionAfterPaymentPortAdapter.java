@@ -8,11 +8,12 @@ import dev.studentpp1.streamingservice.subscription.application.command.CreateUs
 import dev.studentpp1.streamingservice.subscription.domain.event.SubscriptionActivated;
 import dev.studentpp1.streamingservice.subscription.domain.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SubscriptionAfterPaymentPortAdapter implements SubscriptionAfterPaymentApi {
@@ -23,7 +24,6 @@ public class SubscriptionAfterPaymentPortAdapter implements SubscriptionAfterPay
     private final SubscriptionNotification subscriptionNotification;
 
     @Override
-    @Transactional
     public Long onPaymentSucceeded(Long paymentId, Long userId, String userEmail, String planName) {
         UserSubscription subscription = createHandler.handle(planName, userId);
         eventBus.publish(new SubscriptionActivated(
@@ -33,11 +33,14 @@ public class SubscriptionAfterPaymentPortAdapter implements SubscriptionAfterPay
     }
 
     @Override
-    @Transactional
     public void onPaymentFailed(Long userId, String userEmail, String planName, Long existingSubscriptionId, String reason) {
         if (existingSubscriptionId != null) {
             cancelHandler.handle(existingSubscriptionId);
         }
-        subscriptionNotification.notifyFailed(userEmail, planName, reason);
+        try {
+            subscriptionNotification.notifyFailed(userEmail, planName, reason);
+        } catch (Exception e) {
+            log.error("Failed to send payment failure email: {}", e.getMessage());
+        }
     }
 }

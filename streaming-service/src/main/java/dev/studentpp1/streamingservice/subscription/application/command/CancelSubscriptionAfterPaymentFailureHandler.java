@@ -7,6 +7,7 @@ import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscr
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -16,7 +17,7 @@ public class CancelSubscriptionAfterPaymentFailureHandler {
 
     private final UserSubscriptionRepository userSubscriptionRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handle(Long subscriptionId) {
         UserSubscription subscription = userSubscriptionRepository
                 .findByIdWithLock(subscriptionId)
