@@ -8,6 +8,7 @@ import dev.studentpp1.streamingservice.subscription.domain.repository.UserSubscr
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class CreateUserSubscriptionAfterPaymentHandler {
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final UserSubscriptionRepository userSubscriptionRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public UserSubscription handle(String planName, Long userId) {
         SubscriptionPlan plan = subscriptionPlanRepository.findByName(planName)
                 .orElseThrow(() -> new SubscriptionPlanNotFoundException(planName));

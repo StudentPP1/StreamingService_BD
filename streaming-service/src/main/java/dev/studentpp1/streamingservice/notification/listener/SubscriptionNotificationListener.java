@@ -20,6 +20,7 @@ public class SubscriptionNotificationListener {
     @PostConstruct
     void registerSubscriptions() {
         eventBus.subscribeAsync(SubscriptionActivatedEvent.class, this::onActivated);
+        // delete to allow sync failed notification (lab4)
         eventBus.subscribeAsync(SubscriptionFailedEvent.class, this::onFailed);
     }
 
@@ -27,6 +28,7 @@ public class SubscriptionNotificationListener {
         notificationService.notifyActivated(event.userEmail(), event.planName(), event.expiresAt());
     }
 
+    // delete to allow sync failed notification (lab4)
     public void onFailed(SubscriptionFailedEvent event) {
         notificationService.notifyFailed(event.userEmail(), event.planName(), event.reason());
     }

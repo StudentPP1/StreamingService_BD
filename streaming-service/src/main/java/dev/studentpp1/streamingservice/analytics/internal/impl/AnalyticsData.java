@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.analytics.internal.data;
+package dev.studentpp1.streamingservice.analytics.internal.impl;
 
 import dev.studentpp1.streamingservice.analytics.api.AnalyticsSummaryView;
 import dev.studentpp1.streamingservice.analytics.internal.model.PaymentMetric;

@@ -1,9 +1,9 @@
 package dev.studentpp1.streamingservice.auth.service;
 
-import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
-import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
-import dev.studentpp1.streamingservice.users.application.command.CreateUserCommand;
-import dev.studentpp1.streamingservice.users.application.command.UserCommandHandler;
+import dev.studentpp1.streamingservice.auth.presentation.dto.LoginUserRequest;
+import dev.studentpp1.streamingservice.auth.presentation.dto.RegisterUserRequest;
+import dev.studentpp1.streamingservice.auth.domain.model.AuthRegistrationData;
+import dev.studentpp1.streamingservice.auth.domain.port.AuthUsersPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserCommandHandler userCommandHandler;
+    private final AuthUsersPort authUsersPort;
     private final AuthenticationManager authenticationManager;
 
     public void register(RegisterUserRequest request, HttpServletRequest httpServletRequest) {
-        userCommandHandler.handle(new CreateUserCommand(
+        authUsersPort.create(new AuthRegistrationData(
                 request.name(),
                 request.surname(),
                 request.email(),

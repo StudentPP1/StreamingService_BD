@@ -20,26 +20,31 @@ public class SubscriptionNotificationAdapter implements SubscriptionNotification
     @Override
     public void notifyActivated(String email, String planName, LocalDateTime expiresAt) {
         log.info("Subscription activated: email={}, plan={}, expires={}", email, planName, expiresAt);
-        javaMailSender.send(mimeMessage -> {
-            mimeMessage.setFrom("no-reply@example.com");
-            mimeMessage.setRecipients(TO, email);
-            mimeMessage.setSubject("Your subscription is activated!");
-            mimeMessage.setText(String.format(
-                    "Congratulations! Your subscription to the %s plan is now active and will expire on %s.",
-                    planName, expiresAt));
-        });
+        sendEmail(email,
+                "Your subscription is activated!",
+                String.format(
+                        "Congratulations! Your subscription to the %s plan is now active and will expire on %s.",
+                        planName, expiresAt)
+        );
     }
 
     @Override
     public void notifyFailed(String email, String planName, String reason) {
         log.warn("Subscription failed: email={}, plan={}, reason={}", email, planName, reason);
+        sendEmail(email,
+                "Your subscription activation failed",
+                String.format(
+                        "Unfortunately, your subscription to the %s plan could not be activated. Reason: %s.",
+                        planName, reason)
+        );
+    }
+
+    private void sendEmail(String email, String subject, String content) {
         javaMailSender.send(mimeMessage -> {
             mimeMessage.setFrom("no-reply@example.com");
             mimeMessage.setRecipients(TO, email);
-            mimeMessage.setSubject("Your subscription activation failed");
-            mimeMessage.setText(String.format(
-                    "Unfortunately, your subscription to the %s plan could not be activated. Reason: %s.",
-                    planName, reason));
+            mimeMessage.setSubject(subject);
+            mimeMessage.setText(content);
         });
     }
 }

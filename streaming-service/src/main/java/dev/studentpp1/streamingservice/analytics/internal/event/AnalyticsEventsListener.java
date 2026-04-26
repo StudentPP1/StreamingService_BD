@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.analytics.internal.event;
 
 import dev.studentpp1.streamingservice.analytics.internal.acl.AnalyticsAclTranslator;
-import dev.studentpp1.streamingservice.analytics.internal.data.AnalyticsData;
+import dev.studentpp1.streamingservice.analytics.internal.impl.AnalyticsData;
 import dev.studentpp1.streamingservice.common.event.EventBus;
 import dev.studentpp1.streamingservice.payments.api.event.PaymentFailedEvent;
 import dev.studentpp1.streamingservice.payments.api.event.PaymentSucceededEvent;
@@ -17,7 +17,7 @@ public class AnalyticsEventsListener {
 
     private final EventBus eventBus;
     private final AnalyticsAclTranslator aclTranslator;
-    private final AnalyticsData projectionStore;
+    private final AnalyticsData data;
 
     @PostConstruct
     void registerSubscriptions() {
@@ -28,19 +28,19 @@ public class AnalyticsEventsListener {
     }
 
     public void onPaymentSucceeded(PaymentSucceededEvent event) {
-        projectionStore.apply(aclTranslator.toPaymentMetric(event));
+        data.apply(aclTranslator.toPaymentMetric(event));
     }
 
     public void onPaymentFailed(PaymentFailedEvent event) {
-        projectionStore.apply(aclTranslator.toPaymentMetric(event));
+        data.apply(aclTranslator.toPaymentMetric(event));
     }
 
     public void onSubscriptionActivated(SubscriptionActivatedEvent event) {
-        projectionStore.apply(aclTranslator.toSubscriptionMetric(event));
+        data.apply(aclTranslator.toSubscriptionMetric(event));
     }
 
     public void onSubscriptionFailed(SubscriptionFailedEvent event) {
-        projectionStore.apply(aclTranslator.toSubscriptionMetric(event));
+        data.apply(aclTranslator.toSubscriptionMetric(event));
     }
 }
 

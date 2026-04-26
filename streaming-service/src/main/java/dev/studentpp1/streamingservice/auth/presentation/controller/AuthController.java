@@ -1,7 +1,7 @@
-package dev.studentpp1.streamingservice.auth.controller;
+package dev.studentpp1.streamingservice.auth.presentation.controller;
 
-import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
-import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
+import dev.studentpp1.streamingservice.auth.presentation.dto.LoginUserRequest;
+import dev.studentpp1.streamingservice.auth.presentation.dto.RegisterUserRequest;
 import dev.studentpp1.streamingservice.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

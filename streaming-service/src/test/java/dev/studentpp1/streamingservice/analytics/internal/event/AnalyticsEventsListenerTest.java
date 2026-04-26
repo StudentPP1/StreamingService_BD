@@ -1,7 +1,7 @@
 package dev.studentpp1.streamingservice.analytics.internal.event;
 
 import dev.studentpp1.streamingservice.analytics.internal.acl.AnalyticsAclTranslator;
-import dev.studentpp1.streamingservice.analytics.internal.data.AnalyticsData;
+import dev.studentpp1.streamingservice.analytics.internal.impl.AnalyticsData;
 import dev.studentpp1.streamingservice.common.event.EventBus;
 import dev.studentpp1.streamingservice.payments.api.event.PaymentSucceededEvent;
 import org.junit.jupiter.api.Test;

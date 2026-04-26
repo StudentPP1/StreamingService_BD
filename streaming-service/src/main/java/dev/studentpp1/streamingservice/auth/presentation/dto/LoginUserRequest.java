@@ -1,4 +1,4 @@
-package dev.studentpp1.streamingservice.auth.dto;
+package dev.studentpp1.streamingservice.auth.presentation.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

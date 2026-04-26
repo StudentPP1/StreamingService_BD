@@ -10,7 +10,7 @@
 ## Рішення
 1. Розділити систему на обмежені контексти в межах одного розгортуваного проєкту:
    - Core: users/auth, movies, payments, subscription
-   - Analytics: read-only проєкції та метрики
+   - Analytics: read-only метрики
 2. Визначити публічні контракти через API-пакети модулів:
    - `payments.api.event.*`
    - `subscription.api.event.*`

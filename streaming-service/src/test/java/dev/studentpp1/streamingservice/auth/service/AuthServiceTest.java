@@ -1,10 +1,10 @@
 package dev.studentpp1.streamingservice.auth.service;
 
-import dev.studentpp1.streamingservice.auth.dto.LoginUserRequest;
-import dev.studentpp1.streamingservice.auth.dto.RegisterUserRequest;
+import dev.studentpp1.streamingservice.auth.presentation.dto.LoginUserRequest;
+import dev.studentpp1.streamingservice.auth.presentation.dto.RegisterUserRequest;
+import dev.studentpp1.streamingservice.auth.domain.model.AuthRegistrationData;
+import dev.studentpp1.streamingservice.auth.domain.port.AuthUsersPort;
 import dev.studentpp1.streamingservice.auth.persistence.AuthenticatedUser;
-import dev.studentpp1.streamingservice.users.application.command.CreateUserCommand;
-import dev.studentpp1.streamingservice.users.application.command.UserCommandHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UserCommandHandler userCommandHandler;
+    private AuthUsersPort authUsersPort;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -73,7 +73,7 @@ class AuthServiceTest {
 
         authService.register(request, httpServletRequest);
 
-        verify(userCommandHandler).handle(any(CreateUserCommand.class));
+        verify(authUsersPort).create(any(AuthRegistrationData.class));
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
 
         ArgumentCaptor<SecurityContext> contextCaptor = ArgumentCaptor.forClass(SecurityContext.class);
