@@ -113,6 +113,13 @@ public class CheckoutPaymentHandler implements PaymentCheckoutApi {
                 .putMetadata(METADATA_USER_ID, userId.toString())
                 .putMetadata(METADATA_USER_EMAIL, userEmail)
                 .putMetadata(METADATA_PRODUCT_NAME, productName)
+                .setPaymentIntentData(
+                        SessionCreateParams.PaymentIntentData.builder()
+                                .putMetadata(METADATA_USER_ID, userId.toString())
+                                .putMetadata(METADATA_USER_EMAIL, userEmail)
+                                .putMetadata(METADATA_PRODUCT_NAME, productName)
+                                .build()
+                )
                 .build();
         try {
             return Session.create(params);
